@@ -1,6 +1,6 @@
 # hlb-CIFAR10: Git re-basin results
 
-These are the from forking [tysam-code/hlb-CIFAR10](https://github.com/tysam-code/hlb-CIFAR10).
+These are the results from forking [tysam-code/hlb-CIFAR10](https://github.com/tysam-code/hlb-CIFAR10).
 See [snimu/hlb-CIFAR10](https://github.com/snimu/hlb-CIFAR10) for the fork.
 
 Below are first the losses and accuracies plotted for the model, then a graph of the model itself
@@ -95,7 +95,7 @@ The model is a simple Resnet:
     <img
         src="hlb-cifar10-model-graph.png" 
         alt="hlb-CIFAR10 model graph"
-        width="300"
+        width="400"
     />
 </p>
 
