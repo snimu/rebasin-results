@@ -65,6 +65,16 @@ The original filter size.
     />
 </p>
 
+### Filter-size: 18x18
+
+<p align="center">
+    <img
+        src="18x18-plot.png" 
+        alt="Results of Git re-basin for hlb-CIFAR10 with filter-size 18x18"
+        width="600"
+    />
+</p>
+
 ### Analysis
 
 A few things immediately jump out to me from the plots above:
@@ -129,6 +139,9 @@ I move all startpoints (i.e. `model_a`) to the results of the 3x3-filter.
 </p>
 
 The behavior seems noisy, though slightly better for larger filter-sizes.
+
+It remains to be seen how the method works for models that inherently have very large
+filter-sizes, like vision transformers.
 
 
 ## Model

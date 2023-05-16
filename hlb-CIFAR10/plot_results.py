@@ -157,8 +157,8 @@ def plot_all_accuracies_from_same_startpoint(cmp_size: str, sizes: list[str]) ->
 
 
 if __name__ == "__main__":
-    sizes = ["3x3", "6x6", "9x9", "12x12", "15x15"]
-    plot_all_losses_from_same_startpoint("3x3", sizes)
+    sizes = ["3x3", "6x6", "9x9", "12x12", "15x15", "18x18"]
+    # plot_all_losses_from_same_startpoint("3x3", sizes)
     # plot_all_accuracies_from_same_startpoint("3x3", sizes)
     # plot_all_losses(sizes)
-    # plot_all_accuracies(sizes)
+    plot_all_accuracies(sizes)
