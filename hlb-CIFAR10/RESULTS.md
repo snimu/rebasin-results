@@ -80,7 +80,12 @@ A few things immediately jump out to me from the plots above:
      At least for this model, interpolation between `model_a` and `model_b (rebasin)`
      leads to almost flat accuracies. 
 4. Larger filter size is said to work better in the paper, 
-    and actually do work slightly better.
+    and actually do work slightly better. It should be noted, however, that 
+    increasing the filter size significantly increases the number of parameters,
+    and thus the compute it takes to train the model, without increasing
+    accuracy or decreasing the loss (in fact, it slightly worsens the results, 
+    though that may just be because the hyperparameters were not adapted to the 
+    changed model at all).
 
 ## Model
 
