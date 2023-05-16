@@ -54,7 +54,103 @@ def plot_results(size: str) -> None:
     # plt.show()
 
 
-if __name__ == "__main__":
-    for size in ["3x3", "6x6", "9x9", "12x12", "15x15"]:
-        plot_results(size)
+def plot_all_losses(sizes: list[str]) -> None:
+    plt.title("Losses: a-b-rebasin")
+    plt.xlabel("Interpolation %")
+    plt.ylabel("Loss")
+    plt.grid()
 
+    min_scale = 1e12
+    max_scale = 0.0
+    for size in sizes:
+        file = f"{size}-losses.csv"
+        losses = pd.read_csv(file)
+        plt.plot(losses["a-b-rebasin"].values, label=f"filter-size: {size}")
+        max_scale = max(max_scale, np.max(losses["a-b-rebasin"].values).item())
+        min_scale = min(min_scale, np.min(losses["a-b-rebasin"].values).item())
+
+    plt.ylim(min_scale * 0.9, max_scale * 1.1)
+    plt.legend()
+    plt.savefig("losses-all.png", dpi=300)
+    # plt.show()
+
+
+def plot_all_accuracies(sizes: list[str]) -> None:
+    plt.title("Accuracies: a-b-rebasin")
+    plt.xlabel("Interpolation %")
+    plt.ylabel("Accuracy")
+    plt.grid()
+
+    min_scale = 1e12
+    max_scale = 0.0
+    for size in sizes:
+        file = f"{size}-accuracies.csv"
+        accs = pd.read_csv(file)
+        plt.plot(accs["a-b-rebasin"].values, label=f"filter-size: {size}")
+        max_scale = max(max_scale, np.max(accs["a-b-rebasin"].values).item())
+        min_scale = min(min_scale, np.min(accs["a-b-rebasin"].values).item())
+
+    plt.ylim(min_scale * 0.9, max_scale * 1.1)
+    plt.legend()
+    plt.savefig("accuracies-all.png", dpi=300)
+    # plt.show()
+
+
+def plot_all_losses_from_same_startpoint(cmp_size: str, sizes: list[str]) -> None:
+    plt.title("Losses (normalized startpoint): a-b-rebasin")
+    plt.xlabel("Interpolation %")
+    plt.ylabel("Loss")
+    plt.grid()
+
+    min_scale = 1e12
+    max_scale = 0.0
+
+    startpoint = pd.read_csv(f"{cmp_size}-losses.csv")["a-b-rebasin"].values[0].item()
+
+    for size in sizes:
+        file = f"{size}-losses.csv"
+        losses = pd.read_csv(file)
+        values = losses["a-b-rebasin"].values
+        values = values + (startpoint - values[0])
+        plt.plot(values, label=f"filter-size: {size}")
+        max_scale = max(max_scale, np.max(values).item())
+        min_scale = min(min_scale, np.min(values).item())
+
+    plt.ylim(min_scale * 0.9, max_scale * 1.1)
+    plt.legend()
+    plt.savefig("losses-all-normalized-startpoint.png", dpi=300)
+    # plt.show()
+
+
+def plot_all_accuracies_from_same_startpoint(cmp_size: str, sizes: list[str]) -> None:
+    plt.title("Accuracies (normalized startpoint): a-b-rebasin")
+    plt.xlabel("Interpolation %")
+    plt.ylabel("Accuracy")
+    plt.grid()
+
+    min_scale = 1e12
+    max_scale = 0.0
+
+    startpoint = pd.read_csv(f"{cmp_size}-accuracies.csv")["a-b-rebasin"].values[0].item()
+
+    for size in sizes:
+        file = f"{size}-accuracies.csv"
+        accs = pd.read_csv(file)
+        values = accs["a-b-rebasin"].values
+        values = values + (startpoint - values[0])
+        plt.plot(values, label=f"filter-size: {size}")
+        max_scale = max(max_scale, np.max(values).item())
+        min_scale = min(min_scale, np.min(values).item())
+
+    plt.ylim(min_scale * 0.9, max_scale * 1.1)
+    plt.legend()
+    plt.savefig("accuracies-all-normalized-startpoint.png", dpi=300)
+    # plt.show()
+
+
+if __name__ == "__main__":
+    sizes = ["3x3", "6x6", "9x9", "12x12", "15x15"]
+    # plot_all_losses_from_same_startpoint("3x3", sizes)
+    # plot_all_accuracies_from_same_startpoint("3x3", sizes)
+    # plot_all_losses(sizes)
+    plot_all_accuracies(sizes)
