@@ -69,7 +69,9 @@ def plot_all_losses(sizes: list[str]) -> None:
         max_scale = max(max_scale, np.max(losses["a-b-rebasin"].values).item())
         min_scale = min(min_scale, np.min(losses["a-b-rebasin"].values).item())
 
-    plt.ylim(min_scale * 0.9, max_scale * 1.1)
+    min_scale -= 0.1 * (max_scale - min_scale)
+    max_scale += 0.1 * (max_scale - min_scale)
+    plt.ylim(min_scale, max_scale)
     plt.legend()
     plt.savefig("losses-all.png", dpi=300)
     # plt.show()
@@ -90,7 +92,9 @@ def plot_all_accuracies(sizes: list[str]) -> None:
         max_scale = max(max_scale, np.max(accs["a-b-rebasin"].values).item())
         min_scale = min(min_scale, np.min(accs["a-b-rebasin"].values).item())
 
-    plt.ylim(min_scale * 0.9, max_scale * 1.1)
+    min_scale -= 0.1 * (max_scale - min_scale)
+    max_scale += 0.1 * (max_scale - min_scale)
+    plt.ylim(min_scale, max_scale)
     plt.legend()
     plt.savefig("accuracies-all.png", dpi=300)
     # plt.show()
@@ -116,7 +120,9 @@ def plot_all_losses_from_same_startpoint(cmp_size: str, sizes: list[str]) -> Non
         max_scale = max(max_scale, np.max(values).item())
         min_scale = min(min_scale, np.min(values).item())
 
-    plt.ylim(min_scale * 0.9, max_scale * 1.1)
+    min_scale -= 0.1 * (max_scale - min_scale)
+    max_scale += 0.1 * (max_scale - min_scale)
+    plt.ylim(min_scale, max_scale)
     plt.legend()
     plt.savefig("losses-all-normalized-startpoint.png", dpi=300)
     # plt.show()
@@ -142,7 +148,9 @@ def plot_all_accuracies_from_same_startpoint(cmp_size: str, sizes: list[str]) ->
         max_scale = max(max_scale, np.max(values).item())
         min_scale = min(min_scale, np.min(values).item())
 
-    plt.ylim(min_scale * 0.9, max_scale * 1.1)
+    min_scale -= 0.1 * (max_scale - min_scale)
+    max_scale += 0.1 * (max_scale - min_scale)
+    plt.ylim(min_scale, max_scale)
     plt.legend()
     plt.savefig("accuracies-all-normalized-startpoint.png", dpi=300)
     # plt.show()
@@ -150,7 +158,7 @@ def plot_all_accuracies_from_same_startpoint(cmp_size: str, sizes: list[str]) ->
 
 if __name__ == "__main__":
     sizes = ["3x3", "6x6", "9x9", "12x12", "15x15"]
-    # plot_all_losses_from_same_startpoint("3x3", sizes)
+    plot_all_losses_from_same_startpoint("3x3", sizes)
     # plot_all_accuracies_from_same_startpoint("3x3", sizes)
     # plot_all_losses(sizes)
-    plot_all_accuracies(sizes)
+    # plot_all_accuracies(sizes)

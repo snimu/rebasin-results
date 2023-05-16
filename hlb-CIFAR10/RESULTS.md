@@ -69,7 +69,7 @@ The original filter size.
 
 A few things immediately jump out to me from the plots above:
 
-1. The mothod works somewhat; interpolation between `model_a` and `model_b (rebasin)`
+1. The method works somewhat; interpolation between `model_a` and `model_b (rebasin)`
     is much better than between `model_a` and `model_b (original)`.
 2. Applying the method to `model_b` and then interpolating between 
      `model_b (original)` and `model_b (rebasin)` yields better results than
@@ -80,12 +80,56 @@ A few things immediately jump out to me from the plots above:
      At least for this model, interpolation between `model_a` and `model_b (rebasin)`
      leads to almost flat accuracies. 
 4. Larger filter size is said to work better in the paper, 
-    and actually do work slightly better. It should be noted, however, that 
-    increasing the filter size significantly increases the number of parameters,
-    and thus the compute it takes to train the model, without increasing
-    accuracy or decreasing the loss (in fact, it slightly worsens the results, 
-    though that may just be because the hyperparameters were not adapted to the 
-    changed model at all).
+    but it is unclear to me if this is actually the case here. Let's look at that 
+    in more detail below.
+
+#### Filter-size analysis
+
+Below, I plot the losses and accuracies 
+when interpolating between `model_a` and `model_b (rebasin)`.
+
+I do so for all filter-sizes.
+
+<p align="center">
+    <img
+        src="losses-all.png" 
+        alt="Losses of Git re-basin for hlb-CIFAR10 with different filter-sizes"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="accuracies-all.png" 
+        alt="Accuracies of Git re-basin for hlb-CIFAR10 with different filter-sizes"
+        width="600"
+    />
+</p>
+
+It is not clear to me that larger filter sizes lead to better results. 
+However, larger filter-sizes do degrade model-performance in general, 
+so to give a comparison of how rebasin affects how interpolation between models
+behaves, I plot the losses and accuracies again below, but this time 
+I move all startpoints (i.e. `model_a`) to the results of the 3x3-filter.
+
+<p align="center">
+    <img
+        src="losses-all-normalized-startpoint.png" 
+        alt="Losses of Git re-basin for hlb-CIFAR10 with different filter-sizes"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="accuracies-all-normalized-startpoint.png" 
+        alt="Accuracies of Git re-basin for hlb-CIFAR10 with different filter-sizes"
+        width="600"
+    />
+</p>
+
+The behavior seems noisy, though slightly better for larger filter-sizes.
+
 
 ## Model
 
