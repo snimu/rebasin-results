@@ -142,10 +142,6 @@ I move all startpoints (i.e. `model_a`) to the results of the 3x3-filter.
 
 The behavior seems noisy, though slightly better for larger filter-sizes.
 
-It remains to be seen how the method works for models that inherently have very large
-filter-sizes, like vision transformers.
-
-
 ## Model
 
 The model is a simple Resnet:
