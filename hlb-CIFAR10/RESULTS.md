@@ -117,7 +117,9 @@ I do so for all filter-sizes.
 </p>
 
 It is not clear to me that larger filter sizes lead to better results. 
-However, larger filter-sizes do degrade model-performance in general, 
+However, larger filter-sizes do degrade model-performance in general
+(the larger the filter size, the worse the performance of the first and last model,
+which are the original `model_a` and `model_b (rebasin)`), 
 so to give a comparison of how rebasin affects how interpolation between models
 behaves, I plot the losses and accuracies again below, but this time 
 I move all startpoints (i.e. `model_a`) to the results of the 3x3-filter.
