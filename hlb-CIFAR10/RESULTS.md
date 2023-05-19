@@ -154,3 +154,191 @@ The model is a simple Resnet:
     />
 </p>
 
+## Permutations
+
+The model with 3x3-filters has the following permutation structure:
+
+```
+PathSequence(                                                  
+----------------------------------------                       
+                                                               
+LinearPath(                                                    
+  DefaultModule(                                               
+    module.type: Conv                                          
+    input.shape: [(5000, 3, 32, 32)]                           
+    output.shape: [(5000, 12, 31, 31)]                         
+    weight.in_dim.permutation: None                            
+    weight.out_dim.permutation.shape: 12                       
+  )                                                            
+                                                               
+  DefaultModule(                                               
+    module.type: Conv                                          
+    input.shape: [(5000, 12, 31, 31)]                          
+    output.shape: [(5000, 32, 31, 31)]                         
+    weight.in_dim.permutation.shape: 12                        
+    weight.out_dim.permutation.shape: 32                       
+  )                                                            
+                                                               
+  DefaultModule(                                               
+    module.type: Conv                                          
+    input.shape: [(5000, 32, 31, 31)]                          
+    output.shape: [(5000, 64, 31, 31)]                         
+    weight.in_dim.permutation.shape: 32                        
+    weight.out_dim.permutation.shape: 64                       
+  )                                                            
+                                                               
+  OneDimModule(                                                
+    module.type: BatchNorm                                     
+    input.shape: [(5000, 64, 15, 15)]                          
+    output.shape: [(5000, 64, 15, 15)]                         
+    weight.in_dim.permutation.shape: 64                        
+    weight.out_dim.permutation.shape: 64                       
+  )                                                            
+                                                               
+)                                                              
+----------------------------------------                       
+                              |                                
+                              |                                
+                              |                                
+-------------------------------------------------------------- 
+ParallelPaths(                                                 
+  LinearPath(                                 LinearPath()     
+    DefaultModule(                                 |           
+      module.type: Conv                            |           
+      input.shape: [(5000, 64, 15, 15)]            |           
+      output.shape: [(5000, 64, 15, 15)]           |           
+      weight.in_dim.permutation.shape: 64          |           
+      weight.out_dim.permutation.shape: 64         |           
+    )                                              |           
+                                                   |           
+    OneDimModule(                                  |           
+      module.type: BatchNorm                       |           
+      input.shape: [(5000, 64, 15, 15)]            |           
+      output.shape: [(5000, 64, 15, 15)]           |           
+      weight.in_dim.permutation.shape: 64          |           
+      weight.out_dim.permutation.shape: 64         |           
+    )                                              |           
+                                                   |           
+  )                                                |           
+)                                                              
+-------------------------------------------------------------- 
+                   |                                           
+                   |                                           
+                   |                                           
+-----------------------------------------                      
+                                                               
+LinearPath(                                                    
+  DefaultModule(                                               
+    module.type: Conv                                          
+    input.shape: [(5000, 64, 15, 15)]                          
+    output.shape: [(5000, 256, 15, 15)]                        
+    weight.in_dim.permutation.shape: 64                        
+    weight.out_dim.permutation.shape: 256                      
+  )                                                            
+                                                               
+  OneDimModule(                                                
+    module.type: BatchNorm                                     
+    input.shape: [(5000, 256, 7, 7)]                           
+    output.shape: [(5000, 256, 7, 7)]                          
+    weight.in_dim.permutation.shape: 256                       
+    weight.out_dim.permutation.shape: 256                      
+  )                                                            
+                                                               
+)                                                              
+-----------------------------------------                      
+                              |                                
+                              |                                
+                              |                                
+---------------------------------------------------------------
+ParallelPaths(                                                 
+  LinearPath(                                  LinearPath()    
+    DefaultModule(                                  |          
+      module.type: Conv                             |          
+      input.shape: [(5000, 256, 7, 7)]              |          
+      output.shape: [(5000, 256, 7, 7)]             |          
+      weight.in_dim.permutation.shape: 256          |          
+      weight.out_dim.permutation.shape: 256         |          
+    )                                               |          
+                                                    |          
+    OneDimModule(                                   |          
+      module.type: BatchNorm                        |          
+      input.shape: [(5000, 256, 7, 7)]              |          
+      output.shape: [(5000, 256, 7, 7)]             |          
+      weight.in_dim.permutation.shape: 256          |          
+      weight.out_dim.permutation.shape: 256         |          
+    )                                               |          
+                                                    |          
+  )                                                 |          
+)                                                              
+---------------------------------------------------------------
+                   |                                           
+                   |                                           
+                   |                                           
+----------------------------------------                       
+                                                               
+LinearPath(                                                    
+  DefaultModule(                                               
+    module.type: Conv                                          
+    input.shape: [(5000, 256, 7, 7)]                           
+    output.shape: [(5000, 512, 7, 7)]                          
+    weight.in_dim.permutation.shape: 256                       
+    weight.out_dim.permutation: None                           
+  )                                                            
+                                                               
+  OneDimModule(                                                
+    module.type: BatchNorm                                     
+    input.shape: [(5000, 512, 3, 3)]                           
+    output.shape: [(5000, 512, 3, 3)]                          
+    weight.in_dim.permutation: None                            
+    weight.out_dim.permutation: None                           
+  )                                                            
+                                                               
+)                                                              
+----------------------------------------                       
+                            |                                  
+                            |                                  
+                            |                                  
+-----------------------------------------------------------    
+ParallelPaths(                                                 
+  LinearPath(                              LinearPath()        
+    DefaultModule(                              |              
+      module.type: Conv                         |              
+      input.shape: [(5000, 512, 3, 3)]          |              
+      output.shape: [(5000, 512, 3, 3)]         |              
+      weight.in_dim.permutation: None           |              
+      weight.out_dim.permutation: None          |              
+    )                                           |              
+                                                |              
+    OneDimModule(                               |              
+      module.type: BatchNorm                    |              
+      input.shape: [(5000, 512, 3, 3)]          |              
+      output.shape: [(5000, 512, 3, 3)]         |              
+      weight.in_dim.permutation: None           |              
+      weight.out_dim.permutation: None          |              
+    )                                           |              
+                                                |              
+  )                                             |              
+)                                                              
+-----------------------------------------------------------    
+                 |                                             
+                 |                                             
+                 |                                             
+------------------------------------                           
+                                                               
+LinearPath(                                                    
+  DefaultModule(                                               
+    module.type: Linear                                        
+    input.shape: [(5000, 512)]                                 
+    output.shape: [(5000, 10)]                                 
+    weight.in_dim.permutation: None                            
+    weight.out_dim.permutation: None                           
+  )                                                            
+                                                               
+)                                                              
+------------------------------------                           
+)   
+```
+
+The models with larger filter-sizes are exactly the same, 
+except for the convolutions' weight-shapes.
+
