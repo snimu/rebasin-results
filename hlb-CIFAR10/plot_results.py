@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import numpy as np
 
 
@@ -156,9 +157,73 @@ def plot_all_accuracies_from_same_startpoint(cmp_size: str, sizes: list[str]) ->
     # plt.show()
 
 
+def plot_merge_many_losses() -> None:
+    # Manually taken from files
+    losses = [1.01, 1.00, 1.02]
+    losses_merge_3 = [1.98, 1.86, 1.93]
+    losses_merge_6 = [2.24, 2.26, 2.26]
+    losses_merge_9 = [2.28, 2.29, 2.28]
+    losses_merge_12 = [2.29, 2.30, 2.29]
+
+    gs = gridspec.GridSpec(2, 1, height_ratios=[9, 1])
+    fig = plt.figure(figsize=(5, 6))
+    fig.subplots_adjust(hspace=0.1)
+    ax = fig.add_subplot(gs[0])
+
+    ax.set_title("Losses: MergeMany")
+    ax.set_xlabel("Filter-size")
+    ax.set_xticks([0, 1, 2], ["3x3", "6x6", "9x9"])
+    ax.set_ylabel("Loss")
+    ax.grid()
+    ax.plot(losses, label="normal model (average)")
+    ax.plot(losses_merge_3, label="merge 3x3")
+    ax.plot(losses_merge_6, label="merge 6x6")
+    ax.plot(losses_merge_9, label="merge 9x9")
+    ax.plot(losses_merge_12, label="merge 12x12")
+
+    fig.legend(
+        loc='upper center',
+        bbox_to_anchor=(0.5, 0.15),
+        ncols=2,
+        fontsize=10
+    )
+
+    plt.savefig("merge_many/losses.png", dpi=300)
+
+
+def plot_merge_many_accuracies() -> None:
+    # Manually taken from files in merge_many folder
+    accuracies = [0.94, 0.93, 0.92]
+    accuracies_merge_3 = [0.82, 0.86, 0.83]
+    accuracies_merge_6 = [0.44, 0.38, 0.43]
+    accuracies_merge_9 = [0.24, 0.17, 0.27]
+    accuracies_merge_12 = [0.21, 0.13, 0.19]
+
+    gs = gridspec.GridSpec(2, 1, height_ratios=[9, 1])
+    fig = plt.figure(figsize=(5, 6))
+    fig.subplots_adjust(hspace=0.1)
+    ax = fig.add_subplot(gs[0])
+
+    ax.set_title("Accuracies MergeMany")
+    ax.set_xlabel("Filter-size")
+    ax.set_xticks([0, 1, 2], ["3x3", "6x6", "9x9"])
+    ax.set_ylabel("Accuracy")
+    ax.grid()
+    ax.plot(accuracies_merge_3, label="merge 3x3")
+    ax.plot(accuracies_merge_6, label="merge 6x6")
+    ax.plot(accuracies_merge_9, label="merge 9x9")
+    ax.plot(accuracies_merge_12, label="merge 12x12")
+    ax.plot(accuracies, label="normal model (average)")
+
+    fig.legend(
+        loc='upper center',
+        bbox_to_anchor=(0.5, 0.15),
+        ncols=2,
+        fontsize=10
+    )
+
+    plt.savefig("merge_many/accuracies.png", dpi=300)
+
+
 if __name__ == "__main__":
-    sizes = ["3x3", "6x6", "9x9", "12x12", "15x15", "18x18"]
-    # plot_all_losses_from_same_startpoint("3x3", sizes)
-    # plot_all_accuracies_from_same_startpoint("3x3", sizes)
-    # plot_all_losses(sizes)
-    plot_all_accuracies(sizes)
+    plot_merge_many_accuracies()
