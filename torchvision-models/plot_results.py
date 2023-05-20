@@ -33,9 +33,9 @@ def plot_results(model: str, metric: str) -> None:
     plt.grid()
 
     plt.title(f"{model}: {metric_name}")
-    plt.savefig(os.path.join(model, f"{model}_{metric}.png"))
+    plt.savefig(os.path.join(model, f"{model}_{metric}.png"), dpi=300)
     # plt.show()
 
 
 if __name__ == "__main__":
-    plot_results("mobilenet_v3_large", "accuracies5")
+    plot_results("mobilenet_v3_large", "losses")
