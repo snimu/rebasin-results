@@ -107,9 +107,7 @@ A few things immediately jump out to me from the plots above:
     is much better than between `model_a` and `model_b (original)`.
 2. Applying the method to `model_b` and then interpolating between 
      `model_b (original)` and `model_b (rebasin)` yields better results than
-     interpolating between `model_a` and `model_b (original)`. 
-     This is not fully unexpected, because these two are of course fairly
-     close to each other, but it's also not obvious (at least not to me).
+     interpolating between `model_a` and `model_b (original)`.
 3. The git re-basin method works very well for the accuracy of the model!
      At least for this model, interpolation between `model_a` and `model_b (rebasin)`
      leads to almost flat accuracies. 
