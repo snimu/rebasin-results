@@ -6,12 +6,29 @@ See [snimu/hlb-CIFAR10](https://github.com/snimu/hlb-CIFAR10) for the fork.
 Below are first the losses and accuracies plotted for the model, then a graph of the model itself
 (generated using [torchview](https://github.com/mert-kurttutan/torchview)).
 
+
 ## Results
 
 I have results for two algorithms: 
 
 1. `PermutationCoordinateDescent`
 2. `MergeMany`
+
+**Table of Contents:**
+
+- [PermutationCoordinateDescent](#permutationcoordinatedescent)
+  - [Filter-size: 3x3](#filter-size-3x3)
+  - [Filter-size: 6x6](#filter-size-6x6)
+  - [Filter-size:9x9](#filter-size9x9)
+  - [Filter-size: 12x12](#filter-size-12x12)
+  - [Filter-size: 15x15](#filter-size-15x15)
+  - [Filter-size: 18x18](#filter-size-18x18)
+  - [Analysis](#analysis)
+  - [Filter-size Analysis](#filter-size-analysis)
+- [MergeMany](#mergemany)
+  - [Train-Merge-Train](#train-merge-train)
+- [Model](#model)
+- [Permutations](#permutations)
 
 ### PermutationCoordinateDescent
 
@@ -182,6 +199,47 @@ Clearly, `MergeMany` significantly reduces performance instead of improving it
 And to be clear, the more models are merged, the *worse* performance becomes.
 
 In the paper, an MLP was used for merging, so that might be another interesting thing to try.
+
+#### Train-Merge-Train
+
+After the poor results seen above, I was wondering if training for a few steps after 
+merging several models might yield better results than just training a single model
+for the equivalent number of epochs (i.e. 10 epochs, if each of the merged models is trained
+for 5 epochs and the merge model for another 5 epochs). If it were, 
+then the `MergeMany`-algorithm may still be useful for federated learning.
+
+Here are the results (where the "control"-model is the one trained for 10 epochs,
+while the others are all trained for 5 epochs, merged, and the result is then trained
+for another 5 epochs):
+
+| Settings (#models --- filter-size) | Loss   | Loss control | Accuracy | Accuracy control |
+|------------------------------------|--------|--------------|----------|------------------|
+| 3 --- 3x3                          | 1.064  | 1.030        | 0.914    | 0.932            |
+| 3 --- 6x6                          | 1.053  | 1.018        | 0.906    | 0.924            |
+| 3 --- 9x9                          | 1.079  | 1.046        | 0.889    | 0.904            |
+| 6 --- 3x3                          | 1.077  | 1.034        | 0.907    | 0.929            |
+| 6 --- 6x6                          | 1.069  | 1.018        | 0.897    | 0.923            |
+| 6 --- 9x9                          | 1.087  | 1.042        | 0.879    | 0.906            |
+| 9 --- 3x3                          | 1.103  | 1.032        | 0.895    | 0.931            |
+| 9 --- 6x6                          | 1.078  | 1.022        | 0.893    | 0.921            |
+| 9 --- 9x9                          | 1.113  | 1.041        | 0.872    | 0.909            |
+| 12 --- 3x3                         | 1.111  | 1.032        | 0.890    | 0.929            |
+| 12 --- 6x6                         | 1.143  | 1.019        | 0.859    | 0.921            |
+| 12 --- 9x9                         | 1.135  | 1.045        | 0.858    | 0.905            |
+
+It is clear that using `MergeMany` as a form of pre-training does not improve performance.
+However, if a few models were trained for 5 epochs in one location, merged, 
+and then for another *10 epochs* at another location, 
+that would likely improve performance compared to simply training for 10 epochs,
+though it seems like using more models for that is worse, not better,
+and simply not merging before continuing the training would be even better.
+
+There is a caveat to give here: all of these models were trained on the same data.
+Results might be different if the models were trained on different data each.
+
+That means that `MergeMany` *might* still be useful for effectively increasing dataset-size
+through federated learning. However, because increasing the number of models merged decreases
+performance, I'm pretty sceptical of that.
 
 ## Model
 
