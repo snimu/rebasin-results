@@ -8,12 +8,19 @@ Below are first the losses and accuracies plotted for the model, then a graph of
 
 ## Results
 
+I have results for two algorithms: 
+
+1. `PermutationCoordinateDescent`
+2. `MergeMany`
+
+### PermutationCoordinateDescent
+
 The first plot shows the results
 for the original model, while the others show results for ever-increasing filter-sizes of the 
 convolutions. 
 It is mentioned in the paper that the results are better for larger filter-sizes.
 
-### Filter-size: 3x3
+#### Filter-size: 3x3
 
 The original filter size.
 
@@ -25,7 +32,7 @@ The original filter size.
     />
 </p>
 
-### Filter-size: 6x6
+#### Filter-size: 6x6
 
 <p align="center">
     <img
@@ -35,7 +42,7 @@ The original filter size.
     />
 </p>
 
-### Filter-size:9x9
+#### Filter-size:9x9
 
 <p align="center">
     <img
@@ -45,7 +52,7 @@ The original filter size.
     />
 </p>
 
-### Filter-size: 12x12
+#### Filter-size: 12x12
 
 <p align="center">
     <img
@@ -55,7 +62,7 @@ The original filter size.
     />
 </p>
 
-### Filter-size: 15x15
+#### Filter-size: 15x15
 
 <p align="center">
     <img
@@ -65,7 +72,7 @@ The original filter size.
     />
 </p>
 
-### Filter-size: 18x18
+#### Filter-size: 18x18
 
 <p align="center">
     <img
@@ -75,7 +82,7 @@ The original filter size.
     />
 </p>
 
-### Analysis
+#### Analysis
 
 A few things immediately jump out to me from the plots above:
 
@@ -141,6 +148,40 @@ I move all startpoints (i.e. `model_a`) to the results of the 3x3-filter.
 </p>
 
 The behavior seems noisy, though slightly better for larger filter-sizes.
+
+### MergeMany
+
+I used the `MergeMany`-algorithm with the following convolutional kernel-sizes:
+
+- 3x3
+- 6x6
+- 9x9
+
+I used all of these once when merging 3, 6, 9, and 12 models.
+
+Below are the losses and accuracies.
+
+<p align="center">
+    <img
+        src="merge_many/losses.png" 
+        alt="Losses of MergeMany for hlb-CIFAR10 with different filter-sizes and different numbers of models"
+        width="500"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/accuracies.png" 
+        alt="Accuracies of MergeMany for hlb-CIFAR10 with different filter-sizes and different numbers of models"
+        width="500"
+    />
+
+Clearly, `MergeMany` significantly reduces performance instead of improving it 
+(as claimed in the paper). The more models are merged, the greater the loss in performance.
+
+And to be clear, the more models are merged, the *worse* performance becomes.
+
+In the paper, a MLP was used for merging, so that might be another interesting thing to try.
 
 ## Model
 
