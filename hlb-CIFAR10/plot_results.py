@@ -226,4 +226,4 @@ def plot_merge_many_accuracies() -> None:
 
 
 if __name__ == "__main__":
-    plot_merge_many_accuracies()
+    plot_merge_many_losses()
