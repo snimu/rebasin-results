@@ -39,7 +39,7 @@ Here are the losses:
 
 <p align="center">
     <img
-        src="mobilenet_v3_large/mobilenet_v3_large_losses.png"
+        src="mobilenet_v3_large_losses.png"
         alt="mobilenet_v3_large: losses"
         width="600"
     />
@@ -49,7 +49,7 @@ Here are the top-1 accuracies:
 
 <p align="center">
     <img
-        src="mobilenet_v3_large/mobilenet_v3_large_accuracies1.png"
+        src="mobilenet_v3_large_accuracies1.png"
         alt="mobilenet_v3_large: top-1 accuracies"
         width="600"
     />
@@ -59,7 +59,7 @@ Here are the top-5 accuracies:
 
 <p align="center">
     <img
-        src="mobilenet_v3_large/mobilenet_v3_large_accuracies5.png"
+        src="mobilenet_v3_large_accuracies5.png"
         alt="mobilenet_v3_large: top-5 accuracies"
         width="600"
     />
@@ -74,7 +74,7 @@ that calculating the running stats with more data would lead to *much* better re
 
 <p align="center">
     <img
-        src="mobilenet_v3_large/mobilenet_v3_large_model_graph.png"
+        src="mobilenet_v3_large_model_graph.png"
         alt="mobilenet_v3_large: model"
         width="400"
     />
