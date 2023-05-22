@@ -181,7 +181,7 @@ Clearly, `MergeMany` significantly reduces performance instead of improving it
 
 And to be clear, the more models are merged, the *worse* performance becomes.
 
-In the paper, a MLP was used for merging, so that might be another interesting thing to try.
+In the paper, an MLP was used for merging, so that might be another interesting thing to try.
 
 ## Model
 

@@ -176,10 +176,10 @@ def plot_merge_many_losses() -> None:
     ax.set_ylabel("Loss")
     ax.grid()
     ax.plot(losses, label="normal model (average)")
-    ax.plot(losses_merge_3, label="merge 3x3")
-    ax.plot(losses_merge_6, label="merge 6x6")
-    ax.plot(losses_merge_9, label="merge 9x9")
-    ax.plot(losses_merge_12, label="merge 12x12")
+    ax.plot(losses_merge_3, label="merge 3 models")
+    ax.plot(losses_merge_6, label="merge 6 models")
+    ax.plot(losses_merge_9, label="merge 9 models")
+    ax.plot(losses_merge_12, label="merge 12 models")
 
     fig.legend(
         loc='upper center',
@@ -209,10 +209,10 @@ def plot_merge_many_accuracies() -> None:
     ax.set_xticks([0, 1, 2], ["3x3", "6x6", "9x9"])
     ax.set_ylabel("Accuracy")
     ax.grid()
-    ax.plot(accuracies_merge_3, label="merge 3x3")
-    ax.plot(accuracies_merge_6, label="merge 6x6")
-    ax.plot(accuracies_merge_9, label="merge 9x9")
-    ax.plot(accuracies_merge_12, label="merge 12x12")
+    ax.plot(accuracies_merge_3, label="merge 3 models")
+    ax.plot(accuracies_merge_6, label="merge 6 models")
+    ax.plot(accuracies_merge_9, label="merge 9 models")
+    ax.plot(accuracies_merge_12, label="merge 12 models")
     ax.plot(accuracies, label="normal model (average)")
 
     fig.legend(
