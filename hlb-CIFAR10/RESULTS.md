@@ -206,24 +206,32 @@ for the equivalent number of epochs (i.e. 10 epochs, if each of the merged model
 for 5 epochs and the merge model for another 5 epochs). If it were, 
 then the `MergeMany`-algorithm may still be useful for federated learning.
 
-Here are the results (where the "control"-model is the one trained for 10 epochs,
-while the others are all trained for 5 epochs, merged, and the result is then trained
-for another 5 epochs):
+I use the following training procedure:
 
-| Settings (#models --- filter-size) | Loss   | Loss control | Accuracy | Accuracy control |
-|------------------------------------|--------|--------------|----------|------------------|
-| 3 --- 3x3                          | 1.064  | 1.030        | 0.914    | 0.932            |
-| 3 --- 6x6                          | 1.053  | 1.018        | 0.906    | 0.924            |
-| 3 --- 9x9                          | 1.079  | 1.046        | 0.889    | 0.904            |
-| 6 --- 3x3                          | 1.077  | 1.034        | 0.907    | 0.929            |
-| 6 --- 6x6                          | 1.069  | 1.018        | 0.897    | 0.923            |
-| 6 --- 9x9                          | 1.087  | 1.042        | 0.879    | 0.906            |
-| 9 --- 3x3                          | 1.103  | 1.032        | 0.895    | 0.931            |
-| 9 --- 6x6                          | 1.078  | 1.022        | 0.893    | 0.921            |
-| 9 --- 9x9                          | 1.113  | 1.041        | 0.872    | 0.909            |
-| 12 --- 3x3                         | 1.111  | 1.032        | 0.890    | 0.929            |
-| 12 --- 6x6                         | 1.143  | 1.019        | 0.859    | 0.921            |
-| 12 --- 9x9                         | 1.135  | 1.045        | 0.858    | 0.905            |
+- `n` models trained fo 5 epochs each, merged, then trained for another 5 epochs
+- 1 model trained for 10 epochs (the control model)
+
+I use the following abbreviations:
+
+- `L`: Loss (of the merged & retrained model &mdash)
+- `LC`: Loss control (of the control model)
+- `A`: Accuracy (of the merged & retrained model)
+- `AC`: Accuracy control (of the control model)
+
+| Settings (#models --- filter-size) | L     | LC    | L/LC   | A     | AC    | A/AC  |
+|------------------------------------|-------|-------|--------|-------|-------|-------|
+| 3 --- 3x3                          | 1.064 | 1.030 | 103.3% | 0.914 | 0.932 | 98.1% |
+| 3 --- 6x6                          | 1.053 | 1.018 | 103.4% | 0.906 | 0.924 | 98.1% |
+| 3 --- 9x9                          | 1.079 | 1.046 | 103.2% | 0.889 | 0.904 | 98.3% |
+| 6 --- 3x3                          | 1.077 | 1.034 | 104.2% | 0.907 | 0.929 | 97.6% |
+| 6 --- 6x6                          | 1.069 | 1.018 | 105.0% | 0.897 | 0.923 | 97.2% |
+| 6 --- 9x9                          | 1.087 | 1.042 | 104.3% | 0.879 | 0.906 | 97.0% |
+| 9 --- 3x3                          | 1.103 | 1.032 | 106.9% | 0.895 | 0.931 | 96.1% |
+| 9 --- 6x6                          | 1.078 | 1.022 | 105.5% | 0.893 | 0.921 | 97.0% |
+| 9 --- 9x9                          | 1.113 | 1.041 | 106.9% | 0.872 | 0.909 | 95.9% |
+| 12 --- 3x3                         | 1.111 | 1.032 | 107.7% | 0.890 | 0.929 | 95.8% | 
+| 12 --- 6x6                         | 1.143 | 1.019 | 112.2% | 0.859 | 0.921 | 93.2% | 
+| 12 --- 9x9                         | 1.135 | 1.045 | 108.6% | 0.858 | 0.905 | 94.8% |
 
 It is clear that using `MergeMany` as a form of pre-training does not improve performance.
 However, if a few models were trained for 5 epochs in one location, merged, 
