@@ -233,12 +233,30 @@ I use the following abbreviations:
 | 12 --- 6x6                         | 1.143 | 1.019 | 112.2% | 0.859 | 0.921 | 93.2% | 
 | 12 --- 9x9                         | 1.135 | 1.045 | 108.6% | 0.858 | 0.905 | 94.8% |
 
+The control model was always trained in exactly the same way, though with the same 
+filter-size as the merged models. This means that the variance seen in the control model
+for different numbers of losses at the same filter-size is due to the random initialization
+of the model. However, clear trends are still visible.
+
 It is clear that using `MergeMany` as a form of pre-training does not improve performance.
+In fact, increasing the number of models that are merged decreases the performance of the merged model
+(which is not surprising, given that merging is used as a form of pre-training here, 
+and more models mean worse performance in the pre-trained model). 
+Increasing the filter-size, on the other hand, doesn't affect the performance difference
+between the merged model and the control model. 
+
+In general, **`MergeMany` doesn't work for pre-training / initialization.**
+
 However, if a few models were trained for 5 epochs in one location, merged, 
 and then for another *10 epochs* at another location, 
-that would likely improve performance compared to simply training for 10 epochs,
-though it seems like using more models for that is worse, not better,
-and simply not merging before continuing the training would be even better.
+that would likely improve performance compared to simply training for 10 epochs.
+In other words, using distributed training with `MergeMany` will likely increase 
+performance relative to simply training for a lower number of epochs in one location.
+
+On the other hand, it seems like using more models for that is worse, not better,
+and simply not merging before continuing the training would be even better. 
+So even for this purpose, `MergeMany` doesn't seem to be useful 
+(for the given architecture, at least).
 
 There is a caveat to give here: all of these models were trained on the same data.
 Results might be different if the models were trained on different data each.
