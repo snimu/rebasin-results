@@ -171,6 +171,15 @@ The behavior seems noisy, though slightly better for larger filter-sizes.
 I also implemented the `MergeMany`-algorithm from the paper. 
 Here are the results of running tests with it on `hlb-CIFAR10`.
 
+I ran three kinds of tests:
+
+1. [Simple `MergeMany`](#simple-mergemany). Doesn't seem to work well.
+2. [Train-Merge-Train](#train-merge-train). Use `MergeMany` as pre-training / initialization, 
+    then train the model further. Doesn't seem to work well.
+3. [Train on different datasets](#train-on-different-datasets).
+    Train models on different datasets, then merge them and retrain on one last dataset.
+    **This seems to work well!**
+
 #### Simple MergeMany
 
 I used the `MergeMany`-algorithm with the following convolutional kernel-sizes:
