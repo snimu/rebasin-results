@@ -23,12 +23,6 @@ Raw data at [hlb-CIFAR10/results](hlb-CIFAR10/results).
     that are merged on different datasets and then retraining on yet another dataset,
     the results are promising.
 
-## torchvision.models.mobilenet_v3_large
-
-Results for torchvision.models.mobilenet_v3_large.
-
-For results, read [RESULTS.md](torchvision-models/mobilenet_v3_large/RESULTS.md).
-
 ## hlb-gpt
 
 Results from forking [tysam-code/hlb-gpt](https://github.com/tysam-code/hlb-gpt).
@@ -41,6 +35,12 @@ If you would like to look at the raw data from an experiment, though,
 you can, at [hlb-gpt/results](hlb-gpt). I just want to repeat that this data
 is produced by erroneous code, otherwise `model_b_original` and `model_b_rebasin`
 should have the same loss and accuracy, at least approximately.
+
+## torchvision.models.mobilenet_v3_large
+
+Results for torchvision.models.mobilenet_v3_large.
+
+For results, read [RESULTS.md](torchvision-models/mobilenet_v3_large/RESULTS.md).
 
 **Summary**:
 
