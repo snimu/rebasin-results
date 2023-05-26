@@ -26,7 +26,9 @@ I have results for two algorithms:
   - [Analysis](#analysis)
   - [Filter-size Analysis](#filter-size-analysis)
 - [MergeMany](#mergemany)
+  - [Simple MergeMany](#simple-mergemany)
   - [Train-Merge-Train](#train-merge-train)
+  - [Train on different datasets](#train-on-different-datasets)
 - [Model](#model)
 - [Permutations](#permutations)
 
@@ -166,6 +168,11 @@ The behavior seems noisy, though slightly better for larger filter-sizes.
 
 ### MergeMany
 
+I also implemented the `MergeMany`-algorithm from the paper. 
+Here are the results of running tests with it on `hlb-CIFAR10`.
+
+#### Simple MergeMany
+
 I used the `MergeMany`-algorithm with the following convolutional kernel-sizes:
 
 - 3x3
@@ -190,6 +197,7 @@ Below are the losses and accuracies.
         alt="Accuracies of MergeMany for hlb-CIFAR10 with different filter-sizes and different numbers of models"
         width="500"
     />
+</p>
 
 Clearly, `MergeMany` significantly reduces performance instead of improving it 
 (as claimed in the paper). The more models are merged, the greater the loss in performance.
@@ -287,45 +295,192 @@ In the [results](merge_many/train_different_datasets), `Model <i>` refers to the
 that was used for merging, `Merged Model` refers to the model that was obtained by merging
 those models, and `Control Model (<j>)` to the control model trained on `j * e` epochs.
 
-Here are the results for **merging 3 models**:
+There are two different parameters of interest that may influence the results:
 
-| Epochs | Metric   | Avg of Models 1, 2, 3 | Merged Model | Control Model (1) | Control Model (4) |
-|--------|----------|-----------------------|--------------|-------------------|-------------------|
-| 10     | Loss     | 1.284                 | 1.262        | 1.274             | 1.215             |
-| 10     | Accuracy | 0.800                 | 0.806        | 0.807             | 0.834             |
-| 20     | Loss     | 1.237                 | 1.225        | 1.224             | 1.204             |
-| 20     | Accuracy | 0.824                 | 0.827        | 0.831             | 0.841             |
-| 30     | Loss     | 1.224                 | 1.221        | 1.231             | 1.190             |
-| 30     | Accuracy | 0.829                 | 0.831        | 0.822             | 0.846             |
-| 40     | Loss     | 1.211                 | 1.248        | 1.215             | 1.165             |
-| 40     | Accuracy | 0.833                 | 0.810        | 0.835             | 0.856             |
-| 50     | Loss     | 1.191                 | 1.173        | 1.180             | 1.164             |
-| 50     | Accuracy | 0.845                 | 0.852        | 0.850             | 0.858             |
+1. The number of epochs that each model is trained for (`e`).
+2. The number of models that are merged (`n`).
 
-Here are the results for **merging 6 models**:
+#### By number of epochs
 
-| Epochs | Metric   | Avg of Models 1, ..., 6 | Merged Model | Control Model (1) | Control Model (7) |
-|--------|----------|-------------------------|--------------|-------------------|-------------------|
-| 10     | Loss     | 1.476                   | 1.367        | 1.451             | 1.262             |
-| 10     | Accuracy | 0.682                   | 0.748        | 0.700             | 0.810             |
-| 20     | Loss     | 1.308                   | 1.279        | 1.355             | 1.235             |
-| 20     | Accuracy | 0.785                   | 0.805        | 0.763             | 0.825             |
-| 30     | Loss     | 1.287                   | 1.228        | 1.288             | 1.233             |
-| 30     | Accuracy | 0.799                   | 0.827        | 0.799             | 0.827             |
-| 40     | Loss     | 1.260                   | 1.267        | 1.282             | 1.189             |
-| 40     | Accuracy | 0.814                   | 0.803        | 0.796             | 0.851             |
-| 50     | Loss     | 1.259                   | 1.232        | 1.242             | 1.205             |
-| 50     | Accuracy | 0.813                   | 0.821        | 0.822             | 0.846             |
+Here are the results of plotting loss & accuracy over the number of epochs:
 
 
-Here are the results for **merging 9 models**:
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-3models.png" 
+        alt="Loss & accuracy over epochs for 3 models"
+        width="700"
+    />
+</p>
 
-| Epochs | Metric   | Avg of Models 1, ..., 9 | Merged Model | Control Model (1) | Control Model (10) |
-|--------|----------|-------------------------|--------------|-------------------|--------------------|
-| 10     | Loss     | 1.624                   | 1.638        | 1.600             | 1.338              |
-| 10     | Accuracy | 0.581                   | 0.596        | 0.596             | 0.777              |
-| 20     | Loss     | 1.422                   | 1.333        | 1.434             | 1.736              |
-| 20     | Accuracy | 0.667                   | 0.676        | 0.667             | 0.791              |
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-6models.png" 
+        alt="Loss & accuracy over epochs for 6 models"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-9models.png" 
+        alt="Loss & accuracy over epochs for 9 models"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-12models.png" 
+        alt="Loss & accuracy over epochs for 12 models"
+        width="700"
+    />
+</p>
+
+
+A few things become clear immediately:
+
+1. The results are very noisy
+2. The performance of all models improves with the number of epochs (as expected)
+3. The performance of all models falls with the number of models 
+   (because they see a smaller portion of the dataset; fewer datapoints, and less diverse data)
+
+To compensate for the secular change in performance, I will normalize the data 
+by dividing each datapoint to the corresponding datapoint of the `Merged Model`.
+This way, the change in performance of the different models relative to that of the merged model
+will become apparent.
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-normalized-3models.png" 
+        alt="Loss & accuracy over epochs for 3 models, normalized"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-normalized-6models.png" 
+        alt="Loss & accuracy over epochs for 6 models, normalized"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-normalized-9models.png" 
+        alt="Loss & accuracy over epochs for 9 models, normalized"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-normalized-12models.png" 
+        alt="Loss & accuracy over epochs for 12 models, normalized"
+        width="700"
+    />
+</p>
+
+
+Except when using only 3 models, the performance of `Merged Model` is always better
+than that of the models that were used for merging, as well as `Control Model (1)`.
+For high `n`, it is even somewhat competitive with `Control Model (n)`.
+
+#### By number of models
+
+Here are the results of plotting loss & accuracy over the number of models:
+
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-10epochs.png" 
+        alt="Loss & accuracy over number of models for 10 epochs"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-20epochs.png" 
+        alt="Loss & accuracy over number of models for 20 epochs"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-30epochs.png" 
+        alt="Loss & accuracy over number of models for 30 epochs"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-40epochs.png" 
+        alt="Loss & accuracy over number of models for 40 epochs"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-50epochs.png" 
+        alt="Loss & accuracy over number of models for 50 epochs"
+        width="700"
+    />
+</p>
+
+Here, it becomes *very* clear that increasing the number of models decreases performance.
+Let's normalize the data again:
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-normalized-10epochs.png" 
+        alt="Loss & accuracy over number of models for 10 epochs, normalized"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-normalized-20epochs.png" 
+        alt="Loss & accuracy over number of models for 20 epochs, normalized"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-normalized-30epochs.png" 
+        alt="Loss & accuracy over number of models for 30 epochs, normalized"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-normalized-40epochs.png" 
+        alt="Loss & accuracy over number of models for 40 epochs, normalized"
+        width="700"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="merge_many/train_different_datasets/results-normalized-50epochs.png" 
+        alt="Loss & accuracy over number of models for 50 epochs, normalized"
+        width="700"
+    />
+</p>
+
+The performance of all models drops relative to that of the `Merged Model` with increasing `n`.
+This makes me think that `MergeMany` *might* work if the limit on training is the dataset size,
+and not compute budget. In that case, using data and training privately on-device, then
+merging the resulting models and retraining them on a well-tuned central dataset
+might be very useful. This is especially the case if different datasources show different bias,
+though I currently have not tested this (and may not do it in the near future).
 
 
 ## Model

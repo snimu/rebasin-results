@@ -227,178 +227,97 @@ def plot_merge_many_accuracies() -> None:
     plt.savefig("merge_many/accuracies.png", dpi=300)
 
 
-def plot_merge_many_different_datasets() -> None:
+def plot_merge_many_different_datasets(show: bool = False) -> None:
     with open("merge_many/train_different_datasets/losses.txt", "r") as f:
         losses: dict[str, dict[int, dict[str, list[float]]]] = json.loads(f.read())
     with open("merge_many/train_different_datasets/accuracies.txt", "r") as f:
         accuracies: dict[str, dict[int, dict[str, list[float]]]] = json.loads(f.read())
 
-    for epochs, data in losses['epochs'].items():
-        plt.title(f"Losses: MergeMany (epochs: {epochs})")
-        plt.xlabel("# of models")
-        plt.ylabel("Loss")
+    plot_group__merge_many_different_datasets(
+        losses, accuracies, "models", normalize=False, show=show
+    )
+    plot_group__merge_many_different_datasets(
+        losses, accuracies, "epochs", normalize=False, show=show
+    )
+    plot_group__merge_many_different_datasets(
+        losses, accuracies, "models", normalize=True, show=show
+    )
+    plot_group__merge_many_different_datasets(
+        losses, accuracies, "epochs", normalize=True, show=show
+    )
 
-        ticks = np.arange(len(data['avg_model']))
-        labels = (ticks + 1) * 3
-        plt.xticks(ticks, labels)
-        plt.grid()
-        for model_name, values in data.items():
-            plt.plot(values, label=model_name)
-        plt.legend()
-        # plt.show()
-        plt.savefig(
-            f"merge_many/train_different_datasets/losses-{epochs}epochs.png",
-            dpi=300
+
+def plot_group__merge_many_different_datasets(
+        losses: dict[str, dict[int, dict[str, list[float]]]],
+        accuracies: dict[str, dict[int, dict[str, list[float]]]],
+        key: str,
+        normalize: bool,
+        show: bool = False
+) -> None:
+    for (quantity, loss_data), (quantity_control, acc_data) in zip(
+            losses[key].items(), accuracies[key].items()
+    ):
+        assert quantity == quantity_control
+        assert len(loss_data['avg_model']) == len(acc_data['avg_model'])
+
+        if normalize:
+            loss_data = normalize_data(loss_data)
+            acc_data = normalize_data(acc_data)
+
+        gs = gridspec.GridSpec(2, 2, height_ratios=[9, 1])
+        fig = plt.figure(figsize=(9, 5))
+        fig.subplots_adjust(hspace=0.1, wspace=0.3, left=0.1, right=0.95)
+        axs = fig.add_subplot(gs[0]), fig.add_subplot(gs[1])
+
+        if normalize:
+            fig.suptitle(f"Results (normalized): MergeMany ({key}: {quantity})")
+        else:
+            fig.suptitle(f"Results: MergeMany ({key}: {quantity})")
+
+        ticks = np.arange(len(loss_data['avg_model']))
+        labels = (ticks + 1) * (3 if key == 'epochs' else 10)
+        axs[0].set_xticks(ticks, labels)
+        axs[1].set_xticks(ticks, labels)
+
+        axs[0].set_title("Losses")
+        axs[1].set_title("Accuracies")
+
+        axs[0].set_xlabel(f"# of {'epochs' if key == 'models' else 'models'}")
+        axs[1].set_xlabel(f"# of {'epochs' if key == 'models' else 'models'}")
+
+        axs[0].set_ylabel("Loss")
+        axs[1].set_ylabel("Accuracy")
+
+        axs[0].grid()
+        axs[1].grid()
+
+        for model_name, values in loss_data.items():
+            axs[0].plot(values, label=model_name)
+        for model_name, values in acc_data.items():
+            axs[1].plot(values)
+
+        fig.legend(
+            loc='upper center',
+            bbox_to_anchor=(0.5, 0.13),
+            ncols=4,
+            fontsize=10
         )
+        if show:
+            plt.show()
+        else:
+            name = f"{quantity}{key}"
+            name = "results-normalized-" + name if normalize else "results-" + name
+            name = f"merge_many/train_different_datasets/{name}.png"
+            plt.savefig(name, dpi=300)
         plt.clf()
-
-    for model_num, data in losses['models'].items():
-        plt.title(f"Losses: MergeMany (models: {model_num})")
-        plt.xlabel("# of epochs")
-        plt.ylabel("Loss")
-
-        ticks = np.arange(len(data['avg_model']))
-        labels = (ticks + 1) * 10
-        plt.xticks(ticks, labels)
-        plt.grid()
-        for model_name, values in data.items():
-            plt.plot(values, label=model_name)
-        plt.legend()
-        # plt.show()
-        plt.savefig(
-            f"merge_many/train_different_datasets/losses-{model_num}models.png",
-            dpi=300
-        )
-        plt.clf()
-
-    for epochs, data in accuracies['epochs'].items():
-        plt.title(f"Accuracies: MergeMany (epochs: {epochs})")
-        plt.xlabel("# of models")
-        plt.ylabel("Accuracy")
-
-        ticks = np.arange(len(data['avg_model']))
-        labels = (ticks + 1) * 3
-        plt.xticks(ticks, labels)
-        plt.grid()
-        for model_name, values in data.items():
-            plt.plot(values, label=model_name)
-        plt.legend()
-        # plt.show()
-        plt.savefig(
-            f"merge_many/train_different_datasets/accuracies-{epochs}epochs.png",
-            dpi=300
-        )
-        plt.clf()
-
-    for model_num, data in accuracies['models'].items():
-        plt.title(f"Accuracies: MergeMany (models: {model_num})")
-        plt.xlabel("# of epochs")
-        plt.ylabel("Accuracy")
-
-        ticks = np.arange(len(data['avg_model']))
-        labels = (ticks + 1) * 10
-        plt.xticks(ticks, labels)
-        plt.grid()
-        for model_name, values in data.items():
-            plt.plot(values, label=model_name)
-        plt.legend()
-        # plt.show()
-        plt.savefig(
-            f"merge_many/train_different_datasets/accuracies-{model_num}models.png",
-            dpi=300
-        )
-        plt.clf()
-
-    # Now normalize one of the plots and adjust the others accordingly
-    for epochs, data in losses['epochs'].items():
-        plt.title(f"Losses (normalized): MergeMany (epochs: {epochs})")
-        plt.xlabel("# of models")
-        plt.ylabel("Loss")
-
-        ticks = np.arange(len(data['avg_model']))
-        labels = (ticks + 1) * 3
-        plt.xticks(ticks, labels)
-        plt.grid()
-        new_data = normalize_data(data)
-        for model_name, values in new_data.items():
-            plt.plot(values, label=model_name)
-        plt.legend()
-        # plt.show()
-        plt.savefig(
-            f"merge_many/train_different_datasets/"
-            f"losses-normalized-{epochs}epochs.png",
-            dpi=300
-        )
-        plt.clf()
-
-    for model_num, data in losses['models'].items():
-        plt.title(f"Losses (normalized): MergeMany (models: {model_num})")
-        plt.xlabel("# of epochs")
-        plt.ylabel("Loss")
-
-        ticks = np.arange(len(data['avg_model']))
-        labels = (ticks + 1) * 10
-        plt.xticks(ticks, labels)
-        plt.grid()
-        new_data = normalize_data(data)
-        for model_name, values in new_data.items():
-            plt.plot(values, label=model_name)
-        plt.legend()
-        # plt.show()
-        plt.savefig(
-            f"merge_many/train_different_datasets/"
-            f"losses-normalized-{model_num}models.png",
-            dpi=300
-        )
-        plt.clf()
-
-    for epochs, data in accuracies['epochs'].items():
-        plt.title(f"Accuracies (normalized): MergeMany (epochs: {epochs})")
-        plt.xlabel("# of models")
-        plt.ylabel("Accuracy")
-
-        ticks = np.arange(len(data['avg_model']))
-        labels = (ticks + 1) * 3
-        plt.xticks(ticks, labels)
-        plt.grid()
-        new_data = normalize_data(data)
-        for model_name, values in new_data.items():
-            plt.plot(values, label=model_name)
-        plt.legend()
-        # plt.show()
-        plt.savefig(
-            f"merge_many/train_different_datasets/"
-            f"accuracies-normalized-{epochs}epochs.png",
-            dpi=300
-        )
-        plt.clf()
-
-    for model_num, data in accuracies['models'].items():
-        plt.title(f"Accuracies (normalized): MergeMany (models: {model_num})")
-        plt.xlabel("# of epochs")
-        plt.ylabel("Accuracy")
-
-        ticks = np.arange(len(data['avg_model']))
-        labels = (ticks + 1) * 10
-        plt.xticks(ticks, labels)
-        plt.grid()
-        new_data = normalize_data(data)
-        for model_name, values in new_data.items():
-            plt.plot(values, label=model_name)
-        plt.legend()
-        # plt.show()
-        plt.savefig(
-            f"merge_many/train_different_datasets/"
-            f"accuracies-normalized-{model_num}models.png",
-            dpi=300
-        )
-        plt.clf()
+        plt.cla()
+        plt.close()
 
 
 def normalize_data(data: dict[str, list[float]]) -> dict[str, list[float]]:
     new_data: dict[str, list[float]] = {}
     for model_name, values in data.items():
-        new_data[model_name] = [value / values[0] for value in values]
+        new_data[model_name] = [value / data['merged_model'][i] for i, value in enumerate(values)]
     return new_data
 
 
