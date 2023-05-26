@@ -258,12 +258,75 @@ and simply not merging before continuing the training would be even better.
 So even for this purpose, `MergeMany` doesn't seem to be useful 
 (for the given architecture, at least).
 
-There is a caveat to give here: all of these models were trained on the same data.
+### Train on different datasets
+
+There is a caveat to the above: all of these models were trained on the same data.
 Results might be different if the models were trained on different data each.
 
 That means that `MergeMany` *might* still be useful for effectively increasing dataset-size
-through federated learning. However, because increasing the number of models merged decreases
-performance, I'm pretty sceptical of that.
+through federated learning. This is what I've tested next.
+
+To do so, I split `CIFAR10` into `n+1` parts, where `n` is the number of models that I would merge.
+I would train `n` models for `e` epochs, each on a different part of the dataset, 
+then merge them. Then, I would train the merged model for another `e` epochs 
+on the last part of the dataset.
+
+For comparison, I would train a single model for `e` epochs on only the last part of the dataset.
+This is to see whether the merged model performs better 
+than a single model trained for the same number of epochs. 
+This would already be useful, if local training of several models on private datasets 
+followed by merging and retraining on a public dataset yields a better model than just
+training on the public dataset with equivalent compute time.
+
+I then continued training of that model for another `e` models, for a total of `n * e` epochs.
+This is to see whether the merged model performs better than a single model 
+given the same compute resources as the merged model including the "pre-training"
+(a.k.a. training of models that were then merged).
+
+In the [results](merge_many/train_different_datasets), `Model <i>` refers to the ith model
+that was used for merging, `Merged Model` refers to the model that was obtained by merging
+those models, and `Control Model (<j>)` to the control model trained on `j * e` epochs.
+
+Here are the results for **merging 3 models**:
+
+| Epochs | Metric   | Avg of Models 1, 2, 3 | Merged Model | Control Model (1) | Control Model (4) |
+|--------|----------|-----------------------|--------------|-------------------|-------------------|
+| 10     | Loss     | 1.284                 | 1.262        | 1.274             | 1.215             |
+| 10     | Accuracy | 0.800                 | 0.806        | 0.807             | 0.834             |
+| 20     | Loss     | 1.237                 | 1.225        | 1.224             | 1.204             |
+| 20     | Accuracy | 0.824                 | 0.827        | 0.831             | 0.841             |
+| 30     | Loss     | 1.224                 | 1.221        | 1.231             | 1.190             |
+| 30     | Accuracy | 0.829                 | 0.831        | 0.822             | 0.846             |
+| 40     | Loss     | 1.211                 | 1.248        | 1.215             | 1.165             |
+| 40     | Accuracy | 0.833                 | 0.810        | 0.835             | 0.856             |
+| 50     | Loss     | 1.191                 | 1.173        | 1.180             | 1.164             |
+| 50     | Accuracy | 0.845                 | 0.852        | 0.850             | 0.858             |
+
+Here are the results for **merging 6 models**:
+
+| Epochs | Metric   | Avg of Models 1, ..., 6 | Merged Model | Control Model (1) | Control Model (7) |
+|--------|----------|-------------------------|--------------|-------------------|-------------------|
+| 10     | Loss     | 1.476                   | 1.367        | 1.451             | 1.262             |
+| 10     | Accuracy | 0.682                   | 0.748        | 0.700             | 0.810             |
+| 20     | Loss     | 1.308                   | 1.279        | 1.355             | 1.235             |
+| 20     | Accuracy | 0.785                   | 0.805        | 0.763             | 0.825             |
+| 30     | Loss     | 1.287                   | 1.228        | 1.288             | 1.233             |
+| 30     | Accuracy | 0.799                   | 0.827        | 0.799             | 0.827             |
+| 40     | Loss     | 1.260                   | 1.267        | 1.282             | 1.189             |
+| 40     | Accuracy | 0.814                   | 0.803        | 0.796             | 0.851             |
+| 50     | Loss     | 1.259                   | 1.232        | 1.242             | 1.205             |
+| 50     | Accuracy | 0.813                   | 0.821        | 0.822             | 0.846             |
+
+
+Here are the results for **merging 9 models**:
+
+| Epochs | Metric   | Avg of Models 1, ..., 9 | Merged Model | Control Model (1) | Control Model (10) |
+|--------|----------|-------------------------|--------------|-------------------|--------------------|
+| 10     | Loss     | 1.624                   | 1.638        | 1.600             | 1.338              |
+| 10     | Accuracy | 0.581                   | 0.596        | 0.596             | 0.777              |
+| 20     | Loss     | 1.422                   | 1.333        | 1.434             | 1.736              |
+| 20     | Accuracy | 0.667                   | 0.676        | 0.667             | 0.791              |
+
 
 ## Model
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -225,5 +227,180 @@ def plot_merge_many_accuracies() -> None:
     plt.savefig("merge_many/accuracies.png", dpi=300)
 
 
+def plot_merge_many_different_datasets() -> None:
+    with open("merge_many/train_different_datasets/losses.txt", "r") as f:
+        losses: dict[str, dict[int, dict[str, list[float]]]] = json.loads(f.read())
+    with open("merge_many/train_different_datasets/accuracies.txt", "r") as f:
+        accuracies: dict[str, dict[int, dict[str, list[float]]]] = json.loads(f.read())
+
+    for epochs, data in losses['epochs'].items():
+        plt.title(f"Losses: MergeMany (epochs: {epochs})")
+        plt.xlabel("# of models")
+        plt.ylabel("Loss")
+
+        ticks = np.arange(len(data['avg_model']))
+        labels = (ticks + 1) * 3
+        plt.xticks(ticks, labels)
+        plt.grid()
+        for model_name, values in data.items():
+            plt.plot(values, label=model_name)
+        plt.legend()
+        # plt.show()
+        plt.savefig(
+            f"merge_many/train_different_datasets/losses-{epochs}epochs.png",
+            dpi=300
+        )
+        plt.clf()
+
+    for model_num, data in losses['models'].items():
+        plt.title(f"Losses: MergeMany (models: {model_num})")
+        plt.xlabel("# of epochs")
+        plt.ylabel("Loss")
+
+        ticks = np.arange(len(data['avg_model']))
+        labels = (ticks + 1) * 10
+        plt.xticks(ticks, labels)
+        plt.grid()
+        for model_name, values in data.items():
+            plt.plot(values, label=model_name)
+        plt.legend()
+        # plt.show()
+        plt.savefig(
+            f"merge_many/train_different_datasets/losses-{model_num}models.png",
+            dpi=300
+        )
+        plt.clf()
+
+    for epochs, data in accuracies['epochs'].items():
+        plt.title(f"Accuracies: MergeMany (epochs: {epochs})")
+        plt.xlabel("# of models")
+        plt.ylabel("Accuracy")
+
+        ticks = np.arange(len(data['avg_model']))
+        labels = (ticks + 1) * 3
+        plt.xticks(ticks, labels)
+        plt.grid()
+        for model_name, values in data.items():
+            plt.plot(values, label=model_name)
+        plt.legend()
+        # plt.show()
+        plt.savefig(
+            f"merge_many/train_different_datasets/accuracies-{epochs}epochs.png",
+            dpi=300
+        )
+        plt.clf()
+
+    for model_num, data in accuracies['models'].items():
+        plt.title(f"Accuracies: MergeMany (models: {model_num})")
+        plt.xlabel("# of epochs")
+        plt.ylabel("Accuracy")
+
+        ticks = np.arange(len(data['avg_model']))
+        labels = (ticks + 1) * 10
+        plt.xticks(ticks, labels)
+        plt.grid()
+        for model_name, values in data.items():
+            plt.plot(values, label=model_name)
+        plt.legend()
+        # plt.show()
+        plt.savefig(
+            f"merge_many/train_different_datasets/accuracies-{model_num}models.png",
+            dpi=300
+        )
+        plt.clf()
+
+    # Now normalize one of the plots and adjust the others accordingly
+    for epochs, data in losses['epochs'].items():
+        plt.title(f"Losses (normalized): MergeMany (epochs: {epochs})")
+        plt.xlabel("# of models")
+        plt.ylabel("Loss")
+
+        ticks = np.arange(len(data['avg_model']))
+        labels = (ticks + 1) * 3
+        plt.xticks(ticks, labels)
+        plt.grid()
+        new_data = normalize_data(data)
+        for model_name, values in new_data.items():
+            plt.plot(values, label=model_name)
+        plt.legend()
+        # plt.show()
+        plt.savefig(
+            f"merge_many/train_different_datasets/"
+            f"losses-normalized-{epochs}epochs.png",
+            dpi=300
+        )
+        plt.clf()
+
+    for model_num, data in losses['models'].items():
+        plt.title(f"Losses (normalized): MergeMany (models: {model_num})")
+        plt.xlabel("# of epochs")
+        plt.ylabel("Loss")
+
+        ticks = np.arange(len(data['avg_model']))
+        labels = (ticks + 1) * 10
+        plt.xticks(ticks, labels)
+        plt.grid()
+        new_data = normalize_data(data)
+        for model_name, values in new_data.items():
+            plt.plot(values, label=model_name)
+        plt.legend()
+        # plt.show()
+        plt.savefig(
+            f"merge_many/train_different_datasets/"
+            f"losses-normalized-{model_num}models.png",
+            dpi=300
+        )
+        plt.clf()
+
+    for epochs, data in accuracies['epochs'].items():
+        plt.title(f"Accuracies (normalized): MergeMany (epochs: {epochs})")
+        plt.xlabel("# of models")
+        plt.ylabel("Accuracy")
+
+        ticks = np.arange(len(data['avg_model']))
+        labels = (ticks + 1) * 3
+        plt.xticks(ticks, labels)
+        plt.grid()
+        new_data = normalize_data(data)
+        for model_name, values in new_data.items():
+            plt.plot(values, label=model_name)
+        plt.legend()
+        # plt.show()
+        plt.savefig(
+            f"merge_many/train_different_datasets/"
+            f"accuracies-normalized-{epochs}epochs.png",
+            dpi=300
+        )
+        plt.clf()
+
+    for model_num, data in accuracies['models'].items():
+        plt.title(f"Accuracies (normalized): MergeMany (models: {model_num})")
+        plt.xlabel("# of epochs")
+        plt.ylabel("Accuracy")
+
+        ticks = np.arange(len(data['avg_model']))
+        labels = (ticks + 1) * 10
+        plt.xticks(ticks, labels)
+        plt.grid()
+        new_data = normalize_data(data)
+        for model_name, values in new_data.items():
+            plt.plot(values, label=model_name)
+        plt.legend()
+        # plt.show()
+        plt.savefig(
+            f"merge_many/train_different_datasets/"
+            f"accuracies-normalized-{model_num}models.png",
+            dpi=300
+        )
+        plt.clf()
+
+
+def normalize_data(data: dict[str, list[float]]) -> dict[str, list[float]]:
+    new_data: dict[str, list[float]] = {}
+    for model_name, values in data.items():
+        new_data[model_name] = [value / values[0] for value in values]
+    return new_data
+
+
 if __name__ == "__main__":
-    plot_merge_many_losses()
+    plot_merge_many_different_datasets()
