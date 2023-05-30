@@ -70,7 +70,7 @@ def train_mnist(
         num_layers: int = 5,
         use_layer_norm: bool = True,
         epochs: int = 2,
-        learning_rate: float = 1e-3,
+        learning_rate: float = 7e-5,
         weight_decay: float = 0.0,
         loop: tqdm[Any] | None = None
 ) -> MLP:
@@ -162,7 +162,7 @@ def get_filenames(directory):
 
 
 def test_rebasin(
-        learning_rate: float = 1e-3,
+        learning_rate: float = 7e-5,
         weight_decay: float = 0.0,
         epochs: int = 2,
         hidden_features: int | None = None,
