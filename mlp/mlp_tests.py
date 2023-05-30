@@ -38,7 +38,7 @@ class MLP(nn.Module):
             return
 
         hidden_features = (
-            hidden_features
+            20
             if hidden_features is not None
             else in_features
         )
