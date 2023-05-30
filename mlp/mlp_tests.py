@@ -147,7 +147,7 @@ def eval_fn(
             correct += (predicted == labels).sum().item()
 
     model.train()
-    return loss, correct / total
+    return loss / len(dataloader), correct / total
 
 
 def get_filenames(directory):
