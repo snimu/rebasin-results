@@ -43,24 +43,24 @@ class MLP(nn.Module):
             else in_features
         )
 
-        self.layers = nn.Sequential()
+        self.sequential = nn.Sequential()
 
-        self.layers.append(nn.Linear(in_features, hidden_features))
-        self.layers.append(nn.ReLU())
+        self.sequential.append(nn.Linear(in_features, hidden_features))
+        self.sequential.append(nn.ReLU())
         if use_layer_norm:
-            self.layers.append(nn.LayerNorm(hidden_features))
+            self.sequential.append(nn.LayerNorm(hidden_features))
 
         for _ in range(num_layers - 2):
-            self.layers.append(nn.Linear(hidden_features, hidden_features))
-            self.layers.append(nn.ReLU())
+            self.sequential.append(nn.Linear(hidden_features, hidden_features))
+            self.sequential.append(nn.ReLU())
             if use_layer_norm:
-                self.layers.append(nn.LayerNorm(hidden_features))
+                self.sequential.append(nn.LayerNorm(hidden_features))
 
-        self.layers.append(nn.Linear(hidden_features, out_features))
-        self.layers.append(nn.Sigmoid())
+        self.sequential.append(nn.Linear(hidden_features, out_features))
+        self.sequential.append(nn.Sigmoid())
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
-        return self.layers(input_tensor)
+        return self.sequential(input_tensor)
 
 
 def train_mnist(
