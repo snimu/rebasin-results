@@ -335,8 +335,8 @@ def tune_training_parameters() -> None:
     best_acc = -float("inf")
     best_lr = 1e-3
     for lr in tqdm(lrs):
-        mlp = train_mnist(learning_rate=lr)
-        loss, acc = eval_fn(mlp, device)
+        model = train_mnist(learning_rate=lr)
+        loss, acc = eval_fn(model, device)
         if loss < best_loss:
             best_loss = loss
             best_acc = acc
@@ -350,8 +350,8 @@ def tune_training_parameters() -> None:
     best_acc = -float("inf")
     best_num_layers = 1
     for num_layer in tqdm(num_layers):
-        mlp = train_mnist(num_layers=num_layer, learning_rate=best_lr)
-        loss, acc = eval_fn(mlp, device)
+        model = train_mnist(num_layers=num_layer, learning_rate=best_lr)
+        loss, acc = eval_fn(model, device)
         if loss < best_loss:
             best_loss = loss
             best_acc = acc
