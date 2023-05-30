@@ -384,8 +384,8 @@ def tune_training_parameters() -> None:
     loop = tqdm(itertools.product(lrs, num_layers))
     for lr, num_layer in loop:
         loop.set_description(f"{lr=}, {num_layer=}")
-        mlp = train_mnist(learning_rate=lr, num_layers=num_layer, loop=loop)
-        loss, acc = eval_fn(mlp, device)
+        model = train_mnist(learning_rate=lr, num_layers=num_layer, loop=loop)
+        loss, acc = eval_fn(model, device)
         if loss < best_loss:
             best_loss = loss
             best_acc = acc
