@@ -327,8 +327,8 @@ def tune_training_parameters() -> None:
     Isn't very important anyway.
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    lrs = (5e-3, 1e-3, 5e-4, 1e-4, 5e-5)
-    num_layers = (3, 4, 5, 6, 7, 8)
+    lrs = (1e-3, 5e-4, 1e-4, 5e-5)
+    num_layers = (3, 4, 5, 6, 7)
 
     print("lr test at fixed num_layers")
     best_loss = float("inf")
