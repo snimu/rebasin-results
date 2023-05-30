@@ -401,7 +401,7 @@ def tune_training_parameters() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--weight_decay', type=float, default=[0.0], nargs='+')
-    parser.add_argument('-h', '--hidden_features', type=int, default=[28*28], nargs='+')
+    parser.add_argument('-f', '--hidden_features', type=int, default=[28*28], nargs='+')
     parser.add_argument('-p', '--print_model', action='store_true', default=False)
     parser.add_argument('-s', '--show_permutations', action='store_true', default=False)
     parser.add_argument('-t', '--tune_training_parameters', action='store_true', default=False)
