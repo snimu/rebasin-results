@@ -335,12 +335,17 @@ def test_merge_many(
         "acc_merged": [],
     }
 
-    for feature_num, weight_decay, model_num in itertools.product(
-            hidden_features, weight_decays, num_models
-    ):
+    loop = tqdm(
+        itertools.product(hidden_features, weight_decays, num_models),
+        total=len(hidden_features) * len(weight_decays) * len(num_models),
+        disable=not verbose,
+    )
+    for feature_num, weight_decay, model_num in loop:
+        if verbose:
+            loop.set_description(f"hf={feature_num}, wd={weight_decay}, nm={model_num}")
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if verbose:
-            print("Create models")
+            loop.write("Create models")
         models = []
         for i in range(model_num):
             models.append(
@@ -356,7 +361,7 @@ def test_merge_many(
         x = torch.randn(64, 28*28).to(device)
 
         if verbose:
-            print("Evaluate models")
+            loop.write("Evaluate models")
 
         losses = []
         accs = []
@@ -368,9 +373,9 @@ def test_merge_many(
         acc_avg = sum(accs) / len(accs)
 
         if verbose:
-            print(f"Average loss: {loss_avg}")
-            print(f"Average accuracy: {acc_avg}")
-            print("Merge models")
+            loop.write(f"Average loss: {loss_avg}")
+            loop.write(f"Average accuracy: {acc_avg}")
+            loop.write("Merge models")
         mm = rebasin.MergeMany(
             models=models,
             working_model=MLP(28 * 28, 10, feature_num),
@@ -381,8 +386,8 @@ def test_merge_many(
         loss_merged, acc_merged = eval_fn(merged_model, device)
 
         if verbose:
-            print(f"Merged model loss: {loss_merged}")
-            print(f"Merged model accuracy: {acc_merged}")
+            loop.write(f"Merged model loss: {loss_merged}")
+            loop.write(f"Merged model accuracy: {acc_merged}")
 
         results["hidden_features"].append(feature_num)
         results["weight_decay"].append(weight_decay)
