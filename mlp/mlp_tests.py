@@ -182,7 +182,7 @@ def test_rebasin(
         hidden_features=hidden_features,
     )
     model_b_orig = copy.deepcopy(model_b)
-    x = torch.randn(28, 28)
+    x = torch.randn(32, 28*28)
     pcd = rebasin.PermutationCoordinateDescent(
          model_a, model_b, x, device_b=device
     )
