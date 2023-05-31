@@ -161,7 +161,7 @@ def get_filenames(directory):
     return filenames
 
 
-def test_rebasin(
+def test_permutation_coordinate_descent(
         learning_rate: float = 7e-5,
         weight_decay: float = 0.0,
         epochs: int = 2,
@@ -425,7 +425,7 @@ def main() -> None:
 
     for weight_decay in args.weight_decay:
         for hidden_features in args.hidden_features:
-            test_rebasin(weight_decay=weight_decay, hidden_features=hidden_features)
+            test_permutation_coordinate_descent(weight_decay=weight_decay, hidden_features=hidden_features)
 
 
 if __name__ == '__main__':
