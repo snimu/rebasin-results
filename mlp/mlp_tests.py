@@ -321,7 +321,6 @@ def test_merge_many(
     assert isinstance(hidden_features, Sequence)
     assert isinstance(weight_decays, Sequence)
     assert isinstance(num_models, Sequence)
-    assert len(hidden_features) == len(weight_decays) == len(num_models) > 0
     assert all(isinstance(x, int) for x in hidden_features)
     assert all(isinstance(x, float) for x in weight_decays)
     assert all(isinstance(x, int) for x in num_models)
