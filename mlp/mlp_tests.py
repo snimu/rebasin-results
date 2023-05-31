@@ -166,7 +166,7 @@ def get_filenames(directory):
 def test_permutation_coordinate_descent(
         learning_rate: float = 7e-5,
         weight_decay: float = 0.0,
-        epochs: int = 2,
+        epochs: int = 1,
         hidden_features: int | None = None,
         verbose: bool = True,
 ):
@@ -315,7 +315,7 @@ def test_merge_many(
         weight_decays: Sequence[float],
         num_models: Sequence[int],
         learning_rate: float = 7e-5,
-        epochs: int = 2,
+        epochs: int = 1,
         verbose: bool = True,
 ) -> None:
     assert isinstance(hidden_features, Sequence)
