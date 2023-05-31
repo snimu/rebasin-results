@@ -6,7 +6,7 @@ import copy
 import os
 import itertools
 import shutil
-from typing import Any
+from typing import Any, Sequence
 
 from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader
@@ -310,6 +310,90 @@ def test_permutation_coordinate_descent(
     shutil.rmtree("models-b-original-b-rebasin")
 
 
+def test_merge_many(
+        hidden_features: Sequence[int],
+        weight_decays: Sequence[float],
+        num_models: Sequence[int],
+        learning_rate: float = 7e-5,
+        epochs: int = 2,
+        verbose: bool = True,
+) -> None:
+    assert isinstance(hidden_features, Sequence)
+    assert isinstance(weight_decays, Sequence)
+    assert isinstance(num_models, Sequence)
+    assert len(hidden_features) == len(weight_decays) == len(num_models) > 0
+    assert all(isinstance(x, int) for x in hidden_features)
+    assert all(isinstance(x, float) for x in weight_decays)
+    assert all(isinstance(x, int) for x in num_models)
+
+    results = {
+        "hidden_features": [],
+        "weight_decay": [],
+        "num_models": [],
+        "loss_avg": [],
+        "acc_avg": [],
+        "loss_merged": [],
+        "acc_merged": [],
+    }
+
+    for feature_num, weight_decay, model_num in itertools.product(
+            hidden_features, weight_decays, num_models
+    ):
+        if verbose:
+            print("Create models")
+        models = []
+        for i in range(model_num):
+            models.append(
+                train_mnist(
+                    learning_rate=learning_rate,
+                    weight_decay=weight_decay,
+                    epochs=epochs,
+                    hidden_features=feature_num,
+                    verbose=verbose
+                )
+            )
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        x = torch.randn(64, 28*28).to(device)
+
+        if verbose:
+            print("Evaluate models")
+
+        losses = []
+        accs = []
+        for model in models:
+            loss, acc = eval_fn(model, device)
+            losses.append(loss)
+            accs.append(acc)
+        loss_avg = sum(losses) / len(losses)
+        acc_avg = sum(accs) / len(accs)
+
+        if verbose:
+            print(f"Average loss: {loss_avg}")
+            print(f"Average accuracy: {acc_avg}")
+            print("Merge models")
+        mm = rebasin.MergeMany(
+            models=models, working_model=MLP(28 * 28, 10, feature_num), input_data=x
+        )
+        merged_model: MLP = mm.run()  # type: ignore
+        loss_merged, acc_merged = eval_fn(merged_model, device)
+
+        if verbose:
+            print(f"Merged model loss: {loss_merged}")
+            print(f"Merged model accuracy: {acc_merged}")
+
+        results["hidden_features"].append(feature_num)
+        results["weight_decay"].append(weight_decay)
+        results["num_models"].append(model_num)
+        results["loss_avg"].append(loss_avg)
+        results["acc_avg"].append(acc_avg)
+        results["loss_merged"].append(loss_merged)
+        results["acc_merged"].append(acc_merged)
+
+    df = pd.DataFrame(results)
+    os.makedirs("results", exist_ok=True)
+    df.to_csv(f"results/merge_many.csv")
+
 
 def show_permutations() -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -419,6 +503,9 @@ def main() -> None:
     parser.add_argument('-p', '--print_model', action='store_true', default=False)
     parser.add_argument('-s', '--show_permutations', action='store_true', default=False)
     parser.add_argument('-t', '--tune_training_parameters', action='store_true', default=False)
+    parser.add_argument('-v', '--verbose', action='store_true', default=False)
+    parser.add_argument('-m', '--merge_many', action='store_true', default=False)
+    parser.add_argument('-n', '--num_models', type=int, default=[3], nargs='+')
 
     args = parser.parse_args()
 
@@ -434,9 +521,19 @@ def main() -> None:
         print_model()
         return
 
+    if args.merge_many:
+        test_merge_many(
+            args.hidden_features,
+            args.weight_decay,
+            args.num_models,
+            verbose=args.verbose
+        )
+
     for weight_decay in args.weight_decay:
         for hidden_features in args.hidden_features:
-            test_permutation_coordinate_descent(weight_decay=weight_decay, hidden_features=hidden_features)
+            test_permutation_coordinate_descent(
+                weight_decay=weight_decay, hidden_features=hidden_features
+            )
 
 
 if __name__ == '__main__':
