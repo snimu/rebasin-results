@@ -297,9 +297,10 @@ def test_permutation_coordinate_descent(
 
     # Save results
     df = pd.DataFrame(losses)
-    df.to_csv(f"losses_wd{weight_decay}_hf{hidden_features}.csv")
+    os.makedirs("results", exist_ok=True)
+    df.to_csv(f"results/losses_wd{weight_decay}_hf{hidden_features}.csv")
     df = pd.DataFrame(accs)
-    df.to_csv(f"accuracies_wd{weight_decay}_hf{hidden_features}.csv")
+    df.to_csv(f"results/accuracies_wd{weight_decay}_hf{hidden_features}.csv")
 
     # Delete old models
     # (I'm only interested in the results, not the models themselves,
