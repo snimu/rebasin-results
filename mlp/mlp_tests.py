@@ -174,15 +174,15 @@ def test_rebasin(
         weight_decay=weight_decay,
         epochs=epochs,
         hidden_features=hidden_features,
-    )
+    ).to(device)
     model_b = train_mnist(
         learning_rate=learning_rate,
         weight_decay=weight_decay,
         epochs=epochs,
         hidden_features=hidden_features,
-    )
-    model_b_orig = copy.deepcopy(model_b)
-    x = torch.randn(32, 28*28)
+    ).to(device)
+    model_b_orig = copy.deepcopy(model_b).to(device)
+    x = torch.randn(32, 28*28).to(device)
     pcd = rebasin.PermutationCoordinateDescent(
          model_a, model_b, x, device_b=device
     )
