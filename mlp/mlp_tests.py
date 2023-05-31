@@ -5,6 +5,7 @@ import argparse
 import copy
 import os
 import itertools
+import shutil
 from typing import Any
 
 from torchvision.datasets import MNIST
@@ -298,6 +299,14 @@ def test_permutation_coordinate_descent(
     df.to_csv(f"losses_wd{weight_decay}_hf{hidden_features}.csv")
     df = pd.DataFrame(accs)
     df.to_csv(f"accuracies_wd{weight_decay}_hf{hidden_features}.csv")
+
+    # Delete old models
+    # (I'm only interested in the results, not the models themselves,
+    # and I need to free the directories for the next run)
+    shutil.rmtree("models-a-b-rebasin")
+    shutil.rmtree("models-a-b-original")
+    shutil.rmtree("models-b-original-b-rebasin")
+
 
 
 def show_permutations() -> None:
