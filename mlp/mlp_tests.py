@@ -73,7 +73,8 @@ def train_mnist(
         epochs: int = 2,
         learning_rate: float = 7e-5,
         weight_decay: float = 0.0,
-        loop: tqdm[Any] | None = None
+        loop: tqdm[Any] | None = None,
+        verbose: bool = False,
 ) -> MLP:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     mlp = MLP(
@@ -106,7 +107,7 @@ def train_mnist(
             loss.backward()
             optimizer.step()
 
-            if i % 100 == 0:
+            if i % 100 == 0 and verbose:
                 feedback = f"Epoch {epoch}, batch {i}: loss {loss.item()}"
                 if loop is not None:
                     loop.write(feedback)
