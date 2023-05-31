@@ -338,6 +338,7 @@ def test_merge_many(
     for feature_num, weight_decay, model_num in itertools.product(
             hidden_features, weight_decays, num_models
     ):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if verbose:
             print("Create models")
         models = []
@@ -349,10 +350,9 @@ def test_merge_many(
                     epochs=epochs,
                     hidden_features=feature_num,
                     verbose=verbose
-                )
+                ).to(device)
             )
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         x = torch.randn(64, 28*28).to(device)
 
         if verbose:
@@ -372,7 +372,10 @@ def test_merge_many(
             print(f"Average accuracy: {acc_avg}")
             print("Merge models")
         mm = rebasin.MergeMany(
-            models=models, working_model=MLP(28 * 28, 10, feature_num), input_data=x
+            models=models,
+            working_model=MLP(28 * 28, 10, feature_num),
+            input_data=x,
+            device=device,
         )
         merged_model: MLP = mm.run()  # type: ignore
         loss_merged, acc_merged = eval_fn(merged_model, device)
