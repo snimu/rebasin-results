@@ -250,7 +250,8 @@ def test_rebasin(
     files = get_filenames(directory)
     loss_interp_a_b_rebasin = []
     acc_interp_a_b_rebasin = []
-    for file in files:
+    print(f"Evaluating {directory}")
+    for file in tqdm(files):
         working_model.load_state_dict(torch.load(os.path.join(directory, file)))
         working_model.to(device)
         loss, acc = eval_fn(working_model, device)
@@ -261,7 +262,8 @@ def test_rebasin(
     files = get_filenames(directory)
     loss_interp_a_b_original = []
     acc_interp_a_b_original = []
-    for file in files:
+    print(f"Evaluating {directory}")
+    for file in tqdm(files):
         working_model.load_state_dict(torch.load(os.path.join(directory, file)))
         working_model.to(device)
         loss, acc = eval_fn(working_model, device)
@@ -272,7 +274,8 @@ def test_rebasin(
     files = get_filenames(directory)
     loss_interp_b_original_b_rebasin = []
     acc_interp_b_original_b_rebasin = []
-    for file in files:
+    print(f"Evaluating {directory}")
+    for file in tqdm(files):
         working_model.load_state_dict(torch.load(os.path.join(directory, file)))
         working_model.to(device)
         loss, acc = eval_fn(working_model, device)
