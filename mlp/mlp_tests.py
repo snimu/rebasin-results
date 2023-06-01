@@ -406,7 +406,7 @@ def show_permutations() -> None:
     model.to(device)
 
     graph = draw_graph(model, x, depth=1e12).visual_graph
-    graph.render("graph", format="png")
+    graph.render("graph")
 
 
 def print_model() -> None:
