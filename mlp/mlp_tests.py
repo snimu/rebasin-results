@@ -535,6 +535,7 @@ def main() -> None:
             args.num_models,
             verbose=args.verbose
         )
+        return
 
     for weight_decay in args.weight_decay:
         for hidden_features in args.hidden_features:
