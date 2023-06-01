@@ -398,25 +398,25 @@ def test_merge_many(
     df.to_csv(f"results/merge_many.csv")
 
 
-def print_model() -> None:
+def print_model(hidden_features: int) -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     x = torch.randn(64, 28*28)
     x = x.to(device)
-    model = MLP(28*28, 10)
+    model = MLP(28*28, 10, hidden_features)
     model.to(device)
 
     graph = draw_graph(model, x, depth=1e12).visual_graph
-    graph.render("graph")
+    graph.render(f"graph_hf{hidden_features}")
 
 
-def show_permutations() -> None:
-    ma = MLP(28*28, 10)
-    mb = MLP(28*28, 10)
+def show_permutations(hidden_features) -> None:
+    ma = MLP(28*28, 10, hidden_features)
+    mb = MLP(28*28, 10, hidden_features)
     x = torch.randn(64, 28*28)
 
     pcd = rebasin.PermutationCoordinateDescent(ma, mb, x)
 
-    with open("permutations.txt", "w") as f:
+    with open(f"permutations_hf{hidden_features}.txt", "w") as f:
         f.write(repr(pcd.pinit.model_graph))
 
 
@@ -517,11 +517,13 @@ def main() -> None:
         return
 
     if args.show_permutations:
-        show_permutations()
+        for hf in args.hidden_features:
+            show_permutations(hf)
         return
 
     if args.print_model:
-        print_model()
+        for hf in args.hidden_features:
+            print_model(hf)
         return
 
     if args.merge_many:
