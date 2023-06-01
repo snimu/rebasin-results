@@ -398,7 +398,7 @@ def test_merge_many(
     df.to_csv(f"results/merge_many.csv")
 
 
-def show_permutations() -> None:
+def print_model() -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     x = torch.randn(64, 28*28)
     x = x.to(device)
@@ -410,7 +410,7 @@ def show_permutations() -> None:
     graph.render("graph")
 
 
-def print_model() -> None:
+def show_permutations() -> None:
     ma = MLP(28*28, 10)
     mb = MLP(28*28, 10)
     x = torch.randn(64, 28*28)
