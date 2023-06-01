@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -314,6 +315,66 @@ def plot_group__merge_many_different_datasets(
         plt.close()
 
 
+def plot_pcd_weight_decay(show: bool = False) -> None:
+    files = os.listdir("weight_decay_experiments")
+    files = [file for file in files if file.endswith(".csv")]
+    losses = []
+    accuracies = []
+    for file in files:
+        if "loss" in file:
+            losses.append(file)
+        elif "acc" in file:
+            accuracies.append(file)
+
+    losses.sort(key=lambda name: float(name.split("wd")[1].split(".csv")[0]))
+    accuracies.sort(key=lambda name: float(name.split("wd")[1].split(".csv")[0]))
+
+    fig, axs = plt.subplots(len(losses), 2, figsize=(10, 17))
+    fig.subplots_adjust(top=0.94, bottom=0.06)
+
+    fig.suptitle("PermutationCoordinateDescent at different weight_decay values")
+
+    for i, (loss_file, acc_file) in enumerate(zip(losses, accuracies)):
+        loss_data = pd.read_csv(f"weight_decay_experiments/{loss_file}")
+        acc_data = pd.read_csv(f"weight_decay_experiments/{acc_file}")
+
+        axs[i][0].set_title(f"weight_decay: {loss_file.split('wd')[1].split('.csv')[0]}")
+        axs[i][1].set_title(f"weight_decay: {acc_file.split('wd')[1].split('.csv')[0]}")
+
+        if i == len(losses) - 1:
+            axs[i][0].set_xlabel("Interpolation %")
+            axs[i][1].set_xlabel("Interpolation %")
+        else:
+            axs[i][0].set_xticklabels([])
+            axs[i][1].set_xticklabels([])
+
+        axs[i][0].set_ylabel("Loss")
+        axs[i][1].set_ylabel("Accuracy")
+
+        axs[i][0].grid()
+        axs[i][1].grid()
+
+        axs[i][0].plot(loss_data["a-b-rebasin"], color="red")
+        axs[i][0].plot(loss_data["a-b-orig"], color="green")
+        axs[i][0].plot(loss_data["b-orig-b-rebasin"], color="blue")
+
+        axs[i][1].plot(acc_data["a-b-rebasin"], color="red")
+        axs[i][1].plot(acc_data["a-b-orig"], color="green")
+        axs[i][1].plot(acc_data["b-orig-b-rebasin"], color="blue")
+
+    fig.legend(
+        labels=["a-b-rebasin", "a-b-orig", "b-orig-b-rebasin"],
+        loc="lower center",
+        ncol=3,
+        labelcolor=["red", "green", "blue"],
+    )
+
+    if show:
+        plt.show()
+    else:
+        plt.savefig("weight_decay_experiments/weight_decay.png", dpi=300)
+
+
 def normalize_data(data: dict[str, list[float]]) -> dict[str, list[float]]:
     new_data: dict[str, list[float]] = {}
     for model_name, values in data.items():
@@ -322,4 +383,4 @@ def normalize_data(data: dict[str, list[float]]) -> dict[str, list[float]]:
 
 
 if __name__ == "__main__":
-    plot_merge_many_different_datasets()
+    plot_pcd_weight_decay()
