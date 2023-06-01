@@ -8,6 +8,37 @@ For acknowledgements, see [here](https://github.com/snimu/rebasin#acknowledgemen
 For terminology, see [here](https://github.com/snimu/rebasin#terminology).
 
 
+## MLP
+
+Results for a simple MLP. These are very positive!
+The loss barrier was successfully removed in `PermutationCoordinateDescent`,
+and `MergeMany` worked well, too.
+
+For detailed results, read [mlp/RESULTS.md](mlp/RESULTS.md).
+
+Here's a taste:
+
+<p align="center">
+  <img 
+    src="mlp/results/permutation-coordinate-descent/pcd_results.png" 
+    alt="Losses" 
+    width="600"
+  />
+</p>
+
+The L2-regularizer (`weight_decay`) improves the performance of `PermutationCoordinateDescent`!
+
+As seen next, `MergeMany` also works well with a high `weight_decay`:
+
+<p align="center">
+  <img 
+    src="mlp/results/merge-many/merge_many_wd_0.0-0.9.png" 
+    alt="MergeMany results" 
+    width="600"
+  />
+</p>
+
+
 ## hlb-CIFAR10
 
 Results from forking [tysam-code/hlb-CIFAR10](https://github.com/tysam-code/hlb-CIFAR10).
