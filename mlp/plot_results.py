@@ -13,7 +13,7 @@ def get_weight_decay(name: str) -> float:
 
 
 def plot_pcd_results() -> None:
-    fig, axs = plt.subplots(9, 2, figsize=(10, 16))
+    fig, axs = plt.subplots(11, 2, figsize=(10, 19))
     fig.subplots_adjust(top=0.94, bottom=0.06)
 
     fig.suptitle("Permutation Coordinate Descent: MLP")
