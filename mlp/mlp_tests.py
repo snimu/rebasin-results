@@ -405,7 +405,6 @@ def print_model() -> None:
     model = MLP(28*28, 10)
     model.to(device)
 
-    print("Rendering model...")
     graph = draw_graph(model, x, depth=1e12).visual_graph
     graph.render("graph")
 
