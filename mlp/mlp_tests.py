@@ -38,7 +38,7 @@ class MLP(nn.Module):
             self.model = nn.Linear(in_features, out_features)
             return
 
-        hidden_features = hidden_features or in_features
+        hidden_features = hidden_features or 20
 
         self.sequential = nn.Sequential()
 
