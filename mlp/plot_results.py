@@ -13,8 +13,8 @@ def get_weight_decay(name: str) -> float:
 
 
 def plot_pcd_results() -> None:
-    fig, axs = plt.subplots(5, 2, figsize=(5, 7))
-    fig.subplots_adjust(top=0.9, bottom=0.1)
+    fig, axs = plt.subplots(8, 2, figsize=(10, 12))
+    fig.subplots_adjust(top=0.94, bottom=0.06)
 
     fig.suptitle("Permutation Coordinate Descent: MLP")
 
@@ -112,8 +112,6 @@ def plot_mm_wd() -> None:
 
     results_log = pd.read_csv("results/merge-many/results_wd_0.0-0.1_log.csv")
     savefile = "results/merge-many/merge_many_wd_0.0-0.1_log.png"
-    xkey = "weight_decay"
-    xaxislabel = "Weight Decay"
     title = "MergeMany: hidden_features=100, num_models=3"
 
     plot_one_mm_plot(results_log, title, savefile, xkey, xaxislabel)
@@ -123,6 +121,18 @@ def plot_mm_wd() -> None:
     title = "MergeMany: hidden_features=100, num_models=3 (normalized)"
 
     plot_one_mm_plot(results_log, title, savefile, xkey, xaxislabel)
+
+    results_large = pd.read_csv("results/merge-many/results_wd_0.0-0.9.csv")
+    savefile = "results/merge-many/merge_many_wd_0.0-0.9.png"
+    title = "MergeMany: hidden_features=100, num_models=3"
+
+    plot_one_mm_plot(results_large, title, savefile, xkey, xaxislabel)
+
+    results_large = normalize(results_large, "loss_merged", "acc_merged")
+    savefile = "results/merge-many/merge_many_wd_0.0-0.9_norm.png"
+    title = "MergeMany: hidden_features=100, num_models=3 (normalized)"
+
+    plot_one_mm_plot(results_large, title, savefile, xkey, xaxislabel)
 
 
 def plot_one_mm_plot(
@@ -190,4 +200,4 @@ def normalize(data: pd.DataFrame, key_loss: str, key_acc: str) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    plot_pcd_results()
+    plot_mm_wd()
