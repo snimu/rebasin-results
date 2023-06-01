@@ -13,7 +13,7 @@ def get_weight_decay(name: str) -> float:
 
 
 def plot_pcd_results() -> None:
-    fig, axs = plt.subplots(8, 2, figsize=(10, 12))
+    fig, axs = plt.subplots(9, 2, figsize=(10, 16))
     fig.subplots_adjust(top=0.94, bottom=0.06)
 
     fig.suptitle("Permutation Coordinate Descent: MLP")
@@ -62,7 +62,7 @@ def plot_pcd_results() -> None:
         labelcolor=["blue", "red", "green"],
     )
 
-    plt.show()
+    plt.savefig("results/permutation-coordinate-descent/pcd_results.png")
 
 
 def plot_mm_hf() -> None:
@@ -200,4 +200,4 @@ def normalize(data: pd.DataFrame, key_loss: str, key_acc: str) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    plot_mm_wd()
+    plot_pcd_results()
