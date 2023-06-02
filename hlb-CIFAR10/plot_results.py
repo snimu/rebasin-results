@@ -12,7 +12,7 @@ import numpy as np
 def plot_results(size: str) -> None:
     fig, ax = plt.subplots(2, 1, figsize=(7, 6), sharex='all', gridspec_kw={'hspace': 0.1})
 
-    losses = pd.read_csv(f"{size}-losses.csv")
+    losses = pd.read_csv(f"feature_size_experiments/{size}-losses.csv")
 
     ax[0].plot(losses["a-b-rebasin"].values, label="a-b-rebasin", color="red")
     ax[0].plot(losses["a-b-orig"].values, label="a-b-orig", color="blue")
@@ -54,7 +54,7 @@ def plot_results(size: str) -> None:
         fontsize=10
     )
 
-    plt.savefig(f"{size}-plot.png", dpi=300)
+    plt.savefig(f"feature_size_experiments/{size}-plot.png", dpi=300)
     # plt.show()
 
 
@@ -375,6 +375,69 @@ def plot_pcd_weight_decay(show: bool = False) -> None:
         plt.savefig("weight_decay_experiments/weight_decay.png", dpi=300)
 
 
+def plot_pcd_feature_size(show: bool = False) -> None:
+    root = "feature_size_experiments"
+    files = os.listdir(root)
+    files = [file for file in files if file.endswith(".csv")]
+    losses = []
+    accuracies = []
+    for file in files:
+        if "loss" in file:
+            losses.append(file)
+        elif "acc" in file:
+            accuracies.append(file)
+
+    losses.sort(key=lambda name: int(name.split("x")[0]))
+    accuracies.sort(key=lambda name: int(name.split("x")[0]))
+
+    fig, axs = plt.subplots(len(losses), 2, figsize=(10, 12))
+    fig.subplots_adjust(top=0.93, bottom=0.08)
+
+    fig.suptitle("PermutationCoordinateDescent at different feature sizes")
+
+    for i, (loss_file, acc_file) in enumerate(zip(losses, accuracies)):
+        loss_data = pd.read_csv(f"{root}/{loss_file}")
+        acc_data = pd.read_csv(f"{root}/{acc_file}")
+
+        fs = loss_file.split("x")[0]
+
+        axs[i][0].set_title(f"feature_size: {fs}x{fs}")
+        axs[i][1].set_title(f"feature_size: {fs}x{fs}")
+
+        if i == len(losses) - 1:
+            axs[i][0].set_xlabel("Interpolation %")
+            axs[i][1].set_xlabel("Interpolation %")
+        else:
+            axs[i][0].set_xticklabels([])
+            axs[i][1].set_xticklabels([])
+
+        axs[i][0].set_ylabel("Loss")
+        axs[i][1].set_ylabel("Accuracy")
+
+        axs[i][0].grid()
+        axs[i][1].grid()
+
+        axs[i][0].plot(loss_data["a-b-rebasin"], color="red")
+        axs[i][0].plot(loss_data["a-b-orig"], color="green")
+        axs[i][0].plot(loss_data["b-orig-b-rebasin"], color="blue")
+
+        axs[i][1].plot(acc_data["a-b-rebasin"], color="red")
+        axs[i][1].plot(acc_data["a-b-orig"], color="green")
+        axs[i][1].plot(acc_data["b-orig-b-rebasin"], color="blue")
+
+    fig.legend(
+        labels=["a-b-rebasin", "a-b-orig", "b-orig-b-rebasin"],
+        loc="lower center",
+        ncol=3,
+        labelcolor=["red", "green", "blue"],
+    )
+
+    if show:
+        plt.show()
+    else:
+        plt.savefig(f"{root}/results.png", dpi=300)
+
+
 def normalize_data(data: dict[str, list[float]]) -> dict[str, list[float]]:
     new_data: dict[str, list[float]] = {}
     for model_name, values in data.items():
@@ -383,4 +446,4 @@ def normalize_data(data: dict[str, list[float]]) -> dict[str, list[float]]:
 
 
 if __name__ == "__main__":
-    plot_pcd_weight_decay()
+    plot_pcd_feature_size()
