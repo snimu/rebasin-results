@@ -502,6 +502,8 @@ def tune_training_parameters() -> None:
 def full_wd_hf_sweep_merge_many() -> None:
     weight_decays = tuple(torch.arange(10, dtype=torch.float) / 10)  # 0.0, 0.1, ..., 0.9
     hidden_features = tuple((torch.arange(20) + 1) * 100)  # 100, 200, ..., 2000
+    print(weight_decays)
+    print(hidden_features)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     results = {
