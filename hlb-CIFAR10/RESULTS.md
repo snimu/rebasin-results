@@ -17,14 +17,10 @@ I have results for two algorithms:
 **Table of Contents:**
 
 - [PermutationCoordinateDescent](#permutationcoordinatedescent)
-  - [Filter-size: 3x3](#filter-size-3x3)
-  - [Filter-size: 6x6](#filter-size-6x6)
-  - [Filter-size:9x9](#filter-size9x9)
-  - [Filter-size: 12x12](#filter-size-12x12)
-  - [Filter-size: 15x15](#filter-size-15x15)
-  - [Filter-size: 18x18](#filter-size-18x18)
-  - [Analysis](#analysis)
-  - [Filter-size Analysis](#filter-size-analysis)
+  - [By filter-size](#by-filter-size)
+    - [Filter-size: Analysis](#filter-size-analysis)
+  - [By L2-Regularizer](#by-l2-regularizer)
+    - [L2-Regularizer: Analysis](#l2-regularizer-analysis)
 - [MergeMany](#mergemany)
   - [Simple MergeMany](#simple-mergemany)
   - [Train-Merge-Train](#train-merge-train)
@@ -53,7 +49,7 @@ This is at a fixed `weight_decay > 0.0`.
     <img
         src="feature_size_experiments/results.png" 
         alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different filter-sizes"
-        width="600"
+        width="800"
     />
 </p>
 
@@ -80,7 +76,7 @@ I do so for all filter-sizes.
 
 <p align="center">
     <img
-        src="losses-all.png" 
+        src="feature_size_experiments/losses-all.png" 
         alt="Losses of Git re-basin for hlb-CIFAR10 with different filter-sizes"
         width="600"
     />
@@ -88,7 +84,7 @@ I do so for all filter-sizes.
 
 <p align="center">
     <img
-        src="accuracies-all.png" 
+        src="feature_size_experiments/accuracies-all.png" 
         alt="Accuracies of Git re-basin for hlb-CIFAR10 with different filter-sizes"
         width="600"
     />
@@ -104,7 +100,7 @@ I move all startpoints (i.e. `model_a`) to the results of the 3x3-filter.
 
 <p align="center">
     <img
-        src="losses-all-normalized-startpoint.png" 
+        src="feature_size_experiments/losses-all-normalized-startpoint.png" 
         alt="Losses of Git re-basin for hlb-CIFAR10 with different filter-sizes"
         width="600"
     />
@@ -112,7 +108,7 @@ I move all startpoints (i.e. `model_a`) to the results of the 3x3-filter.
 
 <p align="center">
     <img
-        src="accuracies-all-normalized-startpoint.png" 
+        src="feature_size_experiments/accuracies-all-normalized-startpoint.png" 
         alt="Accuracies of Git re-basin for hlb-CIFAR10 with different filter-sizes"
         width="600"
     />
@@ -129,12 +125,53 @@ This is at a fixed `filter_size == 28*28 == 784`.
     <img
         src="weight_decay_experiments/weight_decay.png" 
         alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
-        width="600"
+        width="800"
     />
 </p>
 
 ##### L2-Regularizer: Analysis
     
+These results are *very* weird. 
+
+As expected, increasing the L2-Regularizer 
+improves the results of `PermutationCoordinateDescent` significantly;
+in fact, the algorithm only really works for pretty high `weight_decay`-values,
+where it doesn't fully remove the loss-barrier, but lowers it by a lot, 
+and almost fully removes the accuracy-barrier (this stands in opposition to the results
+of the paper, where `PermutationCoordinateDescent` removed the loss-barrier but not 
+the accuracy-barrier).
+
+However, I cannot explain the behavior of the interpolation between 
+`model_b (original)` and `model_b (rebasin)`. At low `weight_decay`-values,
+it is extremely good, much better than that between `model_a` and `model_b (rebasin)`.
+
+The first possible explanation for this might be that `model_b (original) === model_b (rebasin)`.
+In other words, `model_b (original)` was already optimally aligned with `model_a`,
+such that it didn't get permuted.
+However, this is clearly not the case, as these facts about the interpolation
+as `weight_decay == 0.0` show:
+
+1. The accuracies between `model_b (original)` and `model_b (rebasin)` change
+   from step to step, which means that the interpolated models are different from
+   either of the two models, which in turn means that the two models are different.
+2. The interpolation between `model_a` and `model_b (original)` is different 
+   from that between `model_a` and `model_b (rebasin)`, which means that
+   `model_b (original) != model_b (rebasin)`.
+
+An alternative explanation might be that 
+a high regularization lead to `model_b (original)` being in a narrower loss-basin, 
+such that permuting it and interpolating between the results leads to poor results.
+This might explain why the absolute accuracy falls with rising `weight_decay` 
+(at least when going from `0.0` to `0.1`). However, that fact may also be explained 
+by the fact that the model wasn't tuned for any of the given `weight_decay`-values,
+and that the differences in accuracy are just random.
+
+The explanation that seems the most likely to me is that at low `weight_decay`-values,
+only one or two weights are permuted, leading to good interpolation between
+`model_b (original)` and `model_b (rebasin)`, but barely any difference 
+between the interpolations betwen `model_a` and `model_b (original)` & `model_b (rebasin)`.
+
+Ultimately, though, I don't know.
 
 
 ### MergeMany
