@@ -555,6 +555,95 @@ def full_wd_hf_sweep_merge_many() -> None:
     )
 
 
+def compare_output_statistics(hidden_features: int, weight_decays: list[float]) -> None:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    results = {
+        "weight_decay": [],
+        "max_avg": [],
+        "std_avg": [],
+        "max_merged": [],
+        "std_merged": [],
+        "loss_ratio": [],
+        "acc_ratio": []
+    }
+
+    for wd in weight_decays:
+        models = list(
+            train_mnist(hidden_features=hidden_features, weight_decay=wd).to(device)
+            for _ in range(3)
+        )
+
+        mm = rebasin.MergeMany(
+            models,
+            MLP().to(device),
+            torch.randn(64, 28*28).to(device),
+            device=device
+        )
+        mm.run()
+
+        maxs, stds = [], []
+        losses, accs = [], []
+        for model in models:
+            m, s = output_statistics(model, device)
+            maxs.append(sum(m) / len(m))
+            stds.append(sum(s) / len(s))
+            loss, acc = eval_fn(model, device)
+            losses.append(loss)
+            accs.append(acc)
+        max_avg = sum(maxs) / len(maxs)
+        std_avg = sum(stds) / len(stds)
+        loss_avg = sum(losses) / len(losses)
+        acc_avg = sum(accs) / len(accs)
+
+        maxs, stds = output_statistics(mm.merged_model, device)
+        max_merged = sum(maxs) / len(maxs)
+        std_merged = sum(stds) / len(stds)
+        loss_merged, acc_merged = eval_fn(mm.merged_model, device)
+
+        results["weight_decay"].append(wd)
+        results["max_avg"].append(max_avg)
+        results["std_avg"].append(std_avg)
+        results["max_merged"].append(max_merged)
+        results["std_merged"].append(std_merged)
+        results["loss_ratio"].append(loss_merged / loss_avg)
+        results["acc_ratio"].append(acc_merged / acc_avg)
+
+    df = pd.DataFrame(results)
+    df.to_csv(
+        f"compare_output_statistics"
+        f"_wd{min(weight_decays)}-{max(weight_decays)}"
+        f"_hf{hidden_features}.csv",
+        index=False
+    )
+
+
+@torch.no_grad()
+def output_statistics(model: MLP, device: torch.device) -> tuple(list[float], list[float]):
+    dataloader = DataLoader(
+        MNIST(
+            root="data",
+            train=False,
+            download=True,
+            transform=torchvision.transforms.ToTensor(),
+        ),
+        batch_size=32,
+        shuffle=False,
+    )
+    model.eval()
+
+    maximums = []
+    stds = []
+    for x, y in dataloader:
+        x = x.to(device)
+        y = y.to(device)
+        output = model(x)
+        maximums.append(output.max().item())
+        stds.append(output.std(dim=1).item())
+
+    return maximums, stds
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--weight_decay', type=float, default=[0.0], nargs='+')
@@ -566,6 +655,7 @@ def main() -> None:
     parser.add_argument('-m', '--merge_many', action='store_true', default=False)
     parser.add_argument('-n', '--num_models', type=int, default=[3], nargs='+')
     parser.add_argument('--full_wd_hf_sweep', action='store_true', default=False)
+    parser.add_argument('--compare_output_statistics', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -585,6 +675,10 @@ def main() -> None:
 
     if args.full_wd_hf_sweep:
         full_wd_hf_sweep_merge_many()
+        return
+
+    if args.compare_output_statistics:
+        compare_output_statistics(args.hidden_features[0], args.weight_decay)
         return
 
     if args.merge_many:
