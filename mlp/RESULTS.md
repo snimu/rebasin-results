@@ -104,10 +104,16 @@ to the loss or accuracy of the control model.
     />
 </p>
 
+Here, `avg` stands for the average of the three models from before they are merged,
+and `merged` stands for the merged model.
+
 What becomes clear is that while the feature-size is very important at low `weight_decay` values,
 it becomes almost irrelevant at higher `weight_decay` values. The `weight_decay`-value, 
 on the other hand, is very important for `MergeMany`, irrespective of the feature-size
 (though at higher feature-size, it isn't quite as important as at lower feature-size).
+
+Interestingly, the merged model never reaches a loss as low as the average of the models 
+that make it up, but its top-1 accuracy is often higher.
 
 ## The model
 
