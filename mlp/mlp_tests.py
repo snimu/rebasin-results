@@ -528,7 +528,11 @@ def full_wd_hf_sweep_merge_many() -> None:
         loss_avg /= len(models)
         acc_avg /= len(models)
 
-        mm = rebasin.MergeMany(models, MLP(hidden_features=hf), torch.randn(64, 28*28))
+        mm = rebasin.MergeMany(
+            models,
+            MLP(hidden_features=hf).to(device),
+            torch.randn(64, 28*28).to(device)
+        )
         mm.run()
         loss_merged, acc_merged = eval_fn(mm.merged_model, device)
 
