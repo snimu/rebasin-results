@@ -543,6 +543,8 @@ def full_wd_hf_sweep_merge_many() -> None:
         results["loss_merged"].append(loss_merged)
         results["acc_merged"].append(acc_merged)
 
+        loop.write(f"{wd=}, {hf=}, {loss_avg=}, {acc_avg=}, {loss_merged=}, {acc_merged=}")
+
     df = pd.DataFrame(results)
     df.to_csv("full_wd_hf_sweep.csv", index=False)
 
