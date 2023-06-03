@@ -34,74 +34,30 @@ I have results for two algorithms:
 
 ### PermutationCoordinateDescent
 
-The first plot shows the results
-for the original model, while the others show results for ever-increasing filter-sizes of the 
-convolutions. 
-It is mentioned in the paper that the results are better for larger filter-sizes.
+I'll test `PermutationCoordinateDescent` over two parameters: 
 
-#### Filter-size: 3x3
+1. **Filter-size:** According to the paper, larger filter-sizes work better.
+    I'll test filter-sizes of 3x3, 6x6, 9x9, 12x12, 15x15, and 18x18.
+2. **L2-Regularizer:** This isn't part of the paper, but it makes sense to me 
+   that an algorithm that works by permuting weights to be as similar as possible
+   to that of another model would benefit from all weights being in the same value-range.
+   I'll use the `weight_decay`-parameter of `torch.optim.Adam` to regularize the weights.
+   Values will range from `0.0` to `0.9`
 
-The original filter size.
+
+#### By filter-size
+
+This is at a fixed `weight_decay > 0.0`. 
 
 <p align="center">
     <img
-        src="3x3-plot.png" 
-        alt="Results of Git re-basin for hlb-CIFAR10 with filter-size 3x3"
+        src="feature_size_experiments/results.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different filter-sizes"
         width="600"
     />
 </p>
 
-#### Filter-size: 6x6
-
-<p align="center">
-    <img
-        src="6x6-plot.png" 
-        alt="Results of Git re-basin for hlb-CIFAR10 with filter-size 6x6"
-        width="600"
-    />
-</p>
-
-#### Filter-size:9x9
-
-<p align="center">
-    <img
-        src="9x9-plot.png" 
-        alt="Results of Git re-basin for hlb-CIFAR10 with filter-size 9x9"
-        width="600"
-    />
-</p>
-
-#### Filter-size: 12x12
-
-<p align="center">
-    <img
-        src="12x12-plot.png" 
-        alt="Results of Git re-basin for hlb-CIFAR10 with filter-size 12x12"
-        width="600"
-    />
-</p>
-
-#### Filter-size: 15x15
-
-<p align="center">
-    <img
-        src="15x15-plot.png" 
-        alt="Results of Git re-basin for hlb-CIFAR10 with filter-size 15x15"
-        width="600"
-    />
-</p>
-
-#### Filter-size: 18x18
-
-<p align="center">
-    <img
-        src="18x18-plot.png" 
-        alt="Results of Git re-basin for hlb-CIFAR10 with filter-size 18x18"
-        width="600"
-    />
-</p>
-
-#### Analysis
+##### Filter-size: Analysis
 
 A few things immediately jump out to me from the plots above:
 
@@ -116,8 +72,6 @@ A few things immediately jump out to me from the plots above:
 4. Larger filter size is said to work better in the paper, 
     but it is unclear to me if this is actually the case here. Let's look at that 
     in more detail below.
-
-#### Filter-size analysis
 
 Below, I plot the losses and accuracies 
 when interpolating between `model_a` and `model_b (rebasin)`.
@@ -165,6 +119,23 @@ I move all startpoints (i.e. `model_a`) to the results of the 3x3-filter.
 </p>
 
 The behavior seems noisy, though slightly better for larger filter-sizes.
+
+
+#### By L2-Regularizer
+
+This is at a fixed `filter_size == 28*28 == 784`.
+
+<p align="center">
+    <img
+        src="weight_decay_experiments/weight_decay.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+##### L2-Regularizer: Analysis
+    
+
 
 ### MergeMany
 
