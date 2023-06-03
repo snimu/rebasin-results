@@ -568,7 +568,9 @@ def compare_output_statistics(hidden_features: int, weight_decays: list[float]) 
         "acc_ratio": []
     }
 
-    for wd in weight_decays:
+    loop = tqdm(weight_decays)
+    for wd in loop:
+        loop.set_description(f"{wd=}")
         models = list(
             train_mnist(hidden_features=hidden_features, weight_decay=wd).to(device)
             for _ in range(3)
