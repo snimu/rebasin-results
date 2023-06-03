@@ -513,7 +513,10 @@ def full_wd_hf_sweep_merge_many() -> None:
         "acc_merged": []
     }
 
-    loop = tqdm(itertools.product(weight_decays, hidden_features))
+    loop = tqdm(
+        itertools.product(weight_decays, hidden_features),
+        total=len(weight_decays) * len(hidden_features)
+    )
     for wd, hf in loop:
         loop.set_description(f"{wd=}, {hf=}")
         models = [train_mnist(weight_decay=wd, hidden_features=hf).to(device) for _ in range(3)]
