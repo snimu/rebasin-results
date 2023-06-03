@@ -188,6 +188,75 @@ def plot_one_mm_plot(
     plt.close(fig)
 
 
+def plot_full_wd_hf_sweep() -> None:
+    results = pd.read_csv("results/merge-many/full_wd_hf_sweep.csv")
+
+    fig, axs = plt.subplots(2, 2, figsize=(10, 8))
+    fig.subplots_adjust(top=0.9, bottom=0.15, hspace=0.35, wspace=0.25, left=0.1, right=0.95)
+    fig.suptitle("MergeMany: num_models=3")
+
+    hidden_features = results["hidden_features"].unique()
+
+    for hf in hidden_features:
+        results_hf = results[results["hidden_features"] == hf]
+
+        loss_ratio = results_hf["loss_merged"] / results_hf["loss_avg"]
+        acc_ratio = results_hf["acc_merged"] / results_hf["acc_avg"]
+
+        lratio_text = f"loss ratio (merged/avg)"
+        aratio_text = f"acc ratio (merged/avg)"
+
+        axs[0, 0].plot(
+            results_hf["weight_decay"],
+            loss_ratio,
+            label=f"hidden_features={hf}"
+        )
+        axs[0, 0].set_ylabel(lratio_text)
+
+        axs[0, 1].plot(
+            results_hf["weight_decay"],
+            acc_ratio,
+        )
+        axs[0, 1].set_ylabel(aratio_text)
+
+        axs[1, 0].plot(
+            results_hf["weight_decay"],
+            loss_ratio,
+        )
+        axs[1, 0].set_ylabel(lratio_text)
+
+        axs[1, 1].plot(
+            results_hf["weight_decay"],
+            acc_ratio,
+        )
+        axs[1, 1].set_ylabel(aratio_text)
+
+    axs[0, 0].grid()
+    axs[0, 1].grid()
+    axs[1, 0].grid()
+    axs[1, 1].grid()
+
+    axs[0, 0].set_title("Loss Ratio")
+    axs[0, 1].set_title("Accuracy Ratio")
+    axs[1, 0].set_title("Loss Ratio (zoomed)")
+    axs[1, 1].set_title("Accuracy Ratio (zoomed)")
+
+    axs[1, 0].set_ylim([0.995, 1.02])
+    axs[1, 1].set_ylim([0.95, 1.05])
+
+    axs[0, 0].set_xlabel("Weight Decay")
+    axs[0, 1].set_xlabel("Weight Decay")
+    axs[1, 0].set_xlabel("Weight Decay")
+    axs[1, 1].set_xlabel("Weight Decay")
+    fig.legend(
+        ncol=3,
+        loc="lower center",
+    )
+
+    savefile = "results/merge-many/full_wd_hf_sweep.png"
+    fig.savefig(savefile, dpi=300)
+
+
 def normalize(data: pd.DataFrame, key_loss: str, key_acc: str) -> pd.DataFrame:
     ndata = copy.deepcopy(data)
     norm_factors_loss = ndata[key_loss].values
@@ -200,4 +269,4 @@ def normalize(data: pd.DataFrame, key_loss: str, key_acc: str) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    plot_pcd_results()
+    plot_full_wd_hf_sweep()

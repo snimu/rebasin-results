@@ -89,6 +89,25 @@ at every step:
 Clearly, with high `weight_decay`-values, `MergeMany` works pretty well; 
 the loss is similar to that of the control model, and the accuracy is even higher.
 
+In the paper, though, `weight_decay` isn't mentioned as a factor 
+influencing the results of `PermutationCoordinateDescent` and `MergeMany`.
+On the other hand, feature-size is. So now, let's try `MergeMany` 
+with different feature-sizes plotted over different `weight_decay` values.
+The y-axis shows the ratio of the loss or accuracy of the merged model
+to the loss or accuracy of the control model.
+
+<p align="center">
+    <img
+        src="results/merge-many/full_wd_hf_sweep.png"
+        alt="MergeMany results for MLP"
+        width="600"
+    />
+</p>
+
+What becomes clear is that while the feature-size is very important at low `weight_decay` values,
+it becomes almost irrelevant at higher `weight_decay` values. The `weight_decay`-value, 
+on the other hand, is very important for `MergeMany`, irrespective of the feature-size
+(though at higher feature-size, it isn't quite as important as at lower feature-size).
 
 ## The model
 
