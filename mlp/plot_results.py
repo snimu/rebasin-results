@@ -189,7 +189,7 @@ def plot_one_mm_plot(
 
 
 def plot_full_wd_hf_sweep() -> None:
-    results = pd.read_csv("results/merge-many/full_wd_hf_sweep.csv")
+    results = pd.read_csv("results/merge-many/full_wd0.0-0.9_hf100-2000_sweep.csv")
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 8))
     fig.subplots_adjust(top=0.9, bottom=0.15, hspace=0.35, wspace=0.25, left=0.1, right=0.95)
@@ -253,7 +253,7 @@ def plot_full_wd_hf_sweep() -> None:
         loc="lower center",
     )
 
-    savefile = "results/merge-many/full_wd_hf_sweep.png"
+    savefile = "results/merge-many/full_wd0.0-0.9_hf100-2000_sweep.png"
     fig.savefig(savefile, dpi=300)
 
 

@@ -98,7 +98,7 @@ to the loss or accuracy of the control model.
 
 <p align="center">
     <img
-        src="results/merge-many/full_wd_hf_sweep.png"
+        src="results/merge-many/full_wd0.0-0.9_hf100-2000_sweep.png"
         alt="MergeMany results for MLP"
         width="600"
     />
