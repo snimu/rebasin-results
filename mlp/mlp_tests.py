@@ -676,7 +676,7 @@ def count_permutations(hidden_features: int, weight_decays: list[float]) -> None
         num_permutations = 0
         for model, model_orig in zip(mm.models, models_orig):
             num_permutations += sum(
-                p.numel().item() - (p == p_orig).sum().item()
+                p.numel() - (p == p_orig).sum().item()
                 for p, p_orig in zip(model.parameters(), model_orig.parameters())
             )
 
