@@ -23,8 +23,8 @@ from tqdm import tqdm
 class MLP(nn.Module):
     def __init__(
             self,
-            in_features: int,
-            out_features: int,
+            in_features: int = 28*28,
+            out_features: int = 10,
             hidden_features: int | None = None,
             num_layers: int = 5,
             use_layer_norm: bool = True
@@ -499,6 +499,47 @@ def tune_training_parameters() -> None:
     )
 
 
+def full_wd_hf_sweep_merge_many() -> None:
+    weight_decays = tuple(torch.arange(10, dtype=torch.float) / 10)  # 0.0, 0.1, ..., 0.9
+    hidden_features = tuple((torch.arange(20) + 1) * 100)  # 100, 200, ..., 2000
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    results = {
+        "weight_decay": [],
+        "hidden_features": [],
+        "loss_avg": [],
+        "acc_avg": [],
+        "loss_merged": [],
+        "acc_merged": []
+    }
+
+    loop = tqdm(itertools.product(weight_decays, hidden_features))
+    for wd, hf in loop:
+        loop.set_description(f"{wd=}, {hf=}")
+        models = [train_mnist(weight_decay=wd, hidden_features=hf) for _ in range(3)]
+        loss_avg, acc_avg = 0.0, 0.0
+        for model in models:
+            loss, acc = eval_fn(model, device)
+            loss_avg += loss
+            acc_avg += acc
+        loss_avg /= len(models)
+        acc_avg /= len(models)
+
+        mm = rebasin.MergeMany(models, MLP(hidden_features=hf), torch.randn(64, 28*28))
+        mm.run()
+        loss_merged, acc_merged = eval_fn(mm.merged_model, device)
+
+        results["weight_decay"].append(wd)
+        results["hidden_features"].append(hf)
+        results["loss_avg"].append(loss_avg)
+        results["acc_avg"].append(acc_avg)
+        results["loss_merged"].append(loss_merged)
+        results["acc_merged"].append(acc_merged)
+
+    df = pd.DataFrame(results)
+    df.to_csv("full_wd_hf_sweep.csv", index=False)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--weight_decay', type=float, default=[0.0], nargs='+')
@@ -509,6 +550,7 @@ def main() -> None:
     parser.add_argument('-v', '--verbose', action='store_true', default=False)
     parser.add_argument('-m', '--merge_many', action='store_true', default=False)
     parser.add_argument('-n', '--num_models', type=int, default=[3], nargs='+')
+    parser.add_argument('--full_wd_hf_sweep', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -524,6 +566,10 @@ def main() -> None:
     if args.print_model:
         for hf in args.hidden_features:
             print_model(hf)
+        return
+
+    if args.full_wd_hf_sweep:
+        full_wd_hf_sweep_merge_many()
         return
 
     if args.merge_many:
