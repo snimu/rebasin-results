@@ -189,7 +189,7 @@ def plot_one_mm_plot(
 
 
 def plot_full_wd_hf_sweep() -> None:
-    results = pd.read_csv("results/merge-many/full_wd0.0-0.9_hf100-2000_sweep.csv")
+    results = pd.read_csv("results/merge-many/full_wd0.0-0.2_hf100-2000_sweep.csv")
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 8))
     fig.subplots_adjust(top=0.9, bottom=0.15, hspace=0.35, wspace=0.25, left=0.1, right=0.95)
@@ -241,7 +241,7 @@ def plot_full_wd_hf_sweep() -> None:
     axs[1, 0].set_title("Loss Ratio (zoomed)")
     axs[1, 1].set_title("Accuracy Ratio (zoomed)")
 
-    axs[1, 0].set_ylim([0.995, 1.02])
+    axs[1, 0].set_ylim([0.995, 1.05])
     axs[1, 1].set_ylim([0.95, 1.05])
 
     axs[0, 0].set_xlabel("Weight Decay")
@@ -253,8 +253,50 @@ def plot_full_wd_hf_sweep() -> None:
         loc="lower center",
     )
 
-    savefile = "results/merge-many/full_wd0.0-0.9_hf100-2000_sweep.png"
+    savefile = "results/merge-many/full_wd0.0-0.2_hf100-2000_sweep.png"
     fig.savefig(savefile, dpi=300)
+
+
+def plot_compare_output_statistics() -> None:
+    results = pd.read_csv("results/merge-many/compare_output_statistics_wd0.0-0.2_hf400.csv")
+
+    plt.suptitle("MergeMany: num_models=3, hidden_features=400")
+
+    plt.plot(
+        results["weight_decay"],
+        results["loss_ratio"],
+        label="loss ratio (merged/avg)"
+    )
+    plt.plot(
+        results["weight_decay"],
+        results["acc_ratio"],
+        label="acc ratio (merged/avg)"
+    )
+    plt.plot(
+        results["weight_decay"],
+        results["max_merged"] / results["max_avg"],
+        label="max ratio (merged/avg)"
+    )
+    plt.plot(
+        results["weight_decay"],
+        results["std_merged"] / results["std_avg"],
+        label="std ratio (merged/avg)"
+    )
+    plt.grid()
+    plt.ylabel("metric ratio (merged/avg)")
+    plt.xlabel("Weight Decay")
+
+    plt.legend(
+        ncol=2,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.1),
+    )
+
+    fig = plt.gcf()
+    fig.set_size_inches(8, 6)
+    fig.subplots_adjust(top=0.92, bottom=0.2, hspace=0.35, wspace=0.25, left=0.1, right=0.95)
+
+    plt.savefig("results/merge-many/compare_output_statistics_wd0.0-0.2_hf400.png", dpi=300)
 
 
 def normalize(data: pd.DataFrame, key_loss: str, key_acc: str) -> pd.DataFrame:
@@ -269,4 +311,4 @@ def normalize(data: pd.DataFrame, key_loss: str, key_acc: str) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    plot_full_wd_hf_sweep()
+    plot_compare_output_statistics()

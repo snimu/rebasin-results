@@ -112,8 +112,48 @@ it becomes almost irrelevant at higher `weight_decay` values. The `weight_decay`
 on the other hand, is very important for `MergeMany`, irrespective of the feature-size
 (though at higher feature-size, it isn't quite as important as at lower feature-size).
 
+Let's take a closer look at lower `weight_decay` values:
+
+<p align="center">
+    <img
+        src="results/merge-many/full_wd0.0-0.2_hf100-2000_sweep.png"
+        alt="MergeMany results for MLP"
+        width="800"
+    />
+</p>
+
+Even a pretty low `weight_decay` appears to help `MergeMany` a lot.
+
 Interestingly, the merged model never reaches a loss as low as the average of the models 
-that make it up, but its top-1 accuracy is often higher.
+that make it up, but its top-1 accuracy is often higher. 
+My hypothesis for why that is, is the following:
+
+The merged model acts as an Ensemble, but the outputs of the Ensemble are averaged,
+meaning that the outputs should come closer to their mean. This would express itself
+in two things: 1.) The maximum output would be lower, and 2.) so would the standard deviation.
+This would result in more uniform outputs, and thus a higher loss, 
+but the results might still be better (as long as the information in the outputs
+isn't averaged out into noise), resulting in a higher accuracy.
+
+This view is supported by the following measurements. These show the ratio of 
+some metric from the merged model to the same metric from the average of the models
+that make it up. The metrics are accuracy, loss, maximum output, and standard deviation
+of the outputs.
+
+<p align="center">
+    <img
+        src="results/merge-many/compare_output_statistics_wd0.0-0.2_hf400.png"
+        alt="MergeMany results for MLP"
+        width="600"
+    />
+</p>
+
+It's clear that the maximum output and the standard deviation of the outputs
+are lower in the merged model than in the models that make it up, while loss and
+accuracy are higher (except when `weight_decay == 0.0`; the behavior in this case
+is probably explained by `PermutationCoordinateDescent` &mdash; which is used
+by `MergeMany` &mdash; achieving a worse fit between the models. The permuted models are 
+).
 
 ## The model
 
