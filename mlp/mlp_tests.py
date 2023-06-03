@@ -638,8 +638,7 @@ def output_statistics(model: MLP, device: torch.device) -> tuple[list[float], li
     stds = []
     for x, _ in dataloader:
         x = x.to(device)
-        print(x.shape)
-        output = model(x)
+        output = model(x.view(x.shape[0], -1))
         maximums.append(output.max().item())
         stds.append(output.std(dim=1).item())
 
