@@ -519,7 +519,7 @@ def full_wd_hf_sweep_merge_many() -> None:
     loop = tqdm(itertools.product(weight_decays, hidden_features))
     for wd, hf in loop:
         loop.set_description(f"{wd=}, {hf=}")
-        models = [train_mnist(weight_decay=wd, hidden_features=hf) for _ in range(3)]
+        models = [train_mnist(weight_decay=wd, hidden_features=hf).to(device) for _ in range(3)]
         loss_avg, acc_avg = 0.0, 0.0
         for model in models:
             loss, acc = eval_fn(model, device)
@@ -531,7 +531,8 @@ def full_wd_hf_sweep_merge_many() -> None:
         mm = rebasin.MergeMany(
             models,
             MLP(hidden_features=hf).to(device),
-            torch.randn(64, 28*28).to(device)
+            torch.randn(64, 28*28).to(device),
+            device=device
         )
         mm.run()
         loss_merged, acc_merged = eval_fn(mm.merged_model, device)
