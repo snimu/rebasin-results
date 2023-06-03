@@ -578,7 +578,7 @@ def compare_output_statistics(hidden_features: int, weight_decays: list[float]) 
 
         mm = rebasin.MergeMany(
             models,
-            MLP().to(device),
+            MLP(hidden_features=hidden_features).to(device),
             torch.randn(64, 28*28).to(device),
             device=device
         )
