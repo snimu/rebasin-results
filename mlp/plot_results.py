@@ -300,7 +300,7 @@ def plot_compare_output_statistics() -> None:
 
 
 def plot_count_permutations() -> None:
-    results = pd.read_csv("results/merge-many/count_permutations_wd0.0-0.2_hf400.csv")
+    results = pd.read_csv("results/merge-many/count_permutations_wd0.0-0.02_hf400.csv")
     plt.title("MergeMany: num_models=3, hidden_features=400")
     plt.plot(
         results["weight_decay"],
@@ -309,8 +309,8 @@ def plot_count_permutations() -> None:
     plt.grid()
     plt.ylabel("Number of Permutations")
     plt.xlabel("Weight Decay")
-    plt.show()
-    # plt.savefig("results/merge-many/count_permutations_wd0.0-0.2_hf400.png", dpi=300)
+    # plt.show()
+    plt.savefig("results/merge-many/count_permutations_wd0.0-0.02_hf400.png", dpi=300)
 
 
 def normalize(data: pd.DataFrame, key_loss: str, key_acc: str) -> pd.DataFrame:
