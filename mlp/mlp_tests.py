@@ -576,14 +576,6 @@ def compare_output_statistics(hidden_features: int, weight_decays: list[float]) 
             for _ in range(3)
         )
 
-        mm = rebasin.MergeMany(
-            models,
-            MLP(hidden_features=hidden_features).to(device),
-            torch.randn(64, 28*28).to(device),
-            device=device
-        )
-        mm.run()
-
         maxs, stds = [], []
         losses, accs = [], []
         for model in models:
@@ -597,6 +589,14 @@ def compare_output_statistics(hidden_features: int, weight_decays: list[float]) 
         std_avg = sum(stds) / len(stds)
         loss_avg = sum(losses) / len(losses)
         acc_avg = sum(accs) / len(accs)
+
+        mm = rebasin.MergeMany(
+            models,
+            MLP(hidden_features=hidden_features).to(device),
+            torch.randn(64, 28*28).to(device),
+            device=device
+        )
+        mm.run()
 
         maxs, stds = output_statistics(mm.merged_model, device)
         max_merged = sum(maxs) / len(maxs)
