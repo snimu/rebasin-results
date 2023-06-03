@@ -500,7 +500,7 @@ def tune_training_parameters() -> None:
 
 
 def full_wd_hf_sweep_merge_many() -> None:
-    weight_decays = (0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+    weight_decays = (0.0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2)
     hidden_features = (100, 400, 800, 1200, 1600, 2000)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -547,7 +547,12 @@ def full_wd_hf_sweep_merge_many() -> None:
         loop.write(f"{wd=}, {hf=}, {loss_avg=}, {acc_avg=}, {loss_merged=}, {acc_merged=}")
 
     df = pd.DataFrame(results)
-    df.to_csv("full_wd_hf_sweep.csv", index=False)
+    df.to_csv(
+        f"full_wd{min(weight_decays)}-{max(weight_decays)}"
+        f"_hf{min(hidden_features)}-{max(hidden_features)}"
+        f"_sweep.csv",
+        index=False
+    )
 
 
 def main() -> None:
