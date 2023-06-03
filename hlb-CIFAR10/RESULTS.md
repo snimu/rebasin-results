@@ -76,17 +76,9 @@ I do so for all filter-sizes.
 
 <p align="center">
     <img
-        src="feature_size_experiments/losses-all.png" 
-        alt="Losses of Git re-basin for hlb-CIFAR10 with different filter-sizes"
-        width="600"
-    />
-</p>
-
-<p align="center">
-    <img
-        src="feature_size_experiments/accuracies-all.png" 
-        alt="Accuracies of Git re-basin for hlb-CIFAR10 with different filter-sizes"
-        width="600"
+        src="feature_size_experiments/merged-plot.png" 
+        alt="Losses and accuracies of Git re-basin for hlb-CIFAR10 with different filter-sizes"
+        width="800"
     />
 </p>
 
@@ -100,17 +92,9 @@ I move all startpoints (i.e. `model_a`) to the results of the 3x3-filter.
 
 <p align="center">
     <img
-        src="feature_size_experiments/losses-all-normalized-startpoint.png" 
-        alt="Losses of Git re-basin for hlb-CIFAR10 with different filter-sizes"
-        width="600"
-    />
-</p>
-
-<p align="center">
-    <img
-        src="feature_size_experiments/accuracies-all-normalized-startpoint.png" 
-        alt="Accuracies of Git re-basin for hlb-CIFAR10 with different filter-sizes"
-        width="600"
+        src="feature_size_experiments/merged-normalized-plot.png" 
+        alt="Losses and accuracies of Git re-basin for hlb-CIFAR10 with different filter-sizes"
+        width="800"
     />
 </p>
 

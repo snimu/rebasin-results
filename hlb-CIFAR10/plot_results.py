@@ -6,7 +6,9 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import matplotlib.colors as mcolors
 import numpy as np
+import colorsys
 
 
 def plot_results(size: str) -> None:
@@ -56,6 +58,84 @@ def plot_results(size: str) -> None:
 
     plt.savefig(f"feature_size_experiments/{size}-plot.png", dpi=300)
     # plt.show()
+
+
+def plot_merged_results(sizes: list[str], normalize: bool = False, show: bool = False) -> None:
+    fig, axs = plt.subplots(1, 2, figsize=(10, 6), sharex='all', gridspec_kw={'hspace': 0.1})
+    fig.subplots_adjust(top=0.9, bottom=0.2)
+
+    title = "hlb-CIFAR10: Merged results"
+    title += " (normalized starting-point)" if normalize else ""
+    fig.suptitle(title, fontsize=16)
+
+    # Get a subset of distinct dark colors from the CSS4_COLORS dictionary
+    dark_colors = [
+        color for color in mcolors.CSS4_COLORS
+        if colorsys.rgb_to_hsv(*mcolors.to_rgb(mcolors.CSS4_COLORS[color]))[2] < 0.9
+    ]
+    colors = dark_colors[:len(sizes)]
+
+    min_scale_loss = float("inf")
+    max_scale_loss = -float("inf")
+    min_scale_acc = float("inf")
+    max_scale_acc = -float("inf")
+    startpoint_loss = pd.read_csv(
+        f"feature_size_experiments/{sizes[0]}-losses.csv"
+    )["a-b-rebasin"].values[0].item()
+    startpoint_acc = pd.read_csv(
+        f"feature_size_experiments/{sizes[0]}-accuracies.csv"
+    )["a-b-rebasin"].values[0].item()
+    for i, size in enumerate(sizes):
+        file = f"feature_size_experiments/{size}-losses.csv"
+        losses = pd.read_csv(file)
+        values = losses["a-b-rebasin"].values
+        if normalize:
+            values = values + (startpoint_loss - values[0])
+        axs[0].plot(values, label=f"filter-size: {size}", color=colors[i])
+        max_scale_loss = max(max_scale_loss, np.max(values).item())
+        min_scale_loss = min(min_scale_loss, np.min(values).item())
+
+        file = f"feature_size_experiments/{size}-accuracies.csv"
+        accs = pd.read_csv(file)
+        values = accs["a-b-rebasin"].values
+        if normalize:
+            values = values + (startpoint_acc - values[0])
+        axs[1].plot(values, color=colors[i])
+        max_scale_acc = max(max_scale_acc, np.max(values).item())
+        min_scale_acc = min(min_scale_acc, np.min(values).item())
+
+    min_scale_loss -= 0.1 * (max_scale_loss - min_scale_loss)
+    max_scale_loss += 0.1 * (max_scale_loss - min_scale_loss)
+    axs[0].set_ylim(min_scale_loss, max_scale_loss)
+    axs[0].set_ylabel("Loss")
+
+    min_scale_acc -= 0.1 * (max_scale_acc - min_scale_acc)
+    max_scale_acc += 0.1 * (max_scale_acc - min_scale_acc)
+    axs[1].set_ylim(min_scale_acc, max_scale_acc)
+    axs[1].set_ylabel("Accuracy")
+
+    axs[0].set_xlabel("Interpolation %")
+    axs[1].set_xlabel("Interpolation %")
+
+    axs[0].grid()
+    axs[1].grid()
+
+    fig.legend(
+        loc='upper center',
+        bbox_to_anchor=(0.5, 0.1),
+        ncol=3,
+        fontsize=10,
+        labels=[f"filter-size: {size}" for size in sizes],
+        labelcolor=colors
+    )
+
+    if show:
+        plt.show()
+    else:
+        plt.savefig(
+            f"feature_size_experiments/merged-{'normalized-' if normalize else ''}plot.png",
+            dpi=300
+        )
 
 
 def plot_all_losses(sizes: list[str]) -> None:
@@ -438,12 +518,13 @@ def plot_pcd_feature_size(show: bool = False) -> None:
         plt.savefig(f"{root}/results.png", dpi=300)
 
 
-def normalize_data(data: dict[str, list[float]]) -> dict[str, list[float]]:
+def normalize_data(data: dict[str, list[float]], norm_key: str = 'merged_model') -> dict[str, list[float]]:
     new_data: dict[str, list[float]] = {}
     for model_name, values in data.items():
-        new_data[model_name] = [value / data['merged_model'][i] for i, value in enumerate(values)]
+        new_data[model_name] = [value / data[norm_key][i] for i, value in enumerate(values)]
     return new_data
 
 
 if __name__ == "__main__":
-    plot_pcd_feature_size()
+    sizes = ["3x3", "6x6", "9x9", "12x12", "15x15", "18x18"]
+    plot_merged_results(sizes, True)
