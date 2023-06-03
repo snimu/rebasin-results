@@ -100,7 +100,7 @@ to the loss or accuracy of the control model.
     <img
         src="results/merge-many/full_wd0.0-0.9_hf100-2000_sweep.png"
         alt="MergeMany results for MLP"
-        width="600"
+        width="800"
     />
 </p>
 
