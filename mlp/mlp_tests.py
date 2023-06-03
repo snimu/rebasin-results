@@ -619,7 +619,7 @@ def compare_output_statistics(hidden_features: int, weight_decays: list[float]) 
 
 
 @torch.no_grad()
-def output_statistics(model: MLP, device: torch.device) -> tuple(list[float], list[float]):
+def output_statistics(model: MLP, device: torch.device) -> tuple[list[float], list[float]]:
     dataloader = DataLoader(
         MNIST(
             root="data",
