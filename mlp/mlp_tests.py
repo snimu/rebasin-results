@@ -645,6 +645,54 @@ def output_statistics(model: MLP, device: torch.device) -> tuple[list[float], li
     return maximums, stds
 
 
+def count_permutations(hidden_features: int, weight_decays: list[float]) -> None:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    results = {
+        "weight_decay": [],
+        "num_permutations": []
+    }
+
+    loop = tqdm(weight_decays)
+    for wd in loop:
+        loop.set_description(f"{wd=}")
+        models = list(
+            train_mnist(hidden_features=hidden_features, weight_decay=wd).to(device)
+            for _ in range(3)
+        )
+
+        # To find out the number of permutations, these models will have to be copied
+        models_orig = copy.deepcopy(models)
+
+        mm = rebasin.MergeMany(
+            models,
+            MLP(hidden_features=hidden_features).to(device),
+            torch.randn(64, 28*28).to(device),
+            device=device
+        )
+        mm.run()
+
+        # Count the permutations
+        num_permutations = 0
+        for model, model_orig in zip(mm.models, models_orig):
+            num_permutations += sum(
+                (p == p_orig).sum().item()
+                for p, p_orig in zip(model.parameters(), model_orig.parameters())
+            )
+
+        num_permutations /= len(models)
+        results["weight_decay"].append(wd)
+        results["num_permutations"].append(num_permutations)
+
+    df = pd.DataFrame(results)
+    df.to_csv(
+        f"count_permutations"
+        f"_wd{min(weight_decays)}-{max(weight_decays)}"
+        f"_hf{hidden_features}.csv",
+        index=False
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--weight_decay', type=float, default=[0.0], nargs='+')
@@ -655,6 +703,7 @@ def main() -> None:
     parser.add_argument('-v', '--verbose', action='store_true', default=False)
     parser.add_argument('-m', '--merge_many', action='store_true', default=False)
     parser.add_argument('-n', '--num_models', type=int, default=[3], nargs='+')
+    parser.add_argument('-c', '--count_permutations', action='store_true', default=False)
     parser.add_argument('--full_wd_hf_sweep', action='store_true', default=False)
     parser.add_argument('--compare_output_statistics', action='store_true', default=False)
 
@@ -667,6 +716,11 @@ def main() -> None:
     if args.show_permutations:
         for hf in args.hidden_features:
             show_permutations(hf)
+        return
+
+    if args.count_permutations:
+        for hf in args.hidden_features:
+            count_permutations(hf, args.weight_decay)
         return
 
     if args.print_model:
