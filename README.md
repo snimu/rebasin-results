@@ -28,15 +28,19 @@ Here's a taste:
 
 The L2-regularizer (`weight_decay`) improves the performance of `PermutationCoordinateDescent`!
 
-As seen next, `MergeMany` also works well with a high `weight_decay`:
+In `MergeMany`, I found that a high `weight_decay` is similarly important, 
+though here I also looked at the effect of the feature size:
 
 <p align="center">
   <img 
-    src="mlp/results/merge-many/merge_many_wd_0.0-0.9.png" 
+    src="mlp/results/merge-many/full_wd0.0-0.2_hf100-2000_sweep.png" 
     alt="MergeMany results" 
-    width="600"
+    width="800"
   />
 </p>
+
+Clearly, a higher feature-size is beneficial, but the effect of the weight-decay
+is stronger.
 
 
 ## hlb-CIFAR10
