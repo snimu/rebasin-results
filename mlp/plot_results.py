@@ -300,17 +300,57 @@ def plot_compare_output_statistics() -> None:
 
 
 def plot_count_permutations() -> None:
-    results = pd.read_csv("results/merge-many/count_permutations_wd0.0-0.02_hf400.csv")
-    plt.title("MergeMany: num_models=3, hidden_features=400")
-    plt.plot(
-        results["weight_decay"],
-        results["num_permutations"],
+    results_02 = pd.read_csv("results/merge-many/count_permutations_wd0.0-0.2_hf400.csv")
+    results_002 = pd.read_csv("results/merge-many/count_permutations_wd0.0-0.02_hf400.csv")
+
+    fig, axs = plt.subplots(2, 2, figsize=(12, 6))
+    fig.subplots_adjust(top=0.91, bottom=0.08, hspace=0.15, wspace=0.05, left=0.1, right=0.95)
+    fig.suptitle("MergeMany: num_models=3, hidden_features=400")
+
+    axs[0, 0].plot(
+        results_002["weight_decay"],
+        results_002["num_permutations"] / 1_000,
     )
-    plt.grid()
-    plt.ylabel("Number of Permutations")
-    plt.xlabel("Weight Decay")
+    axs[0, 0].set_ylabel("# Permutations (in 1000)")
+    axs[0, 0].set_ylim([680, 800])
+    axs[0, 0].set_xticklabels([])
+    axs[0, 0].set_xticks(np.arange(0.0, 0.021, 0.002))
+    axs[0, 0].set_title("Weight Decay in [0.0, 0.02]")
+    axs[0, 0].grid()
+
+    axs[0, 1].plot(
+        results_02["weight_decay"],
+        results_02["num_permutations"] / 1_000,
+    )
+    axs[0, 1].set_ylim([680, 800])
+    axs[0, 1].set_yticklabels([])
+    axs[0, 1].set_xticklabels([])
+    axs[0, 1].set_xticks(np.arange(0.0, 0.21, 0.02))
+    axs[0, 1].set_title("Weight Decay in [0.0, 0.2]")
+    axs[0, 1].grid()
+
+    axs[1, 0].plot(
+        results_002["weight_decay"],
+        results_002["num_permutations"] / 1_000,
+    )
+    axs[1, 0].set_ylabel("# Permutations (in 1000)")
+    axs[1, 0].set_ylim([0, 800])
+    axs[1, 0].set_xticks(np.arange(0.0, 0.021, 0.002))
+    axs[1, 0].set_xlabel("Weight Decay")
+    axs[1, 0].grid()
+
+    axs[1, 1].plot(
+        results_02["weight_decay"],
+        results_02["num_permutations"] / 1_000,
+    )
+    axs[1, 1].set_ylim([0, 800])
+    axs[1, 1].set_yticklabels([])
+    axs[1, 1].set_xticks(np.arange(0.0, 0.21, 0.02))
+    axs[1, 1].set_xlabel("Weight Decay")
+    axs[1, 1].grid()
+
     # plt.show()
-    plt.savefig("results/merge-many/count_permutations_wd0.0-0.02_hf400.png", dpi=300)
+    plt.savefig("results/merge-many/count_permutations.png", dpi=300)
 
 
 def normalize(data: pd.DataFrame, key_loss: str, key_acc: str) -> pd.DataFrame:

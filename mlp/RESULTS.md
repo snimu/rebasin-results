@@ -150,10 +150,30 @@ of the outputs.
 
 It's clear that the maximum output and the standard deviation of the outputs
 are lower in the merged model than in the models that make it up, while loss and
-accuracy are higher (except when `weight_decay == 0.0`; the behavior in this case
+accuracy are higher. 
+
+An exception to this is the case where `weight_decay == 0.0`; the behavior in this case
 is probably explained by `PermutationCoordinateDescent` &mdash; which is used
-by `MergeMany` &mdash; achieving a worse fit between the models. The permuted models are 
-).
+by `MergeMany` &mdash; achieving a worse fit between the models. The permuted models are
+averaged, so if they fit poorly, they will converge towards random noise. 
+
+This view is supported by the number of permutations that are applied to the models
+before they are merged, at different `weigth_decay` values:
+
+<p align="center">
+    <img
+        src="results/merge-many/count_permutations.png"
+        alt="MergeMany: # Permutations for MLP over weight_decay"
+        width="800"
+    />
+</p>
+
+The number of permutations rises quickly at low `weight_decay`-values,
+but then almost levels off. Clearly, an L2-regulizer helps `PermutationCoordinateDescent`
+and, with that, `MergeMany`. It should be noted, however, that the difference in 
+permutation counts isn't very large in relative terms. The lower two plots
+show the same data, but with the y-axis scaled to start from 0, and it 
+clearly shows this.
 
 ## The model
 
