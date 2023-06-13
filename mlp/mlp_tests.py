@@ -696,10 +696,11 @@ def count_permutations(hidden_features: int, weight_decays: list[float]) -> None
 
 def choose_most_common(outputs: list[torch.Tensor]) -> torch.Tensor:
     """Return a tensor of zeros with a one where most outputs have their maximum."""
-    argmax_counts = Counter([output.argmax() for output in outputs])
+    argmax_counts = Counter([output.argmax(dim=1) for output in outputs])
     most_common = argmax_counts.most_common(1)[0][0]
     output = torch.zeros_like(outputs[0])
-    output[most_common] = 1
+    for i, mc in enumerate(most_common):
+        output[i, mc] = 1
     return output
 
 
