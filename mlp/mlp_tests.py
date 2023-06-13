@@ -6,6 +6,7 @@ import copy
 import os
 import itertools
 import shutil
+from collections import Counter
 from typing import Any, Sequence
 
 from torchvision.datasets import MNIST
@@ -693,6 +694,112 @@ def count_permutations(hidden_features: int, weight_decays: list[float]) -> None
     )
 
 
+def choose_most_common(outputs: list[torch.Tensor]) -> torch.Tensor:
+    """Return a tensor of zeros with a one where most outputs have their maximum."""
+    argmax_counts = Counter([output.argmax() for output in outputs])
+    most_common = argmax_counts.most_common(1)[0][0]
+    output = torch.zeros_like(outputs[0])
+    output[most_common] = 1
+    return output
+
+
+def nfold_forward(model: MLP, x: torch.Tensor, n: int) -> torch.Tensor:
+    outputs = []
+    mean_x = x.mean()
+    for _ in range(n):
+        # Add a little noise to the input so that the model doesn't always
+        # predict the same class
+        noise = torch.randn_like(x) * mean_x / 100
+        outputs.append(model(x + noise))
+    return choose_most_common(outputs)
+
+
+def eval_fn_nfold(model: MLP, device: torch.device, n: int) -> tuple[float, float]:
+    dataloader = DataLoader(
+        MNIST(
+            root="data",
+            train=False,
+            download=True,
+            transform=torchvision.transforms.ToTensor(),
+        ),
+        batch_size=32,
+        shuffle=False,
+    )
+    criterion = nn.CrossEntropyLoss()
+    correct = 0
+    total = 0
+    loss = 0
+    with torch.no_grad():
+        for x, y in dataloader:
+            x, y = x.to(device), y.to(device)
+            output = nfold_forward(model, x.view(x.shape[0], -1), n)
+            loss += criterion(output, y).item()
+            correct += (output.argmax(1) == y).sum().item()
+            total += y.numel()
+
+    return loss / total, correct / total
+
+
+def test_merge_many_nfold(
+        hidden_features: int,
+        weight_decay: float,
+        num_models: int,
+        forward_pass_nums: list[int],
+) -> None:
+    results = {
+        "nforward": [],
+        "loss_avg": [],
+        "acc_avg": [],
+        "loss_merged": [],
+        "acc_merged": [],
+    }
+    loop = tqdm(forward_pass_nums)
+    for nforward in loop:
+        loop.set_description(f"{nforward=}")
+        models = list(
+            train_mnist(hidden_features=hidden_features, weight_decay=weight_decay)
+            for _ in range(num_models)
+        )
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        losses = []
+        accs = []
+        for model in models:
+            loss, acc = eval_fn_nfold(model, device, nforward)
+            losses.append(loss)
+            accs.append(acc)
+
+        loss = sum(losses) / len(losses)
+        acc = sum(accs) / len(accs)
+
+        mm = rebasin.MergeMany(
+            models,
+            MLP(hidden_features=hidden_features).to(device),
+            torch.randn(64, 28*28).to(device),
+            device=device
+        )
+        mm.run()
+
+        # Test the merged model
+        loss_merged, acc_merged = eval_fn_nfold(mm.merged_model, device, nforward)
+
+        loop.write(f"{loss=}, {loss_merged=}, {acc=}, {acc_merged=}")
+        results["nforward"].append(nforward)
+        results["loss_avg"].append(loss)
+        results["acc_avg"].append(acc)
+        results["loss_merged"].append(loss_merged)
+        results["acc_merged"].append(acc_merged)
+
+    df = pd.DataFrame(results)
+    df.to_csv(
+        f"test_merge_many_nfold"
+        f"_wd{weight_decay}"
+        f"_hf{hidden_features}"
+        f"_nm{num_models}.csv",
+        index=False
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--weight_decay', type=float, default=[0.0], nargs='+')
@@ -706,6 +813,7 @@ def main() -> None:
     parser.add_argument('-c', '--count_permutations', action='store_true', default=False)
     parser.add_argument('--full_wd_hf_sweep', action='store_true', default=False)
     parser.add_argument('--compare_output_statistics', action='store_true', default=False)
+    parser.add_argument('--forward_pass_nums', type=int, default=None, nargs='+')
 
     args = parser.parse_args()
 
@@ -743,6 +851,12 @@ def main() -> None:
             args.num_models,
             verbose=args.verbose
         )
+        return
+
+    if args.forward_pass_nums is not None:
+        for hf in args.hidden_features:
+            for wd in args.weight_decay:
+                test_merge_many_nfold(hf, wd, args.num_models[0], args.forward_pass_nums)
         return
 
     for weight_decay in args.weight_decay:
