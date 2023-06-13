@@ -857,7 +857,8 @@ def main() -> None:
     if args.forward_pass_nums is not None:
         for hf in args.hidden_features:
             for wd in args.weight_decay:
-                test_merge_many_nfold(hf, wd, args.num_models[0], args.forward_pass_nums)
+                for nm in args.num_models:
+                    test_merge_many_nfold(hf, wd, nm, args.forward_pass_nums)
         return
 
     for weight_decay in args.weight_decay:
