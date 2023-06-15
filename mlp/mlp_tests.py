@@ -804,24 +804,26 @@ def test_merge_many_nfold(
 def test_squared_weight_mean_differences(
         hidden_feature_sizes: Sequence[int],
         weight_decays: Sequence[float],
-        num_models: int,
+        model_nums: Sequence[int],
 ) -> None:
     # Meant to see if filter size corresponds to an implicit regularization
     results = {
         "weight_decay": [],
         "hidden_features": [],
+        "num_models": [],
         "mean_variance": [],
     }
 
     loop = tqdm(
-        itertools.product(weight_decays, hidden_feature_sizes),
-        total=len(weight_decays) * len(hidden_feature_sizes)
+        itertools.product(weight_decays, hidden_feature_sizes, model_nums),
+        total=len(weight_decays) * len(hidden_feature_sizes) * len(model_nums)
     )
 
-    for wd, hf in loop:
+    for wd, hf, num_models in loop:
         loop.set_description(f"{wd=}, {hf=}")
         results["weight_decay"].append(wd)
         results["hidden_features"].append(hf)
+        results["num_models"].append(num_models)
         models = list(
             train_mnist(hidden_features=hf, weight_decay=wd)
             for _ in range(num_models)
@@ -918,7 +920,8 @@ def main() -> None:
     if args.test_squared_weight_mean_differences:
         test_squared_weight_mean_differences(
             args.hidden_features,
-            args.weight_decay
+            args.weight_decay,
+            args.num_models,
         )
         return
 
