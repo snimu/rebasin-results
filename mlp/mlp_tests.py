@@ -801,6 +801,59 @@ def test_merge_many_nfold(
     )
 
 
+def test_squared_weight_mean_differences(
+        hidden_feature_sizes: Sequence[int],
+        weight_decays: Sequence[float],
+        num_models: int,
+) -> None:
+    # Meant to see if filter size corresponds to an implicit regularization
+    results = {
+        "weight_decay": [],
+        "hidden_features": [],
+        "mean_variance": [],
+    }
+
+    loop = tqdm(
+        itertools.product(weight_decays, hidden_feature_sizes),
+        total=len(weight_decays) * len(hidden_feature_sizes)
+    )
+
+    for wd, hf in loop:
+        loop.set_description(f"{wd=}, {hf=}")
+        results["weight_decay"].append(wd)
+        results["hidden_features"].append(hf)
+        models = list(
+            train_mnist(hidden_features=hf, weight_decay=wd)
+            for _ in range(num_models)
+        )
+        variances = []
+        for info in zip(*[model.named_parameters() for model in models]):
+            if "weight" not in info[0][0]:  # Weight not in name -> skip
+                continue
+
+            squared_means = [p.pow(2).mean() for _, p in info]
+            variance = torch.var(torch.tensor(squared_means))
+
+            variances.append(variance)
+
+        for i in range(1, len(variances) + 1):
+            if f"variance{i}" not in results.keys():
+                results[f"variance{i}"] = []
+            results[f"variance{i}"].append(variances[i - 1])
+
+        mean_variance = torch.mean(torch.tensor(variances))
+        results[f"mean_variance"].append(mean_variance)
+        loop.write(f"{wd=}, {hf=}, {mean_variance=}")
+
+    df = pd.DataFrame(results)
+    df.to_csv(
+        f"test_squared_weight_mean_differences"
+        f"_hf{hidden_feature_sizes[0]}-{hidden_feature_sizes[-1]}"
+        f"_wd{weight_decays[0]}-{weight_decays[-1]}.csv",
+        index=False
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--weight_decay', type=float, default=[0.0], nargs='+')
@@ -815,6 +868,7 @@ def main() -> None:
     parser.add_argument('--full_wd_hf_sweep', action='store_true', default=False)
     parser.add_argument('--compare_output_statistics', action='store_true', default=False)
     parser.add_argument('--forward_pass_nums', type=int, default=None, nargs='+')
+    parser.add_argument('--test_squared_weight_mean_differences', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -859,6 +913,13 @@ def main() -> None:
             for wd in args.weight_decay:
                 for nm in args.num_models:
                     test_merge_many_nfold(hf, wd, nm, args.forward_pass_nums)
+        return
+
+    if args.test_squared_weight_mean_differences:
+        test_squared_weight_mean_differences(
+            args.hidden_features,
+            args.weight_decay
+        )
         return
 
     for weight_decay in args.weight_decay:
