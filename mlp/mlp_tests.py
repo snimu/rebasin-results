@@ -811,7 +811,7 @@ def test_squared_weight_mean_differences(
         "weight_decay": [],
         "hidden_features": [],
         "num_models": [],
-        "mean_variance": [],
+        "mean_perc_diff": [],
     }
 
     loop = tqdm(
@@ -828,24 +828,27 @@ def test_squared_weight_mean_differences(
             train_mnist(hidden_features=hf, weight_decay=wd)
             for _ in range(num_models)
         )
-        variances = []
+        perc_diffs = []
         for info in zip(*[model.named_parameters() for model in models]):
             if "weight" not in info[0][0]:  # Weight not in name -> skip
                 continue
 
-            squared_means = [p.pow(2).mean() for _, p in info]
-            variance = torch.var(torch.tensor(squared_means))
+            squared_means = torch.tensor([p.pow(2).mean() for _, p in info])
+            perc_diff = (
+                    (torch.max(squared_means) - torch.min(squared_means))
+                    / torch.mean(squared_means)  # always positive due to squaring
+            )
 
-            variances.append(variance)
+            perc_diffs.append(perc_diff)
 
-        for i in range(1, len(variances) + 1):
-            if f"variance{i}" not in results.keys():
-                results[f"variance{i}"] = []
-            results[f"variance{i}"].append(variances[i - 1])
+        for i in range(1, len(perc_diffs) + 1):
+            if f"perc_diff{i}" not in results.keys():
+                results[f"perc_diff{i}"] = []
+            results[f"perc_diff{i}"].append(perc_diffs[i - 1])
 
-        mean_variance = torch.mean(torch.tensor(variances))
-        results[f"mean_variance"].append(mean_variance)
-        loop.write(f"{wd=}, {hf=}, {mean_variance=}")
+        mean_perc_diff = torch.mean(torch.tensor(perc_diffs))
+        results[f"mean_perc_diff"].append(mean_perc_diff)
+        loop.write(f"{wd=}, {hf=}, {mean_perc_diff=}")
 
     df = pd.DataFrame(results)
     df.to_csv(
