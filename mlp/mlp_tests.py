@@ -833,7 +833,7 @@ def test_squared_weight_mean_differences(
             if "weight" not in info[0][0]:  # Weight not in name -> skip
                 continue
 
-            squared_means = torch.tensor([p.pow(2).mean() for _, p in info])
+            squared_means = torch.tensor([p.abs().mean() for _, p in info])
             perc_diff = (
                     (torch.max(squared_means) - torch.min(squared_means))
                     / torch.mean(squared_means)  # always positive due to squaring
@@ -844,9 +844,9 @@ def test_squared_weight_mean_differences(
         for i in range(1, len(perc_diffs) + 1):
             if f"perc_diff{i}" not in results.keys():
                 results[f"perc_diff{i}"] = []
-            results[f"perc_diff{i}"].append(perc_diffs[i - 1])
+            results[f"perc_diff{i}"].append(perc_diffs[i - 1].item())
 
-        mean_perc_diff = torch.mean(torch.tensor(perc_diffs))
+        mean_perc_diff = torch.mean(torch.tensor(perc_diffs)).item()
         results[f"mean_perc_diff"].append(mean_perc_diff)
         loop.write(f"{wd=}, {hf=}, {mean_perc_diff=}")
 
