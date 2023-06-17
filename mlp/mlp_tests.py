@@ -571,7 +571,7 @@ def compare_output_statistics(
     }
 
     loop = tqdm(
-        zip(weight_decays, feature_nums, model_nums),
+        itertools.product(weight_decays, feature_nums, model_nums),
         total=len(weight_decays) * len(feature_nums) * len(model_nums)
     )
     for wd, fn, mn in loop:
