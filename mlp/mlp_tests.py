@@ -906,7 +906,7 @@ def main() -> None:
         return
 
     if args.compare_output_statistics:
-        compare_output_statistics(args.hidden_features[0], args.weight_decay)
+        compare_output_statistics(args.hidden_features, args.weight_decay, args.num_models)
         return
 
     if args.merge_many:
