@@ -609,6 +609,8 @@ def compare_output_statistics(
         loss_merged, acc_merged = eval_fn(mm.merged_model, device)
 
         results["weight_decay"].append(wd)
+        results["hidden_features"].append(fn)
+        results["num_models"].append(mn)
         results["max_avg"].append(max_avg)
         results["std_avg"].append(std_avg)
         results["max_merged"].append(max_merged)
