@@ -364,5 +364,86 @@ def normalize(data: pd.DataFrame, key_loss: str, key_acc: str) -> pd.DataFrame:
     return ndata
 
 
+def plot_abs_weight_mean_diff() -> None:
+    data = pd.read_csv("results/other/test_squared_weight_mean_differences_hf20-1000_wd0.0-0.03.csv")
+    wds = data["weight_decay"].unique()
+
+    for wd in wds:
+        data_wd = data[data["weight_decay"] == wd]
+        plt.plot(data_wd["hidden_features"], data_wd["mean_perc_diff"] * 100, label=f"wd={wd}")
+
+    plt.grid()
+    plt.ylabel("difference in %")
+    plt.xlabel("hidden features")
+    plt.legend()
+
+    plt.show()
+
+
+def plot_abs_weight_mean_diff3d() -> None:
+    # 1. Read the data using pandas
+    df = pd.read_csv("results/other/test_squared_weight_mean_differences_hf20-1000_wd0.0-0.03.csv")
+
+    # 2. Pivot the DataFrame
+    pivot_df = df.pivot(index='weight_decay', columns='hidden_features', values='mean_perc_diff')
+
+    # 3. Create a 3D plot
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Create a grid of x, y values
+    x = pivot_df.columns.values
+    y = pivot_df.index.values
+    x, y = np.meshgrid(x, y)
+
+    # Get corresponding z values
+    z = pivot_df.values
+
+    # 3D surface plot
+    surf = ax.plot_surface(x, y, z, cmap='viridis')
+
+    # Add labels and title
+    ax.set_xlabel('Weight Decay')
+    ax.set_ylabel('Hidden Features')
+    ax.set_zlabel('Mean Percentage Difference')
+    ax.set_title('3D plot of Mean Percentage Difference')
+
+    # Add a color bar and shrink it
+    fig.colorbar(surf, shrink=0.6)
+
+    plt.tight_layout()
+    plt.show()
+
+    plt.show()
+
+
+def plot_abs_weight_mean_diff_heatmap() -> None:
+    # Read the CSV file
+    data = pd.read_csv('results/other/test_squared_weight_mean_differences_hf20-1000_wd0.0-0.03.csv')
+
+    # Extract unique values of weight_decay and hidden_features
+    weight_decays = data['weight_decay'].unique()
+    hidden_features = data['hidden_features'].unique()
+
+    # Create a grid of mean_perc_diff values
+    grid = np.zeros((len(hidden_features), len(weight_decays)))
+
+    for i, weight_decay in enumerate(weight_decays):
+        for j, hidden_feature in enumerate(hidden_features):
+            mean_perc_diff = data[(data['weight_decay'] == weight_decay) & (data['hidden_features'] == hidden_feature)][
+                'mean_perc_diff']
+            grid[j, i] = mean_perc_diff.values[0]
+
+    # Create a grid plot
+    plt.imshow(grid, cmap='viridis', origin='lower')
+    plt.xticks(np.arange(len(weight_decays)), weight_decays)
+    plt.yticks(np.arange(len(hidden_features)), hidden_features)
+    plt.xlabel('Weight Decay')
+    plt.ylabel('Hidden Features')
+    plt.title('Mean Percentage Difference')
+    plt.colorbar(label='Mean Perc Diff')
+    plt.show()
+
+
 if __name__ == "__main__":
-    plot_count_permutations()
+    plot_abs_weight_mean_diff_heatmap()
