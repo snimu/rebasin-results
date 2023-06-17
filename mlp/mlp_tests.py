@@ -551,11 +551,17 @@ def full_wd_hf_sweep_merge_many() -> None:
     )
 
 
-def compare_output_statistics(hidden_features: int, weight_decays: list[float]) -> None:
+def compare_output_statistics(
+        feature_nums: list[int],
+        weight_decays: list[float],
+        model_nums: list[float],
+) -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     results = {
         "weight_decay": [],
+        "hidden_features": [],
+        "num_models": [],
         "max_avg": [],
         "std_avg": [],
         "max_merged": [],
@@ -564,12 +570,15 @@ def compare_output_statistics(hidden_features: int, weight_decays: list[float]) 
         "acc_ratio": []
     }
 
-    loop = tqdm(weight_decays)
-    for wd in loop:
+    loop = tqdm(
+        zip(weight_decays, feature_nums, model_nums),
+        total=len(weight_decays) * len(feature_nums) * len(model_nums)
+    )
+    for wd, fn, mn in loop:
         loop.set_description(f"{wd=}")
         models = list(
-            train_mnist(hidden_features=hidden_features, weight_decay=wd).to(device)
-            for _ in range(3)
+            train_mnist(hidden_features=fn, weight_decay=wd).to(device)
+            for _ in range(mn)
         )
 
         maxs, stds = [], []
@@ -588,7 +597,7 @@ def compare_output_statistics(hidden_features: int, weight_decays: list[float]) 
 
         mm = rebasin.MergeMany(
             models,
-            MLP(hidden_features=hidden_features).to(device),
+            MLP(hidden_features=fn).to(device),
             torch.randn(64, 28*28).to(device),
             device=device
         )
@@ -611,7 +620,8 @@ def compare_output_statistics(hidden_features: int, weight_decays: list[float]) 
     df.to_csv(
         f"compare_output_statistics"
         f"_wd{min(weight_decays)}-{max(weight_decays)}"
-        f"_hf{hidden_features}.csv",
+        f"_hf{min(feature_nums)}-{max(feature_nums)}"
+        f"_nm{min(model_nums)}-{max(model_nums)}.csv",
         index=False
     )
 
