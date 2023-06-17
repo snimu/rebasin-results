@@ -574,11 +574,11 @@ def compare_output_statistics(
         itertools.product(weight_decays, feature_nums, model_nums),
         total=len(weight_decays) * len(feature_nums) * len(model_nums)
     )
-    for wd, fn, mn in loop:
+    for wd, hf, nm in loop:
         loop.set_description(f"{wd=}")
         models = list(
-            train_mnist(hidden_features=fn, weight_decay=wd).to(device)
-            for _ in range(mn)
+            train_mnist(hidden_features=hf, weight_decay=wd).to(device)
+            for _ in range(nm)
         )
 
         maxs, stds = [], []
@@ -597,7 +597,7 @@ def compare_output_statistics(
 
         mm = rebasin.MergeMany(
             models,
-            MLP(hidden_features=fn).to(device),
+            MLP(hidden_features=hf).to(device),
             torch.randn(64, 28*28).to(device),
             device=device
         )
@@ -608,11 +608,11 @@ def compare_output_statistics(
         std_merged = sum(stds) / len(stds)
         loss_merged, acc_merged = eval_fn(mm.merged_model, device)
 
-        loop.write(f"{wd=}, {fn=}, {mn=}, {max_avg=}, {std_avg=}, {max_merged=}, {std_merged=}")
+        loop.write(f"{wd=}, {hf=}, {nm=}, {max_avg=}, {std_avg=}, {max_merged=}, {std_merged=}")
 
         results["weight_decay"].append(wd)
-        results["hidden_features"].append(fn)
-        results["num_models"].append(mn)
+        results["hidden_features"].append(hf)
+        results["num_models"].append(nm)
         results["max_avg"].append(max_avg)
         results["std_avg"].append(std_avg)
         results["max_merged"].append(max_merged)
