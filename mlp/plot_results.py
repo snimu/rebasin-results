@@ -445,5 +445,50 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
     plt.show()
 
 
+def plot_mm_nm() -> None:
+    df = pd.read_csv("results/merge-many/merge_many_nm2-6_wd0-0.3_nf200.csv")
+    nms = df["num_models"].unique()
+
+    fig, axs = plt.subplots(2, 2, figsize=(10, 7))
+    fig.subplots_adjust(top=0.9, bottom=0.2, hspace=0.5, wspace=0.3)
+    fig.suptitle("Merge Many: different numbers of models (at 200 Hidden Features)")
+
+    for nm in nms:
+        df_nm = df[df["num_models"] == nm]
+        axs[0, 0].plot(df_nm["weight_decay"], df_nm["loss_merged"] / df_nm["loss_avg"], label=f"{nm} models")
+        axs[0, 0].set_ylabel("loss ratio (merged / avg)")
+        axs[0, 0].set_xlabel("weight decay")
+        axs[0, 0].grid()
+        axs[0, 0].set_title("Loss Ratio")
+
+        axs[0, 1].plot(df_nm["weight_decay"], df_nm["acc_merged"] / df_nm["acc_avg"])
+        axs[0, 1].set_ylabel("acc ratio (merged / avg)")
+        axs[0, 1].set_xlabel("weight decay")
+        axs[0, 1].grid()
+        axs[0, 1].set_title("Accuracy Ratio")
+
+        axs[1, 0].plot(df_nm["weight_decay"], df_nm["loss_merged"] / df_nm["loss_avg"])
+        axs[1, 0].set_ylabel("loss ratio (merged / avg)")
+        axs[1, 0].set_xlabel("weight decay")
+        axs[1, 0].grid()
+        axs[1, 0].set_title("Loss Ratio (zoomed)")
+        axs[1, 0].set_ylim([1.0, 1.05])
+
+        axs[1, 1].plot(df_nm["weight_decay"], df_nm["acc_merged"] / df_nm["acc_avg"])
+        axs[1, 1].set_ylabel("acc ratio (merged / avg)")
+        axs[1, 1].set_xlabel("weight decay")
+        axs[1, 1].grid()
+        axs[1, 1].set_title("Accuracy Ratio (zoomed)")
+        axs[1, 1].set_ylim([0.98, 1.03])
+
+    fig.legend(
+        ncol=5,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 0.05),
+    )
+
+    plt.savefig("results/merge-many/merge_many_nm2-6_wd0-0.3_nf200.png", dpi=300)
+
+
 if __name__ == "__main__":
-    plot_abs_weight_mean_diff_heatmap()
+    plot_mm_nm()

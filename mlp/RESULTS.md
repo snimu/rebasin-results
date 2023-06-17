@@ -2,9 +2,9 @@
 
 These are results from running `PermutationCoordinateDescent` and `MergeMany` on MLPs.
 
-## Results
+# Results
 
-### PermutationCoordinateDescent
+## PermutationCoordinateDescent
 
 I wanted to find out if `PermutationCoordinateDescent` works better with a higher L2-regularizer.
 This would make sense, because then, the weights would be more similar in magnitude,
@@ -43,7 +43,7 @@ Some observations:
 
 This is a clear success!!!
 
-### MergeMany
+## MergeMany
 
 The above makes it likely that `MergeMany` also works better with a higher L2-regularizer.
 
@@ -89,7 +89,35 @@ at every step:
 Clearly, with high `weight_decay`-values, `MergeMany` works pretty well; 
 the loss is similar to that of the control model, and the accuracy is even higher.
 
-In the paper, though, `weight_decay` isn't mentioned as a factor 
+### By number of models
+
+While `weight_decay` isn't mentioned as a factor influencing the 
+results of `PermutationCoordinateDescent` and `MergeMany`
+in the paper, it is clearly important. 
+
+Another factor, however, is the number of models that are merged.
+Ideally, more models would mean better results. However, in practice, the opposite is true.
+At best, high `weight_decay` values are needed to get good results with many models,
+though they are still not better than with fewer models.
+
+<p align="center">
+    <img
+        src="results/merge-many/merge_many_nm2-6_wd0-0.3_nf200.png"
+        alt="MergeMany results for MLP"
+        width="800"
+    />
+</p>
+
+Observations:
+
+- At low `weight_decay` values, `MergeMany` works significantly better with fewer models.
+- At high `weight_decay` values, this effect almost disappears in the loss, 
+   and seems to fully reduce the effect on accuracy &mdash; though that might be because
+   the accuracy is a highly non-linear measure, making the data noisy.
+
+### By feature-size
+
+In the paper, `weight_decay` isn't mentioned as a factor 
 influencing the results of `PermutationCoordinateDescent` and `MergeMany`.
 On the other hand, feature-size is. So now, let's try `MergeMany` 
 with different feature-sizes plotted over different `weight_decay` values.
@@ -175,7 +203,7 @@ permutation counts isn't very large in relative terms. The lower two plots
 show the same data, but with the y-axis scaled to start from 0, and it 
 clearly shows this.
 
-## The model
+# The model
 
 <p align="center">
     <img
@@ -185,7 +213,7 @@ clearly shows this.
     />
 </p>
 
-## The permutations
+# The permutations
 
 ```
                                          
