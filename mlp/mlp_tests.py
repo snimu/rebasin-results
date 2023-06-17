@@ -575,7 +575,7 @@ def compare_output_statistics(
         total=len(weight_decays) * len(feature_nums) * len(model_nums)
     )
     for wd, hf, nm in loop:
-        loop.set_description(f"{wd=}")
+        loop.set_description(f"{wd=}, {hf=}, {nm=}")
         models = list(
             train_mnist(hidden_features=hf, weight_decay=wd).to(device)
             for _ in range(nm)
