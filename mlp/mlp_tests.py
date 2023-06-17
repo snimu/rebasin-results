@@ -351,7 +351,6 @@ def test_merge_many(
                     weight_decay=weight_decay,
                     epochs=epochs,
                     hidden_features=feature_num,
-                    verbose=verbose
                 ).to(device)
             )
 
