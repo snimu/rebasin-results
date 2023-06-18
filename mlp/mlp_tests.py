@@ -828,15 +828,35 @@ def test_squared_weight_mean_differences(
         total=len(weight_decays) * len(hidden_feature_sizes) * len(model_nums)
     )
 
+    last_settings = {"wd": None, "hf": None, "num_models": None}
+    models = []
     for wd, hf, num_models in loop:
         loop.set_description(f"{wd=}, {hf=}")
         results["weight_decay"].append(wd)
         results["hidden_features"].append(hf)
         results["num_models"].append(num_models)
-        models = list(
-            train_mnist(hidden_features=hf, weight_decay=wd)
-            for _ in range(num_models)
-        )
+
+        # Make it so that I don't have to retrain models if I don't have to
+        # (i.e. if the hyperparameters are the same)
+        if last_settings["wd"] != wd or last_settings["hf"] != hf:
+            last_settings["wd"] = wd
+            last_settings["hf"] = hf
+            models = list(
+                train_mnist(hidden_features=hf, weight_decay=wd)
+                for _ in range(num_models)
+            )
+        elif num_models > last_settings["num_models"]:
+            models.extend(
+                train_mnist(hidden_features=hf, weight_decay=wd)
+                for _ in range(num_models - last_settings["num_models"])
+            )
+            last_settings["num_models"] = num_models
+        elif num_models < last_settings["num_models"]:
+            models = models[:num_models]
+            last_settings["num_models"] = num_models
+        else:
+            continue
+
         perc_diffs = []
         for info in zip(*[model.named_parameters() for model in models]):
             if "weight" not in info[0][0]:  # Weight not in name -> skip
