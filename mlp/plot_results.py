@@ -365,7 +365,7 @@ def normalize(data: pd.DataFrame, key_loss: str, key_acc: str) -> pd.DataFrame:
 
 
 def plot_abs_weight_mean_diff() -> None:
-    data = pd.read_csv("results/other/test_squared_weight_mean_differences_hf20-1000_wd0.0-0.03.csv")
+    data = pd.read_csv("results/other/test_squared_weight_mean_differences_hf20-1000_wd0.0-0.2.csv")
     wds = data["weight_decay"].unique()
 
     for wd in wds:
@@ -382,7 +382,7 @@ def plot_abs_weight_mean_diff() -> None:
 
 def plot_abs_weight_mean_diff3d() -> None:
     # 1. Read the data using pandas
-    df = pd.read_csv("results/other/test_squared_weight_mean_differences_hf20-1000_wd0.0-0.03.csv")
+    df = pd.read_csv("results/other/test_squared_weight_mean_differences_hf20-1000_wd0.0-0.2.csv")
 
     # 2. Pivot the DataFrame
     pivot_df = df.pivot(index='weight_decay', columns='hidden_features', values='mean_perc_diff')
@@ -419,11 +419,11 @@ def plot_abs_weight_mean_diff3d() -> None:
 
 def plot_abs_weight_mean_diff_heatmap() -> None:
     # Read the CSV file
-    data = pd.read_csv('results/other/test_squared_weight_mean_differences_hf20-1000_wd0.0-0.03.csv')
+    data = pd.read_csv('results/other/test_squared_weight_mean_differences_hf20-1000_wd0.0-0.2.csv')
 
     # Extract unique values of weight_decay and hidden_features
     weight_decays = data['weight_decay'].unique()
-    hidden_features = data['hidden_features'].unique()
+    hidden_features = data['hidden_features'].unique()[::2]
 
     # Create a grid of mean_perc_diff values
     grid = np.zeros((len(hidden_features), len(weight_decays)))
@@ -434,15 +434,25 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
                 'mean_perc_diff']
             grid[j, i] = mean_perc_diff.values[0]
 
-    # Create a grid plot
-    plt.imshow(grid, cmap='viridis', origin='lower')
-    plt.xticks(np.arange(len(weight_decays)), weight_decays)
-    plt.yticks(np.arange(len(hidden_features)), hidden_features)
-    plt.xlabel('Weight Decay')
-    plt.ylabel('Hidden Features')
-    plt.title('Mean Percentage Difference')
-    plt.colorbar(label='Mean Perc Diff')
+    # Create a Figure and an Axes
+    fig = plt.figure(figsize=(8, 7))
+    ax = fig.add_subplot(111)  # 111 means 1 row, 1 column, first subplot
+
+    # Plot using the Axes
+    cax = ax.imshow(grid, cmap='viridis', origin='lower')
+    ax.set_xticks(np.arange(len(weight_decays)/2)*2)
+    ax.set_xticklabels(weight_decays[::2])
+    ax.set_yticks(np.arange(len(hidden_features)))
+    ax.set_yticklabels(hidden_features)
+    ax.set_xlabel('Weight Decay')
+    ax.set_ylabel('Hidden Features')
+    ax.set_title('Mean Percentage Difference')
+
+    # Add colorbar using the Figure, not the Axes
+    fig.colorbar(cax, label='Mean Perc Diff')
+
     plt.show()
+
 
 
 def plot_mm_nm() -> None:
@@ -491,4 +501,4 @@ def plot_mm_nm() -> None:
 
 
 if __name__ == "__main__":
-    plot_mm_nm()
+    plot_abs_weight_mean_diff_heatmap()
