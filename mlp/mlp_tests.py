@@ -6,6 +6,7 @@ import copy
 import os
 import itertools
 import shutil
+import warnings
 from collections import Counter
 from typing import Any, Sequence
 
@@ -850,10 +851,14 @@ def get_weight_infos(models: list[MLP]) -> tuple[torch.Tensor, torch.Tensor, tor
 
         # Get the eigendecomposition of the weight matrix
         eigvals, eigvecs = [], []
+        warnings.filterwarnings("ignore")  # converting to float from complex gives warning but is fine
         for _, p in info:
-            eigval, eigvec = torch.eig(p, eigenvectors=True)
+            eigval, eigvec = torch.linalg.eig(p)
+            eigval, eigvec = eigval.to(torch.float), eigvec.to(torch.float)  # im is 0 anyway
             eigvals.append(eigval)
             eigvecs.append(eigvec)
+
+        warnings.resetwarnings()  # now, warnings are useful again
 
         eigval_diff = (
             (torch.max(torch.tensor(eigvals)) - torch.min(torch.tensor(eigvals)))
