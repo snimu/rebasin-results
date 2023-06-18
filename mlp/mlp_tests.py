@@ -833,7 +833,8 @@ def vec_angle(vec1: torch.nn.Parameter, vec2: torch.nn.Parameter) -> float:
     return torch.acos(torch.dot(vec1, vec2) / (vec1.norm() * vec2.norm())).item() * 180 / torch.pi
 
 
-def get_weight_infos(models: list[MLP]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def get_weight_infos(models: list[MLP]) -> tuple[torch.Tensor, ...]:
+    abs_mean_vals = []
     abs_mean_diffs = []
     eigval_diffs = []
     eigvec_angles = []
@@ -842,11 +843,11 @@ def get_weight_infos(models: list[MLP]) -> tuple[torch.Tensor, torch.Tensor, tor
             continue
 
         abs_means = torch.tensor([p.abs().mean() for _, p in info])
+        abs_mean_vals.append(torch.mean(abs_means))
         abs_mean_diff = (
                 (torch.max(abs_means) - torch.min(abs_means))
                 / torch.mean(abs_means)  # always positive due to squaring
         )
-
         abs_mean_diffs.append(abs_mean_diff)
 
         # Eigval & eigvec only works for square matrices
@@ -879,6 +880,7 @@ def get_weight_infos(models: list[MLP]) -> tuple[torch.Tensor, torch.Tensor, tor
         eigvec_angles.append(eigvec_angle)
 
     return (
+        torch.mean(torch.tensor(abs_mean_vals)),
         torch.mean(torch.tensor(abs_mean_diffs)),
         torch.mean(torch.tensor(eigval_diffs)),
         torch.mean(torch.tensor(eigvec_angles))
@@ -895,6 +897,7 @@ def test_weight_statistics(
         "weight_decay": [],
         "hidden_features": [],
         "num_models": [],
+        "abs_mean_val": [],
         "abs_mean_diff": [],
         "eigval_diff": [],
         "eigvec_angle": [],
@@ -935,8 +938,9 @@ def test_weight_statistics(
         else:
             continue
 
-        abs_mean_diff, eigval_diff, eigvec_angle = get_weight_infos(models)
+        abs_mean_val, abs_mean_diff, eigval_diff, eigvec_angle = get_weight_infos(models)
 
+        results[f"abs_mean_val"].append(abs_mean_val)
         results[f"abs_mean_diff"].append(abs_mean_diff)
         results[f"eigval_diff"].append(eigval_diff)
         results[f"eigvec_angle"].append(eigvec_angle)
