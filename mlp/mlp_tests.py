@@ -570,16 +570,32 @@ def compare_output_statistics(
         "acc_ratio": []
     }
 
+    last_settings = {"wd": -1, "hf": -1, "nm": -1}
+    models = []
     loop = tqdm(
         itertools.product(weight_decays, feature_nums, model_nums),
         total=len(weight_decays) * len(feature_nums) * len(model_nums)
     )
     for wd, hf, nm in loop:
         loop.set_description(f"{wd=}, {hf=}, {nm=}")
-        models = list(
-            train_mnist(hidden_features=hf, weight_decay=wd).to(device)
-            for _ in range(nm)
-        )
+        if wd != last_settings["wd"] or hf != last_settings["hf"]:
+            last_settings["wd"] = wd
+            last_settings["hf"] = hf
+            models = list(
+                train_mnist(hidden_features=hf, weight_decay=wd).to(device)
+                for _ in range(nm)
+            )
+        elif nm > last_settings["nm"]:
+            models.extend(
+                train_mnist(hidden_features=hf, weight_decay=wd).to(device)
+                for _ in range(last_settings["nm"], nm)
+            )
+            last_settings["nm"] = nm
+        elif nm < last_settings["nm"]:
+            models = models[:nm]
+            last_settings["nm"] = nm
+        else:
+            continue
 
         maxs, stds = [], []
         losses, accs = [], []
@@ -828,7 +844,7 @@ def test_squared_weight_mean_differences(
         total=len(weight_decays) * len(hidden_feature_sizes) * len(model_nums)
     )
 
-    last_settings = {"wd": None, "hf": None, "num_models": None}
+    last_settings = {"wd": -1, "hf": -1, "num_models": -1}
     models = []
     for wd, hf, num_models in loop:
         loop.set_description(f"{wd=}, {hf=}")
@@ -877,7 +893,7 @@ def test_squared_weight_mean_differences(
 
         mean_perc_diff = torch.mean(torch.tensor(perc_diffs)).item()
         results[f"mean_perc_diff"].append(mean_perc_diff)
-        loop.write(f"{wd=}, {hf=}, {mean_perc_diff=}")
+        loop.write(f"{wd=:.3f}, {hf=:.3f}, {mean_perc_diff=:.3f}")
 
     df = pd.DataFrame(results)
     df.to_csv(
