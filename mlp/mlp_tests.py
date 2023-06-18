@@ -934,7 +934,7 @@ def test_weight_statistics(
 
     df = pd.DataFrame(results)
     df.to_csv(
-        f"test_squared_weight_mean_differences"
+        f"weight_statistics"
         f"_hf{hidden_feature_sizes[0]}-{hidden_feature_sizes[-1]}"
         f"_wd{weight_decays[0]}-{weight_decays[-1]}.csv",
         index=False
