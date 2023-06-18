@@ -936,7 +936,8 @@ def test_weight_statistics(
     df.to_csv(
         f"weight_statistics"
         f"_hf{hidden_feature_sizes[0]}-{hidden_feature_sizes[-1]}"
-        f"_wd{weight_decays[0]}-{weight_decays[-1]}.csv",
+        f"_wd{weight_decays[0]}-{weight_decays[-1]}"
+        f"_nm{model_nums[0]}-{model_nums[-1]}.csv",
         index=False
     )
 
