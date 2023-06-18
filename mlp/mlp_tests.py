@@ -826,7 +826,7 @@ def test_merge_many_nfold(
     )
 
 
-def test_squared_weight_mean_differences(
+def test_abs_weight_mean_differences(
         hidden_feature_sizes: Sequence[int],
         weight_decays: Sequence[float],
         model_nums: Sequence[int],
@@ -878,10 +878,10 @@ def test_squared_weight_mean_differences(
             if "weight" not in info[0][0]:  # Weight not in name -> skip
                 continue
 
-            squared_means = torch.tensor([p.abs().mean() for _, p in info])
+            abs_means = torch.tensor([p.abs().mean() for _, p in info])
             perc_diff = (
-                    (torch.max(squared_means) - torch.min(squared_means))
-                    / torch.mean(squared_means)  # always positive due to squaring
+                    (torch.max(abs_means) - torch.min(abs_means))
+                    / torch.mean(abs_means)  # always positive due to squaring
             )
 
             perc_diffs.append(perc_diff)
@@ -918,7 +918,7 @@ def main() -> None:
     parser.add_argument('--full_wd_hf_sweep', action='store_true', default=False)
     parser.add_argument('--compare_output_statistics', action='store_true', default=False)
     parser.add_argument('--forward_pass_nums', type=int, default=None, nargs='+')
-    parser.add_argument('--test_squared_weight_mean_differences', action='store_true', default=False)
+    parser.add_argument('--test_abs_weight_mean_differences', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -965,8 +965,8 @@ def main() -> None:
                     test_merge_many_nfold(hf, wd, nm, args.forward_pass_nums)
         return
 
-    if args.test_squared_weight_mean_differences:
-        test_squared_weight_mean_differences(
+    if args.test_abs_weight_mean_differences:
+        test_abs_weight_mean_differences(
             args.hidden_features,
             args.weight_decay,
             args.num_models,
