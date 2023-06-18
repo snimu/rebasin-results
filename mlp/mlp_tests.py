@@ -581,6 +581,7 @@ def compare_output_statistics(
         if wd != last_settings["wd"] or hf != last_settings["hf"]:
             last_settings["wd"] = wd
             last_settings["hf"] = hf
+            del models  # force freeing-up of memory
             models = list(
                 train_mnist(hidden_features=hf, weight_decay=wd).to(device)
                 for _ in range(nm)
@@ -857,6 +858,7 @@ def test_abs_weight_mean_differences(
         if last_settings["wd"] != wd or last_settings["hf"] != hf:
             last_settings["wd"] = wd
             last_settings["hf"] = hf
+            del models  # force the freeing-up of memory
             models = list(
                 train_mnist(hidden_features=hf, weight_decay=wd)
                 for _ in range(num_models)
