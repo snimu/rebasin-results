@@ -827,7 +827,55 @@ def test_merge_many_nfold(
     )
 
 
-def test_abs_weight_mean_differences(
+def vec_angle(vec1: torch.nn.Parameter, vec2: torch.nn.Parameter) -> float:
+    """Return the angle between two vectors in degrees."""
+    return torch.acos(torch.dot(vec1, vec2) / (vec1.norm() * vec2.norm())).item() * 180 / torch.pi
+
+
+def get_weight_infos(models: list[MLP]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    abs_mean_diffs = []
+    eigval_diffs = []
+    eigvec_angles = []
+    for info in zip(*[model.named_parameters() for model in models]):
+        if "weight" not in info[0][0] or info[0][1].ndim != 2:
+            continue
+
+        abs_means = torch.tensor([p.abs().mean() for _, p in info])
+        abs_mean_diff = (
+                (torch.max(abs_means) - torch.min(abs_means))
+                / torch.mean(abs_means)  # always positive due to squaring
+        )
+
+        abs_mean_diffs.append(abs_mean_diff)
+
+        # Get the eigendecomposition of the weight matrix
+        eigvals, eigvecs = [], []
+        for _, p in info:
+            eigval, eigvec = torch.eig(p, eigenvectors=True)
+            eigvals.append(eigval)
+            eigvecs.append(eigvec)
+
+        eigval_diff = (
+            (torch.max(torch.tensor(eigvals)) - torch.min(torch.tensor(eigvals)))
+            / torch.mean(torch.tensor(eigvals))
+        )
+        eigval_diffs.append(eigval_diff)
+
+        eigvec_angle = torch.mean(
+            torch.tensor(
+                [vec_angle(v1, v2) for v1, v2 in itertools.combinations(eigvecs, 2)]
+            )
+        )
+        eigvec_angles.append(eigvec_angle)
+
+    return (
+        torch.mean(torch.tensor(abs_mean_diffs)),
+        torch.mean(torch.tensor(eigval_diffs)),
+        torch.mean(torch.tensor(eigvec_angles))
+    )
+
+
+def test_weight_statistics(
         hidden_feature_sizes: Sequence[int],
         weight_decays: Sequence[float],
         model_nums: Sequence[int],
@@ -837,7 +885,9 @@ def test_abs_weight_mean_differences(
         "weight_decay": [],
         "hidden_features": [],
         "num_models": [],
-        "mean_perc_diff": [],
+        "abs_mean_diff": [],
+        "eigval_diff": [],
+        "eigvec_angle": [],
     }
 
     loop = tqdm(
@@ -847,11 +897,11 @@ def test_abs_weight_mean_differences(
 
     last_settings = {"wd": -1, "hf": -1, "num_models": -1}
     models = []
-    for wd, hf, num_models in loop:
+    for wd, hf, nm in loop:
         loop.set_description(f"{wd=}, {hf=}")
         results["weight_decay"].append(wd)
         results["hidden_features"].append(hf)
-        results["num_models"].append(num_models)
+        results["num_models"].append(nm)
 
         # Make it so that I don't have to retrain models if I don't have to
         # (i.e. if the hyperparameters are the same)
@@ -861,41 +911,26 @@ def test_abs_weight_mean_differences(
             del models  # force the freeing-up of memory
             models = list(
                 train_mnist(hidden_features=hf, weight_decay=wd)
-                for _ in range(num_models)
+                for _ in range(nm)
             )
-        elif num_models > last_settings["num_models"]:
+        elif nm > last_settings["num_models"]:
             models.extend(
                 train_mnist(hidden_features=hf, weight_decay=wd)
-                for _ in range(num_models - last_settings["num_models"])
+                for _ in range(nm - last_settings["num_models"])
             )
-            last_settings["num_models"] = num_models
-        elif num_models < last_settings["num_models"]:
-            models = models[:num_models]
-            last_settings["num_models"] = num_models
+            last_settings["num_models"] = nm
+        elif nm < last_settings["num_models"]:
+            models = models[:nm]
+            last_settings["num_models"] = nm
         else:
             continue
 
-        perc_diffs = []
-        for info in zip(*[model.named_parameters() for model in models]):
-            if "weight" not in info[0][0]:  # Weight not in name -> skip
-                continue
+        abs_mean_diff, eigval_diff, eigvec_angle = get_weight_infos(models)
 
-            abs_means = torch.tensor([p.abs().mean() for _, p in info])
-            perc_diff = (
-                    (torch.max(abs_means) - torch.min(abs_means))
-                    / torch.mean(abs_means)  # always positive due to squaring
-            )
-
-            perc_diffs.append(perc_diff)
-
-        for i in range(1, len(perc_diffs) + 1):
-            if f"perc_diff{i}" not in results.keys():
-                results[f"perc_diff{i}"] = []
-            results[f"perc_diff{i}"].append(perc_diffs[i - 1].item())
-
-        mean_perc_diff = torch.mean(torch.tensor(perc_diffs)).item()
-        results[f"mean_perc_diff"].append(mean_perc_diff)
-        loop.write(f"{wd=:.3f}, {hf=:.3f}, {mean_perc_diff=:.3f}")
+        results[f"abs_mean_diff"].append(abs_mean_diff)
+        results[f"eigval_diff"].append(eigval_diff)
+        results[f"eigvec_angle"].append(eigvec_angle)
+        loop.write(f"{wd=:.3f}, {hf=:.3f}, {nm=}, {abs_mean_diff=:.3f}, {eigval_diff=:.3f}, {eigvec_angle=:.3f}")
 
     df = pd.DataFrame(results)
     df.to_csv(
@@ -920,7 +955,7 @@ def main() -> None:
     parser.add_argument('--full_wd_hf_sweep', action='store_true', default=False)
     parser.add_argument('--compare_output_statistics', action='store_true', default=False)
     parser.add_argument('--forward_pass_nums', type=int, default=None, nargs='+')
-    parser.add_argument('--test_abs_weight_mean_differences', action='store_true', default=False)
+    parser.add_argument('--test_weight_statistics', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -967,8 +1002,8 @@ def main() -> None:
                     test_merge_many_nfold(hf, wd, nm, args.forward_pass_nums)
         return
 
-    if args.test_abs_weight_mean_differences:
-        test_abs_weight_mean_differences(
+    if args.test_weight_statistics:
+        test_weight_statistics(
             args.hidden_features,
             args.weight_decay,
             args.num_models,
