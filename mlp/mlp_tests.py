@@ -849,6 +849,10 @@ def get_weight_infos(models: list[MLP]) -> tuple[torch.Tensor, torch.Tensor, tor
 
         abs_mean_diffs.append(abs_mean_diff)
 
+        # Eigval & eigvec only works for square matrices
+        if info[0][1].shape[0] != info[0][1].shape[1]:
+            continue
+
         # Get the eigendecomposition of the weight matrix
         eigvals, eigvecs = [], []
         warnings.filterwarnings("ignore")  # converting to float from complex gives warning but is fine
