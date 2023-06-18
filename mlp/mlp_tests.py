@@ -873,7 +873,7 @@ def get_weight_infos(models: list[MLP]) -> tuple[torch.Tensor, torch.Tensor, tor
 
         eigvec_angle = torch.mean(
             torch.tensor(
-                [vec_angle(v1, v2) for v1, v2 in itertools.combinations(eigvecs, 2)]
+                [vec_angle(v1, v2) for vecs in eigvecs for v1, v2 in itertools.combinations(vecs, 2)]
             )
         )
         eigvec_angles.append(eigvec_angle)
