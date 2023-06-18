@@ -940,11 +940,11 @@ def test_weight_statistics(
 
         abs_mean_val, abs_mean_diff, eigval_diff, eigvec_angle = get_weight_infos(models)
 
-        results[f"abs_mean_val"].append(abs_mean_val)
-        results[f"abs_mean_diff"].append(abs_mean_diff)
-        results[f"eigval_diff"].append(eigval_diff)
-        results[f"eigvec_angle"].append(eigvec_angle)
-        loop.write(f"{wd=:.3f}, {hf=:.3f}, {nm=}, {abs_mean_val=}, {abs_mean_diff=:.3f}, {eigval_diff=:.3f}, {eigvec_angle=:.3f}")
+        results[f"abs_mean_val"].append(abs_mean_val.item())
+        results[f"abs_mean_diff"].append(abs_mean_diff.item())
+        results[f"eigval_diff"].append(eigval_diff.item())
+        results[f"eigvec_angle"].append(eigvec_angle.item())
+        loop.write(f"{wd=:.3f}, {hf=:.3f}, {nm=}, {abs_mean_val=:.3f}, {abs_mean_diff=:.3f}, {eigval_diff=:.3f}, {eigvec_angle=:.3f}")
 
     df = pd.DataFrame(results)
     df.to_csv(
