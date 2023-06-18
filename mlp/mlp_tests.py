@@ -864,7 +864,7 @@ def get_weight_infos(models: list[MLP]) -> tuple[torch.Tensor, torch.Tensor, tor
 
         warnings.resetwarnings()  # now, warnings are useful again
 
-        eigvals = torch.tensor(eigvals).abs().mean()
+        eigvals = [torch.tensor(eigval).abs().mean() for eigval in eigvals]
         eigval_diff = (
             (torch.max(torch.tensor(eigvals)) - torch.min(torch.tensor(eigvals)))
             / torch.mean(torch.tensor(eigvals))
