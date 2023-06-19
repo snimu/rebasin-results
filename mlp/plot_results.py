@@ -8,6 +8,9 @@ import numpy as np
 import pandas as pd
 
 
+plt.rcParams['text.usetex'] = True  # use latex for font rendering
+
+
 def get_weight_decay(name: str) -> float:
     return float(name.split("wd")[1].split("_")[0])
 
@@ -419,40 +422,142 @@ def plot_abs_weight_mean_diff3d() -> None:
 
 def plot_abs_weight_mean_diff_heatmap() -> None:
     # Read the CSV file
-    data = pd.read_csv('results/other/test_squared_weight_mean_differences_hf20-1000_wd0.0-0.2.csv')
+    data = pd.read_csv('results/other/weight_statistics_hf20-500_wd0.0-0.4_nm2-2.csv')
+
+    # Create a Figure
+    fig = plt.figure(figsize=(11, 13))
+    mean_abs_title = (
+        r'$\texttt{mean}_{\mathrm{abs}} '
+        r'= \texttt{mean}_i\left('
+        r'\texttt{mean}_j\left( w_{am,i}^{m_j} \right)'
+        r'\right)$'
+    )
+    mean_delta_title = (
+        r'$\texttt{mean}_{\Delta\%} '
+        r'= 100 \cdot \texttt{mean}_i\left('
+        r'\frac{'
+        r'\texttt{max}\left( w_{am,i}^{m_1}, w_{am,i}^{m_2} \right) '
+        r'- \texttt{min}\left( w_{am,i}^{m_1}, w_{am,i}^{m_2} \right)'
+        r'}{\texttt{mean}\left(w_{am,i}^{m_1}, w_{am,i}^{m_2}\right)}'
+        r'\right)$'
+    )
+    eigval_delta_title = (
+        r'$\texttt{eigval}_{\Delta\%} '
+        r'= 100 \cdot \texttt{mean}_i\left('
+        r'\frac{'
+        r'\texttt{max}\left( \texttt{eva}_i^{m_1}, \texttt{eva}_i^{m_2} \right) '
+        r'- \texttt{min}\left( \texttt{eva}_i^{m_1}, \texttt{eva}_i^{m_2} \right)'
+        r'}{\texttt{mean}\left( \texttt{eva}_i^{m_1}, \texttt{eva}_i^{m_2} \right)}'
+        r'\right)$'
+    )
+    eigvec_angle_title = (
+        r'$\texttt{eigvec}_{\mathrm{angle}} '
+        r'= \texttt{mean}_j\left('
+        r'\texttt{mean}_k\left('
+        r'\texttt{angle}\left(\texttt{eve}^{k,m_j}, \texttt{eve}^{k+1,m_j}\right)'
+        r'\right)'
+        r'\right)$'
+    )
+    fig.suptitle(
+        r'\textbf{Weight Statistics} \\---\\ '
+        r'$w_{am,i}^{model_j} = \texttt{mean}\left(\texttt{abs}\left(w_i^{m_j}\right)\right)$, '
+        r'$w$: weight; $m$: model; $i$: weight-index; $j$: model-index'
+        r'\\---\\'
+        r'$\texttt{eva}_i^k$: $k^{th}$ eigenvalue of $w_i$; $\texttt{eve}_i^k$: $k^{th}$ eigenvector of $w_i$'
+        r' \\---\\ ' + mean_abs_title +
+        r' \\---\\ ' + mean_delta_title +
+        r' \\---\\ ' + eigval_delta_title +
+        r' \\---\\ ' + eigvec_angle_title
+    )
+    fig.subplots_adjust(top=0.75, bottom=0.05, left=0.05, right=0.95, hspace=0.2, wspace=0.2)
 
     # Extract unique values of weight_decay and hidden_features
     weight_decays = data['weight_decay'].unique()
-    hidden_features = data['hidden_features'].unique()[::2]
+    hidden_features = data['hidden_features'].unique()
 
     # Create a grid of mean_perc_diff values
     grid = np.zeros((len(hidden_features), len(weight_decays)))
 
+    # abs_mean_val
     for i, weight_decay in enumerate(weight_decays):
         for j, hidden_feature in enumerate(hidden_features):
-            mean_perc_diff = data[(data['weight_decay'] == weight_decay) & (data['hidden_features'] == hidden_feature)][
-                'mean_perc_diff']
-            grid[j, i] = mean_perc_diff.values[0]
+            abs_mean_val = data[(data['weight_decay'] == weight_decay) & (data['hidden_features'] == hidden_feature)][
+                'abs_mean_val']
+            grid[j, i] = abs_mean_val.values[0]
 
-    # Create a Figure and an Axes
-    fig = plt.figure(figsize=(8, 7))
-    ax = fig.add_subplot(111)  # 111 means 1 row, 1 column, first subplot
+    ax1 = fig.add_subplot(221)
+    cax1 = ax1.imshow(grid, cmap='viridis', origin='lower')
+    ax1.set_xticks(np.arange(len(weight_decays)/2)*2)
+    ax1.set_xticklabels(weight_decays[::2])
+    ax1.set_yticks(np.arange(len(hidden_features)/2)*2)
+    ax1.set_yticklabels(hidden_features[::2])
+    ax1.set_xlabel('Weight Decay')
+    ax1.set_ylabel('Hidden Features')
+    ax1.set_title(r'$\texttt{mean}_{\mathrm{abs}}$')
 
-    # Plot using the Axes
-    cax = ax.imshow(grid, cmap='viridis', origin='lower')
-    ax.set_xticks(np.arange(len(weight_decays)/2)*2)
-    ax.set_xticklabels(weight_decays[::2])
-    ax.set_yticks(np.arange(len(hidden_features)))
-    ax.set_yticklabels(hidden_features)
-    ax.set_xlabel('Weight Decay')
-    ax.set_ylabel('Hidden Features')
-    ax.set_title('Mean Percentage Difference')
+    fig.colorbar(cax1, label=r'$\texttt{mean}_{\mathrm{abs}}$')
 
-    # Add colorbar using the Figure, not the Axes
-    fig.colorbar(cax, label='Mean Perc Diff')
+    # abs_mean_diff
+    for i, weight_decay in enumerate(weight_decays):
+        for j, hidden_feature in enumerate(hidden_features):
+            abs_mean_diff = data[(data['weight_decay'] == weight_decay) & (data['hidden_features'] == hidden_feature)][
+                'abs_mean_diff']
+            grid[j, i] = abs_mean_diff.values[0] * 100
 
-    plt.show()
+    ax2 = fig.add_subplot(222)
+    cax2 = ax2.imshow(grid, cmap='viridis', origin='lower')
+    ax2.set_xticks(np.arange(len(weight_decays)/2)*2)
+    ax2.set_xticklabels(weight_decays[::2])
+    ax2.set_yticks(np.arange(len(hidden_features)/2)*2)
+    ax2.set_yticklabels(hidden_features[::2])
+    ax2.set_xlabel('Weight Decay')
+    ax2.set_ylabel('Hidden Features')
+    ax2.set_title(r'$\texttt{mean}_{\Delta\%}$')
 
+    fig.colorbar(cax2, label=r'$\texttt{mean}_{\Delta\%}$ $[\%]$')
+
+    # eigvals
+    for i, weight_decay in enumerate(weight_decays):
+        for j, hidden_feature in enumerate(hidden_features):
+            eigvals = data[(data['weight_decay'] == weight_decay) & (data['hidden_features'] == hidden_feature)][
+                'eigval_diff']
+            grid[j, i] = eigvals.values[0] * 100
+
+    ax3 = fig.add_subplot(223)
+    cax3 = ax3.imshow(grid, cmap='viridis', origin='lower')
+    ax3.set_xticks(np.arange(len(weight_decays)/2)*2)
+    ax3.set_xticklabels(weight_decays[::2])
+    ax3.set_yticks(np.arange(len(hidden_features)/2)*2)
+    ax3.set_yticklabels(hidden_features[::2])
+    ax3.set_xlabel('Weight Decay')
+    ax3.set_ylabel('Hidden Features')
+    ax3.set_title(r'$\texttt{eigval}_{\Delta\%}$')
+
+    fig.colorbar(cax3, label=r'$\texttt{eigval}_{\Delta\%}$ $[\%]$')
+
+    # eigvec_angle
+    for i, weight_decay in enumerate(weight_decays):
+        for j, hidden_feature in enumerate(hidden_features):
+            eigvec_angle = data[(data['weight_decay'] == weight_decay) & (data['hidden_features'] == hidden_feature)][
+                'eigvec_angle']
+            grid[j, i] = eigvec_angle.values[0]
+
+    ax4 = fig.add_subplot(224)
+    cax4 = ax4.imshow(grid, cmap='viridis', origin='lower')
+    ax4.set_xticks(np.arange(len(weight_decays)/2)*2)
+    ax4.set_xticklabels(weight_decays[::2])
+    ax4.set_yticks(np.arange(len(hidden_features)/2)*2)
+    ax4.set_yticklabels(hidden_features[::2])
+    ax4.set_xlabel('Weight Decay')
+    ax4.set_ylabel('Hidden Features')
+    ax4.set_title(r'$\texttt{eigvec}_{\mathrm{angle}}$')
+
+    fig.colorbar(cax4, label=r'$\texttt{eigvec}_{\mathrm{angle}}$')
+
+    plt.savefig(
+        "results/other/weight_statistics_hf20-500_wd0.0-0.4_nm2-2.png",
+        dpi=300,
+    )
 
 
 def plot_mm_nm() -> None:
