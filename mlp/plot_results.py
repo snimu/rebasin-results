@@ -445,25 +445,25 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
         r'$\texttt{eigval}_{\Delta\%} '
         r'= 100 \cdot \texttt{mean}_i\left('
         r'\frac{'
-        r'\texttt{max}\left( \texttt{eva}_i^{m_1}, \texttt{eva}_i^{m_2} \right) '
-        r'- \texttt{min}\left( \texttt{eva}_i^{m_1}, \texttt{eva}_i^{m_2} \right)'
-        r'}{\texttt{mean}\left( \texttt{eva}_i^{m_1}, \texttt{eva}_i^{m_2} \right)}'
+        r'\texttt{max}\left( \texttt{eigval}_i^{m_1}, \texttt{eigval}_i^{m_2} \right) '
+        r'- \texttt{min}\left( \texttt{eigval}_i^{m_1}, \texttt{eigval}_i^{m_2} \right)'
+        r'}{\texttt{mean}\left( \texttt{eigval}_i^{m_1}, \texttt{eigval}_i^{m_2} \right)}'
         r'\right)$'
     )
     eigvec_angle_title = (
         r'$\texttt{eigvec}_{\mathrm{angle}} '
         r'= \texttt{mean}_j\left('
         r'\texttt{mean}_k\left('
-        r'\texttt{angle}\left(\texttt{eve}^{k,m_j}, \texttt{eve}^{k+1,m_j}\right)'
+        r'\texttt{angle}\left(\texttt{eigvec}^{k,m_j}, \texttt{eigvec}^{k+1,m_j}\right)'
         r'\right)'
         r'\right)$'
     )
     fig.suptitle(
-        r'\textbf{Weight Statistics} \\---\\ '
+        r'\textbf{Weight Statistics (for 2 models)} \\---\\ '
         r'$w_{am,i}^{model_j} = \texttt{mean}\left(\texttt{abs}\left(w_i^{m_j}\right)\right)$, '
         r'$w$: weight; $m$: model; $i$: weight-index; $j$: model-index'
         r'\\---\\'
-        r'$\texttt{eva}_i^k$: $k^{th}$ eigenvalue of $w_i$; $\texttt{eve}_i^k$: $k^{th}$ eigenvector of $w_i$'
+        r'$\texttt{eigval}_i^k$: $k^{th}$ eigenvalue of $w_i$; $\texttt{eigvec}_i^k$: $k^{th}$ eigenvector of $w_i$'
         r' \\---\\ ' + mean_abs_title +
         r' \\---\\ ' + mean_delta_title +
         r' \\---\\ ' + eigval_delta_title +
