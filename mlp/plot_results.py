@@ -424,6 +424,9 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
     # Read the CSV file
     data = pd.read_csv('results/other/weight_statistics_hf20-500_wd0.0-0.4_nm2-2.csv')
 
+    # Set a colormap
+    cmap = "viridis"
+
     # Create a Figure
     fig = plt.figure(figsize=(11, 13))
     mean_abs_title = (
@@ -485,19 +488,19 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
         for j, hidden_feature in enumerate(hidden_features):
             abs_mean_val = data[(data['weight_decay'] == weight_decay) & (data['hidden_features'] == hidden_feature)][
                 'abs_mean_val']
-            grid[j, i] = abs_mean_val.values[0]
+            grid[j, i] = np.log(abs_mean_val.values[0])
 
     ax1 = fig.add_subplot(221)
-    cax1 = ax1.imshow(grid, cmap='viridis', origin='lower')
+    cax1 = ax1.imshow(grid, cmap=cmap, origin='lower')
     ax1.set_xticks(np.arange(len(weight_decays)/2)*2)
     ax1.set_xticklabels(weight_decays[::2])
     ax1.set_yticks(np.arange(len(hidden_features)/2)*2)
     ax1.set_yticklabels(hidden_features[::2])
     ax1.set_xlabel('Weight Decay')
     ax1.set_ylabel('Hidden Features')
-    ax1.set_title(r'$\texttt{mean}_{\mathrm{abs}}$')
+    ax1.set_title(r'$\texttt{log} \left( \texttt{mean}_{\mathrm{abs}} \right)$')
 
-    fig.colorbar(cax1, label=r'$\texttt{mean}_{\mathrm{abs}}$')
+    fig.colorbar(cax1, label=r'$\texttt{log} \left( \texttt{mean}_{\mathrm{abs}} \right)$')
 
     # abs_mean_diff
     for i, weight_decay in enumerate(weight_decays):
@@ -507,7 +510,7 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
             grid[j, i] = abs_mean_diff.values[0] * 100
 
     ax2 = fig.add_subplot(222)
-    cax2 = ax2.imshow(grid, cmap='viridis', origin='lower')
+    cax2 = ax2.imshow(grid, cmap=cmap, origin='lower')
     ax2.set_xticks(np.arange(len(weight_decays)/2)*2)
     ax2.set_xticklabels(weight_decays[::2])
     ax2.set_yticks(np.arange(len(hidden_features)/2)*2)
@@ -526,7 +529,7 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
             grid[j, i] = eigvals.values[0] * 100
 
     ax3 = fig.add_subplot(223)
-    cax3 = ax3.imshow(grid, cmap='viridis', origin='lower')
+    cax3 = ax3.imshow(grid, cmap=cmap, origin='lower')
     ax3.set_xticks(np.arange(len(weight_decays)/2)*2)
     ax3.set_xticklabels(weight_decays[::2])
     ax3.set_yticks(np.arange(len(hidden_features)/2)*2)
@@ -545,7 +548,7 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
             grid[j, i] = eigvec_angle.values[0]
 
     ax4 = fig.add_subplot(224)
-    cax4 = ax4.imshow(grid, cmap='viridis', origin='lower')
+    cax4 = ax4.imshow(grid, cmap=cmap, origin='lower')
     ax4.set_xticks(np.arange(len(weight_decays)/2)*2)
     ax4.set_xticklabels(weight_decays[::2])
     ax4.set_yticks(np.arange(len(hidden_features)/2)*2)
@@ -554,7 +557,7 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
     ax4.set_ylabel('Hidden Features')
     ax4.set_title(r'$\texttt{eigvec}_{\mathrm{angle}}$')
 
-    fig.colorbar(cax4, label=r'$\texttt{eigvec}_{\mathrm{angle}}$')
+    fig.colorbar(cax4, label=r'$\texttt{eigvec}_{\mathrm{angle}}$ $[\deg]$')
 
     plt.savefig(
         "results/other/weight_statistics_hf20-500_wd0.0-0.4_nm2-2.png",
