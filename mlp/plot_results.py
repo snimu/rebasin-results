@@ -474,6 +474,8 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
     # Extract unique values of weight_decay and hidden_features
     weight_decays = data['weight_decay'].unique()
     hidden_features = data['hidden_features'].unique()
+    weight_decays.sort()
+    hidden_features.sort()
 
     # Create a grid of mean_perc_diff values
     grid = np.zeros((len(hidden_features), len(weight_decays)))

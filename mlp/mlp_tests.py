@@ -337,6 +337,7 @@ def test_merge_many(
         itertools.product(hidden_features, weight_decays, num_models),
         total=len(hidden_features) * len(weight_decays) * len(num_models),
         disable=not verbose,
+        smoothing=0,  # Visualize average time taken per iteration, not weighted towards current iteration
     )
     for feature_num, weight_decay, model_num in loop:
         if verbose:
@@ -512,7 +513,8 @@ def full_wd_hf_sweep_merge_many() -> None:
 
     loop = tqdm(
         itertools.product(weight_decays, hidden_features),
-        total=len(weight_decays) * len(hidden_features)
+        total=len(weight_decays) * len(hidden_features),
+        smoothing=0,  # Visualize average time taken per iteration, not weighted towards current iteration
     )
     for wd, hf in loop:
         loop.set_description(f"{wd=}, {hf=}")
@@ -575,7 +577,8 @@ def compare_output_statistics(
     models = []
     loop = tqdm(
         itertools.product(weight_decays, feature_nums, model_nums),
-        total=len(weight_decays) * len(feature_nums) * len(model_nums)
+        total=len(weight_decays) * len(feature_nums) * len(model_nums),
+        smoothing=0,  # Visualize average time taken per iteration, not weighted towards current iteration
     )
     for wd, hf, nm in loop:
         loop.set_description(f"{wd=}, {hf=}, {nm=}")
@@ -905,7 +908,8 @@ def test_weight_statistics(
 
     loop = tqdm(
         itertools.product(weight_decays, hidden_feature_sizes, model_nums),
-        total=len(weight_decays) * len(hidden_feature_sizes) * len(model_nums)
+        total=len(weight_decays) * len(hidden_feature_sizes) * len(model_nums),
+        smoothing=0,  # Take average time estimate
     )
 
     last_settings = {"wd": -1, "hf": -1, "num_models": -1}
