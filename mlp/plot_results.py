@@ -422,7 +422,7 @@ def plot_abs_weight_mean_diff3d() -> None:
 
 def plot_abs_weight_mean_diff_heatmap() -> None:
     # Read the CSV file
-    data = pd.read_csv('results/other/weight_statistics_hf20-500_wd0.0-0.4_nm2-2.csv')
+    data = pd.read_csv('results/other/weight_statistics_hf20-1000_wd0.0-1.0_nm2-2.csv')
 
     # Set a colormap
     cmap = "viridis"
@@ -492,8 +492,8 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
 
     ax1 = fig.add_subplot(221)
     cax1 = ax1.imshow(grid, cmap=cmap, origin='lower')
-    ax1.set_xticks(np.arange(len(weight_decays)/2)*2)
-    ax1.set_xticklabels(weight_decays[::2])
+    ax1.set_xticks(np.arange(len(weight_decays)/4)*4)
+    ax1.set_xticklabels(weight_decays[::4])
     ax1.set_yticks(np.arange(len(hidden_features)/2)*2)
     ax1.set_yticklabels(hidden_features[::2])
     ax1.set_xlabel('Weight Decay')
@@ -511,8 +511,8 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
 
     ax2 = fig.add_subplot(222)
     cax2 = ax2.imshow(grid, cmap=cmap, origin='lower')
-    ax2.set_xticks(np.arange(len(weight_decays)/2)*2)
-    ax2.set_xticklabels(weight_decays[::2])
+    ax2.set_xticks(np.arange(len(weight_decays)/4)*4)
+    ax2.set_xticklabels(weight_decays[::4])
     ax2.set_yticks(np.arange(len(hidden_features)/2)*2)
     ax2.set_yticklabels(hidden_features[::2])
     ax2.set_xlabel('Weight Decay')
@@ -530,8 +530,8 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
 
     ax3 = fig.add_subplot(223)
     cax3 = ax3.imshow(grid, cmap=cmap, origin='lower')
-    ax3.set_xticks(np.arange(len(weight_decays)/2)*2)
-    ax3.set_xticklabels(weight_decays[::2])
+    ax3.set_xticks(np.arange(len(weight_decays)/4)*4)
+    ax3.set_xticklabels(weight_decays[::4])
     ax3.set_yticks(np.arange(len(hidden_features)/2)*2)
     ax3.set_yticklabels(hidden_features[::2])
     ax3.set_xlabel('Weight Decay')
@@ -549,8 +549,8 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
 
     ax4 = fig.add_subplot(224)
     cax4 = ax4.imshow(grid, cmap=cmap, origin='lower')
-    ax4.set_xticks(np.arange(len(weight_decays)/2)*2)
-    ax4.set_xticklabels(weight_decays[::2])
+    ax4.set_xticks(np.arange(len(weight_decays)/4)*4)
+    ax4.set_xticklabels(weight_decays[::4])
     ax4.set_yticks(np.arange(len(hidden_features)/2)*2)
     ax4.set_yticklabels(hidden_features[::2])
     ax4.set_xlabel('Weight Decay')
@@ -560,7 +560,7 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
     fig.colorbar(cax4, label=r'$\texttt{eigvec}_{\mathrm{angle}}$ $[\deg]$')
 
     plt.savefig(
-        "results/other/weight_statistics_hf20-500_wd0.0-0.4_nm2-2.png",
+        "results/other/weight_statistics_hf20-1000_wd0.0-1.0_nm2-2.png",
         dpi=300,
     )
 
