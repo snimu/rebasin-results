@@ -302,6 +302,98 @@ def plot_compare_output_statistics() -> None:
     plt.savefig("results/merge-many/compare_output_statistics_wd0.0-0.2_hf400.png", dpi=300)
 
 
+def plot_output_statistics_heatmap() -> None:
+    results = pd.read_csv("results/merge-many/compare_output_statistics_wd0.0-0.2_hf50-1000_nm2-6.csv")
+
+    results["max_ratio"] = results["max_merged"] / results["max_avg"]
+    results["std_ratio"] = results["std_merged"] / results["std_avg"]
+    num_models = results["num_models"].unique()
+
+    fig, axs = plt.subplots(nrows=len(num_models), ncols=4, figsize=(13, 19))
+    fig.subplots_adjust(top=2.2, hspace=3)
+
+    for y, nm in enumerate(num_models):
+        draw_heatmap(
+            results, fig, axs, 0, y, nm, "viridis",
+            f"Std Dev Ratio at {nm} models",
+            r'$\frac{\mathtt{std}_{\mathrm{merged}}}{\mathtt{std}_{\mathrm{avg}}}$',
+            "std_ratio",
+            vmin=0.48,
+            vmax=1.01,
+        )
+        draw_heatmap(
+            results, fig, axs, 1, y, nm, "viridis",
+            f"Max Ratio at {nm} models",
+            r'$\frac{\mathtt{max}_{\mathrm{merged}}}{\mathtt{max}_{\mathrm{avg}}}$',
+            "max_ratio",
+            vmin=0.83,
+            vmax=1.01,
+        )
+        draw_heatmap(
+            results, fig, axs, 2, y, nm, "viridis",
+            f"Loss Ratio at {nm} models",
+            r'$\frac{\mathtt{loss}_{\mathrm{merged}}}{\mathtt{loss}_{\mathrm{avg}}}$',
+            "loss_ratio",
+            vmin=0.99,
+            vmax=1.38,
+        )
+        draw_heatmap(
+            results, fig, axs, 3, y, nm, "viridis",
+            f"Acc Ratio at {nm} models",
+            r'$\frac{\mathtt{acc}_{\mathrm{merged}}}{\mathtt{acc}_{\mathrm{avg}}}$',
+            "acc_ratio",
+            vmin=0.58,
+            vmax=1.01,
+        )
+
+    fig.tight_layout()
+    plt.savefig(
+        "results/merge-many/compare_output_statistics_wd0.0-0.2_hf50-1000_nm2-6_heatmap.png",
+        dpi=300
+    )
+
+
+def draw_heatmap(
+        data: pd.DataFrame,
+        fig,
+        axs,
+        x: int,
+        y: int,
+        num_models: int,
+        cmap: str,
+        title: str,
+        label: str,
+        feature: str,
+        vmin: float,
+        vmax: float,
+) -> None:
+    working_data = data[data["num_models"] == num_models]
+    weight_decays = working_data["weight_decay"].unique()
+    hidden_features = working_data["hidden_features"].unique()
+    grid = np.zeros((len(hidden_features), len(weight_decays)))
+
+    for i, wd in enumerate(weight_decays):
+        for j, hf in enumerate(hidden_features):
+            thisdata = (
+                working_data[
+                    (working_data["weight_decay"] == wd) & (working_data["hidden_features"] == hf)
+                ]
+            )
+            grid[j, i] = thisdata[feature].values
+
+    cax = axs[y, x].imshow(grid, cmap=cmap, origin='lower')
+    axs[y, x].set_xticks(np.arange(len(weight_decays)/2)*2)
+    axs[y, x].set_xticklabels(weight_decays[::2])
+    axs[y, x].set_yticks(np.arange(len(hidden_features)))
+    axs[y, x].set_yticklabels(hidden_features)
+    axs[y, x].set_xlabel('Weight Decay')
+    axs[y, x].set_ylabel('Hidden Features')
+    axs[y, x].set_title(title)
+
+    cax.set_clim(vmin=vmin, vmax=vmax)
+    fig.colorbar(cax, label=label)
+
+
 def plot_count_permutations() -> None:
     results_02 = pd.read_csv("results/merge-many/count_permutations_wd0.0-0.2_hf400.csv")
     results_002 = pd.read_csv("results/merge-many/count_permutations_wd0.0-0.02_hf400.csv")
@@ -611,4 +703,4 @@ def plot_mm_nm() -> None:
 
 
 if __name__ == "__main__":
-    plot_abs_weight_mean_diff_heatmap()
+    plot_output_statistics_heatmap()
