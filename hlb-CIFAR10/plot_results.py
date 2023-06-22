@@ -525,6 +525,39 @@ def normalize_data(data: dict[str, list[float]], norm_key: str = 'merged_model')
     return new_data
 
 
+def plot_loss_predictiveness() -> None:
+    df = pd.read_csv("loss_predictiveness/loss_predictiveness_before_bn_recalc.csv")
+
+    fig, axs = plt.subplots(1, 2, figsize=(8, 5))
+    fig.subplots_adjust(top=0.85, bottom=0.2, wspace=0.25, left=0.05, right=0.95)
+    fig.suptitle("Metrics before and after recalculating BatchNorm-statistics")
+
+    axs[0].set_title("Loss")
+    axs[1].set_title("Accuracy")
+
+    axs[0].set_xlabel("Interpolation %")
+    axs[1].set_xlabel("Interpolation %")
+
+    axs[0].set_ylabel("Loss")
+    axs[1].set_ylabel("Accuracy")
+
+    axs[0].grid()
+    axs[1].grid()
+
+    axs[0].plot(df["step"], df["loss_before"], label="loss_before")
+    axs[0].plot(df["step"], df["loss_recalc"], label="loss_recalc")
+
+    axs[1].plot(df["step"], df["acc_before"], label="acc_before")
+    axs[1].plot(df["step"], df["acc_recalc"], label="acc_recalc")
+
+    fig.legend(
+        loc="lower center",
+        ncol=4,
+        # bbox_to_anchor=(0.5, 0.05),
+    )
+
+    plt.savefig("loss_predictiveness/loss_predictiveness_before_bn_recalc.png", dpi=300)
+
+
 if __name__ == "__main__":
-    sizes = ["3x3", "6x6", "9x9", "12x12", "15x15", "18x18"]
-    plot_merged_results(sizes, True)
+    plot_loss_predictiveness()
