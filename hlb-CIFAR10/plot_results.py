@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 import json
 import os
 
@@ -525,12 +526,12 @@ def normalize_data(data: dict[str, list[float]], norm_key: str = 'merged_model')
     return new_data
 
 
-def plot_loss_predictiveness() -> None:
-    df = pd.read_csv("loss_predictiveness/loss_predictiveness_before_bn_recalc.csv")
+def plot_loss_predictiveness(wd: float, ks: int) -> None:
+    df = pd.read_csv(f"loss_predictiveness/loss_predictiveness_before_bn_recalc_wd{wd}_ks{ks}.csv")
 
     fig, axs = plt.subplots(1, 2, figsize=(8, 5))
-    fig.subplots_adjust(top=0.85, bottom=0.2, wspace=0.25, left=0.05, right=0.95)
-    fig.suptitle("Metrics before and after recalculating BatchNorm-statistics")
+    fig.subplots_adjust(top=0.85, bottom=0.2, wspace=0.25, left=0.1, right=0.98)
+    fig.suptitle(f"weight_decay: {wd}, kernel_size: {ks}")
 
     axs[0].set_title("Loss")
     axs[1].set_title("Accuracy")
@@ -544,20 +545,27 @@ def plot_loss_predictiveness() -> None:
     axs[0].grid()
     axs[1].grid()
 
-    axs[0].plot(df["step"], df["loss_before"], label="loss_before")
-    axs[0].plot(df["step"], df["loss_recalc"], label="loss_recalc")
+    axs[0].plot(df["step"], df["loss_bn_a"], label="BN model A")
+    axs[0].plot(df["step"], df["loss_bn_b"], label="BN model B", linestyle="-.")
+    axs[0].plot(df["step"], df["loss_reset"], label="BN reset")
+    axs[0].plot(df["step"], df["loss_recalc"], label="BN recalculated")
 
-    axs[1].plot(df["step"], df["acc_before"], label="acc_before")
-    axs[1].plot(df["step"], df["acc_recalc"], label="acc_recalc")
-
+    axs[1].plot(df["step"], df["acc_bn_a"])
+    axs[1].plot(df["step"], df["acc_bn_b"], linestyle="-.")
+    axs[1].plot(df["step"], df["acc_reset"])
+    axs[1].plot(df["step"], df["acc_recalc"])
     fig.legend(
         loc="lower center",
         ncol=4,
         # bbox_to_anchor=(0.5, 0.05),
     )
 
-    plt.savefig("loss_predictiveness/loss_predictiveness_before_bn_recalc.png", dpi=300)
+    # plt.show()
+    plt.savefig(f"loss_predictiveness/loss_predictiveness_before_bn_recalc_wd{wd}_ks{ks}.png", dpi=300)
 
 
 if __name__ == "__main__":
-    plot_loss_predictiveness()
+    wds = (0.0, 0.001, 0.05, 0.075, 0.1, 0.15, 0.2, 0.4, 0.6, 0.8, 1.0)
+    kss = (3, 4)
+    for wd, ks in itertools.product(wds, kss):
+        plot_loss_predictiveness(wd, ks)

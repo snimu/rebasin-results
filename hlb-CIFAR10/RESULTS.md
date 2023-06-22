@@ -158,6 +158,128 @@ between the interpolations betwen `model_a` and `model_b (original)` & `model_b 
 Ultimately, though, I don't know.
 
 
+### BatchNorm
+
+BatchNorm statistics have to be re-calculated after permuting the weights.
+This is a big problem: if every interpolated model must have its 
+BatchNorm statistics re-calculated, then the interpolation takes 
+a lot of compute. 
+
+So a natural question to ask is: how well can you predict the loss and accuracy
+of an interpolated model after re-calculating the BatchNorm statistics
+from the loss and accuracy of the same model before re-calculating the BatchNorm statistics? 
+
+Here are the results of evaluating the loss and accuracy of the interpolated models 
+in four different modes:
+
+1. `BN model A`: BatchNorm statistics as in model A
+2. `BN model B`: BatchNorm statistics as in model B
+3. `BN reset`: All BatchNorms have `reset_running_stats` called on them
+4. `BN recalc`: All BachNorms have their statistics re-calculated using the entire CIFAR10 dataset
+
+Here are the results for different `weight_decay`-values at training:
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd0.0_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd0.001_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd0.01_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd0.05_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd0.075_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd0.1_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd0.2_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd0.4_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd0.6_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd0.8_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+<p align="center">
+    <img
+        src="loss_predictiveness/loss_predictiveness_before_bn_recalc_wd1.0_ks3.png" 
+        alt="Results of PermutationCoordinateDescent for hlb-CIFAR10 with different L2-Regularizers"
+        width="600"
+    />
+</p>
+
+It seems like the final loss and accuracy are somewhat predictable from
+the loss and accuracy of the models before re-calculating the BatchNorm statistics.
+`BN reset` seems like the best setting for that, but not for very high `weight_decay`-values.
+
+`BN model A` and `BN model B` seem almost useless. 
+It is, however, very interesting to see that they almost perfectly align
+with each other. The outputs of the models with the two different BatchNorm settings
+are not precisely the same, and using the `BatchNorm`-statistics from 
+`model_b` degrades the performance very sharply very close to `model_a`,
+so there almost certainly isn't a programming error here 
+(though you are welcome to check the code youself :)
+
+
 ### MergeMany
 
 I also implemented the `MergeMany`-algorithm from the paper. 
