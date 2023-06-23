@@ -1059,6 +1059,47 @@ def test_eigvec_angles_different_distributions() -> None:
     df.to_csv("results/other/eigvec_angles_different_distributions.csv", index=False)
 
 
+def test_weight_histograms(
+        weight_decays: list[float],
+        hidden_feature_sizes: list[int],
+) -> None:
+    results = {
+        "weight_decay": [],
+        "hidden_features": [],
+        "values": [],
+        "bins": [],
+    }
+
+    loop = tqdm(
+        itertools.product(weight_decays, hidden_feature_sizes),
+        total=len(weight_decays) * len(hidden_feature_sizes),
+        smoothing=0.8
+    )
+
+    for wd, hf in loop:
+        loop.set_description(f"{wd=}, {hf=}")
+
+        model = train_mnist()
+
+        weights = []
+        for name, param in model.named_parameters():
+            if "weight" in name:
+                weights.append(param)
+
+        weights = torch.cat(weights)
+        histogram = torch.histogram(weights, bins=20)
+        values = histogram[0].tolist()
+        bins = histogram[1].tolist()
+
+        results["weight_decay"].append(wd)
+        results["hidden_features"].append(hf)
+        results["values"].append(values)
+        results["bins"].append(bins)
+
+    df = pd.DataFrame(results)
+    df.to_csv("results/other/weight_histograms.csv", index=False)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--weight_decay', type=float, default=[0.0], nargs='+')
@@ -1075,6 +1116,7 @@ def main() -> None:
     parser.add_argument('--forward_pass_nums', type=int, default=None, nargs='+')
     parser.add_argument('--test_weight_statistics', action='store_true', default=False)
     parser.add_argument('--test_eigvec_angles_different_distributions', action='store_true', default=False)
+    parser.add_argument('--test_weight_histograms', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -1131,6 +1173,13 @@ def main() -> None:
 
     if args.test_eigvec_angles_different_distributions:
         test_eigvec_angles_different_distributions()
+        return
+
+    if args.test_weight_histograms:
+        test_weight_histograms(
+            args.weight_decay,
+            args.hidden_features,
+        )
         return
 
     for weight_decay in args.weight_decay:
