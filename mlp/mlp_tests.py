@@ -1095,8 +1095,8 @@ def test_weight_histograms(
         model2 = train_mnist(weight_decay=wd, hidden_features=hf)
         weights2 = cat_all_weights(model2, hf)
 
-        minimum = min(weights1.min(), weights2.min())
-        maximum = max(weights1.max(), weights2.max())
+        minimum = min(weights1.min().item(), weights2.min().item())
+        maximum = max(weights1.max().item(), weights2.max().item())
         hist1 = torch.histc(weights1, bins=40, min=minimum, max=maximum)
         hist2 = torch.histc(weights2, bins=40, min=minimum, max=maximum)
 
