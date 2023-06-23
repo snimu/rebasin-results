@@ -1083,7 +1083,7 @@ def test_weight_histograms(
 
         weights = []
         for name, param in model.named_parameters():
-            if "weight" in name:
+            if "weight" in name and param.shape[0] == param.shape[1] == hf:
                 weights.append(param)
 
         weights = torch.cat(weights)
