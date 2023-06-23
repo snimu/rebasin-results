@@ -1097,7 +1097,12 @@ def test_weight_histograms(
         results["bins"].append(bins)
 
     df = pd.DataFrame(results)
-    df.to_csv("results/other/weight_histograms.csv", index=False)
+    df.to_csv(
+        f"results/other/weight_histograms"
+        f"_wd{weight_decays[0]}-{weight_decays[-1]}"
+        f"_hf{hidden_feature_sizes[0]}-{hidden_feature_sizes[-1]}.csv",
+        index=False
+    )
 
 
 def main() -> None:
