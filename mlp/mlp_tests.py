@@ -1099,8 +1099,8 @@ def test_weight_histograms(
         hist1 = torch.histc(weights1, bins=40, min=minimum, max=maximum)
         hist2 = torch.histc(weights2, bins=40, min=minimum, max=maximum)
 
-        values1 = hist1[0].tolist()
-        values2 = hist2[0].tolist()
+        values1 = hist1.tolist()
+        values2 = hist2.tolist()
 
         results["weight_decay"].append(wd)
         results["hidden_features"].append(hf)
