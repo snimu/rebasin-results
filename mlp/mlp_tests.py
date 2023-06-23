@@ -1072,6 +1072,7 @@ def cat_all_weights(model: MLP, hf: int) -> torch.Tensor:
 def test_weight_histograms(
         weight_decays: list[float],
         hidden_feature_sizes: list[int],
+        num_bins: int,
 ) -> None:
     results = {
         "weight_decay": [],
@@ -1096,8 +1097,8 @@ def test_weight_histograms(
 
         minimum = min(weights1.min().item(), weights2.min().item())
         maximum = max(weights1.max().item(), weights2.max().item())
-        hist1 = torch.histc(weights1, bins=40, min=minimum, max=maximum)
-        hist2 = torch.histc(weights2, bins=40, min=minimum, max=maximum)
+        hist1 = torch.histc(weights1, bins=num_bins, min=minimum, max=maximum)
+        hist2 = torch.histc(weights2, bins=num_bins, min=minimum, max=maximum)
 
         values1 = hist1.tolist()
         values2 = hist2.tolist()
@@ -1111,7 +1112,8 @@ def test_weight_histograms(
     df.to_csv(
         f"results/other/weight_histograms"
         f"_wd{weight_decays[0]}-{weight_decays[-1]}"
-        f"_hf{hidden_feature_sizes[0]}-{hidden_feature_sizes[-1]}.csv",
+        f"_hf{hidden_feature_sizes[0]}-{hidden_feature_sizes[-1]}"
+        f"_nbins{num_bins}.csv",
         index=False
     )
 
@@ -1133,6 +1135,7 @@ def main() -> None:
     parser.add_argument('--test_weight_statistics', action='store_true', default=False)
     parser.add_argument('--test_eigvec_angles_different_distributions', action='store_true', default=False)
     parser.add_argument('--test_weight_histograms', action='store_true', default=False)
+    parser.add_argument('--num_bins', type=int, default=40)
 
     args = parser.parse_args()
 
@@ -1195,6 +1198,7 @@ def main() -> None:
         test_weight_histograms(
             args.weight_decay,
             args.hidden_features,
+            args.num_bins,
         )
         return
 
