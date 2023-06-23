@@ -1078,7 +1078,6 @@ def test_weight_histograms(
         "hidden_features": [],
         "values1": [],
         "values2": [],
-        "bins": [],
     }
 
     loop = tqdm(
@@ -1102,13 +1101,11 @@ def test_weight_histograms(
 
         values1 = hist1[0].tolist()
         values2 = hist2[0].tolist()
-        bins = hist1[1].tolist()
 
         results["weight_decay"].append(wd)
         results["hidden_features"].append(hf)
         results["values1"].append(values1)
         results["values2"].append(values2)
-        results["bins"].append(bins)
 
     df = pd.DataFrame(results)
     df.to_csv(
