@@ -541,8 +541,7 @@ def plot_abs_weight_mean_diff_heatmap() -> None:
         r'$\texttt{eigval}_{\Delta\%} '
         r'= 100 \cdot \texttt{mean}_i\left('
         r'\frac{'
-        r'\texttt{max}\left( \texttt{eigval}_i^{m_1}, \texttt{eigval}_i^{m_2} \right) '
-        r'- \texttt{min}\left( \texttt{eigval}_i^{m_1}, \texttt{eigval}_i^{m_2} \right)'
+        r'\left| \texttt{eigval}_i^{m_1} - \texttt{eigval}_i^{m_2} \right|'
         r'}{\texttt{mean}\left( \texttt{eigval}_i^{m_1}, \texttt{eigval}_i^{m_2} \right)}'
         r'\right)$'
     )
@@ -809,4 +808,4 @@ def plot_eigvec_angles_different_distributions() -> None:
 
 
 if __name__ == "__main__":
-    plot_eigvec_angles_different_distributions()
+    plot_abs_weight_mean_diff_heatmap()
