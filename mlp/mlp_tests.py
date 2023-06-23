@@ -1087,7 +1087,7 @@ def test_weight_histograms(
                 weights.append(param)
 
         weights = torch.cat(weights)
-        histogram = torch.histogram(weights, bins=20)
+        histogram = torch.histogram(weights.to("cpu"), bins=20)
         values = histogram[0].tolist()
         bins = histogram[1].tolist()
 
