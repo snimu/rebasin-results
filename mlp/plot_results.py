@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import copy
 import math
 import os
@@ -807,5 +808,48 @@ def plot_eigvec_angles_different_distributions() -> None:
     plt.savefig("results/other/eigvec_angles_different_distributions.png", dpi=300)
 
 
+def plot_histograms() -> None:
+    df = pd.read_csv("results/other/weight_histograms_wd0.0-0.6_hf20-220_nbins100.csv")
+
+    weight_decays = df["weight_decay"].unique()
+    weight_decays.sort()
+    hidden_features = df["hidden_features"].unique()
+    hidden_features.sort()
+
+    fig, axs = plt.subplots(len(hidden_features), len(weight_decays), figsize=(10, 12))
+    fig.subplots_adjust(top=0.93, bottom=0.07, hspace=0.6, wspace=0.5, left=0.07, right=0.98)
+    fig.suptitle("Histograms of weight-element values")
+
+    for i, hidden_feature in enumerate(hidden_features):
+        for j, weight_decay in enumerate(weight_decays):
+            this_df = df[
+                (df["hidden_features"] == hidden_feature) &
+                (df["weight_decay"] == weight_decay)
+            ]
+            values1 = ast.literal_eval(this_df["values1"].values[0])
+            values2 = ast.literal_eval(this_df["values2"].values[0])
+            assert len(values1) == len(values2)
+            bins = np.arange(len(values1))
+            values_overlap = [min(v1, v2) for v1, v2 in zip(values1, values2)]
+
+            axs[i, j].bar(np.arange(len(bins)), values1, width=1, color="orange")
+            axs[i, j].bar(np.arange(len(bins)), values2, width=1, color="purple")
+            axs[i, j].bar(np.arange(len(bins)), values_overlap, width=1, color="black")
+            axs[i, j].set_xticks([])
+            axs[i, j].set_xticklabels([])
+            axs[i, j].set_title(f"hf: {hidden_feature}, wd: {weight_decay}")
+            axs[i, j].set_xlabel("Magnitude")
+            axs[i, j].set_ylabel("Element Count")
+
+    fig.legend(
+        ncol=3,
+        loc="lower center",
+        labelcolor=["orange", "purple", "black"],
+        labels=["model 1", "model 2", "overlap"],
+    )
+
+    plt.savefig("results/other/weight_histograms_wd0.0-0.6_hf20-220_nbins100.png", dpi=300)
+
+
 if __name__ == "__main__":
-    plot_abs_weight_mean_diff_heatmap()
+    plot_histograms()
