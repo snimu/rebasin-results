@@ -1079,7 +1079,7 @@ def test_weight_histograms(
     for wd, hf in loop:
         loop.set_description(f"{wd=}, {hf=}")
 
-        model = train_mnist()
+        model = train_mnist(weight_decay=wd, hidden_features=hf)
 
         weights = []
         for name, param in model.named_parameters():
