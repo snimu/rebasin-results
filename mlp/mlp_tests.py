@@ -1059,6 +1059,16 @@ def test_eigvec_angles_different_distributions() -> None:
     df.to_csv("results/other/eigvec_angles_different_distributions.csv", index=False)
 
 
+def cat_all_weights(model: MLP, hf: int) -> torch.Tensor:
+    weights = []
+    for name, param in model.named_parameters():
+        if "weight" in name and len(param.shape) == 2 and param.shape[0] == param.shape[1] == hf:
+            weights.append(param)
+
+    weights = torch.cat(weights)
+    return weights
+
+
 def test_weight_histograms(
         weight_decays: list[float],
         hidden_feature_sizes: list[int],
@@ -1066,7 +1076,8 @@ def test_weight_histograms(
     results = {
         "weight_decay": [],
         "hidden_features": [],
-        "values": [],
+        "values1": [],
+        "values2": [],
         "bins": [],
     }
 
@@ -1079,21 +1090,24 @@ def test_weight_histograms(
     for wd, hf in loop:
         loop.set_description(f"{wd=}, {hf=}")
 
-        model = train_mnist(weight_decay=wd, hidden_features=hf)
+        model1 = train_mnist(weight_decay=wd, hidden_features=hf)
+        weights1 = cat_all_weights(model1, hf)
+        model2 = train_mnist(weight_decay=wd, hidden_features=hf)
+        weights2 = cat_all_weights(model2, hf)
 
-        weights = []
-        for name, param in model.named_parameters():
-            if "weight" in name and len(param.shape) == 2 and param.shape[0] == param.shape[1] == hf:
-                weights.append(param)
+        minimum = min(weights1.min(), weights2.min())
+        maximum = max(weights1.max(), weights2.max())
+        hist1 = torch.histc(weights1, bins=40, min=minimum, max=maximum)
+        hist2 = torch.histc(weights2, bins=40, min=minimum, max=maximum)
 
-        weights = torch.cat(weights)
-        histogram = torch.histogram(weights.to("cpu"), bins=20)
-        values = histogram[0].tolist()
-        bins = histogram[1].tolist()
+        values1 = hist1[0].tolist()
+        values2 = hist2[0].tolist()
+        bins = hist1[1].tolist()
 
         results["weight_decay"].append(wd)
         results["hidden_features"].append(hf)
-        results["values"].append(values)
+        results["values1"].append(values1)
+        results["values2"].append(values2)
         results["bins"].append(bins)
 
     df = pd.DataFrame(results)
