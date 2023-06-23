@@ -702,5 +702,28 @@ def plot_mm_nm() -> None:
     plt.savefig("results/merge-many/merge_many_nm2-6_wd0-0.3_nf200.png", dpi=300)
 
 
+def plot_eigvec_angles_different_distributions() -> None:
+    df = pd.read_csv("results/other/eigvec_angles_different_distributions.csv")
+
+    distributions = ("uniform", "gaussian", "dirac", "orthogonal", "sparse0.5")
+    ksizes = df["ksize"].unique()
+    ksizes.sort()
+
+    plt.plot(ksizes, df[df["distribution"] == "uniform"]["eigvec_angle"], label="uniform")
+    plt.plot(ksizes, df[df["distribution"] == "gaussian"]["eigvec_angle"], label="gaussian")
+    plt.plot(ksizes, df[df["distribution"] == "dirac"]["eigvec_angle"], label="dirac")
+    plt.plot(ksizes, df[df["distribution"] == "orthogonal"]["eigvec_angle"], label="orthogonal")
+    plt.plot(ksizes, df[df["distribution"] == "sparse0.5"]["eigvec_angle"], label="sparse (s=0.5)")
+
+    plt.xlabel("Kernel Size")
+    plt.ylabel(r"$\texttt{eigvec}_{\mathrm{angle}}$ $[\deg]$")
+    plt.title("Angle between eigenvectors for different distributions")
+    plt.legend()
+    plt.grid()
+
+    plt.show()
+    # plt.savefig("results/other/eigvec_angles_different_distributions.png", dpi=300)
+
+
 if __name__ == "__main__":
-    plot_output_statistics_heatmap()
+    plot_eigvec_angles_different_distributions()

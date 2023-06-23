@@ -203,6 +203,120 @@ permutation counts isn't very large in relative terms. The lower two plots
 show the same data, but with the y-axis scaled to start from 0, and it 
 clearly shows this.
 
+### Larger Sweeps
+
+To find answers, let's do larger hyperparameter sweeps!
+
+#### Analyzing outputs
+
+This first image shows four outputs over `weight_decay` and `feature_size`:
+
+1. The ratio of the loss of the merged model to the loss of the average of the models
+   that make it up. (lower is better)
+2. The ratio of the accuracy of the merged model to the accuracy of the average of the models
+   that make it up. (higher is better)
+3. The ratio of the maximum output of the merged model to the maximum output of the average of the models
+   that make it up. (higher is better, because it means that the merged model is more confident)
+4. The ratio of the standard deviation of the outputs of the merged model to the standard deviation
+   of the outputs of the average of the models that make it up. (higher is better, because it means
+   that the merged model is more confident)
+
+<p align="center">
+    <img
+        src="results/merge-many/compare_output_statistics_wd0.0-0.2_hf50-1000_nm2-6_heatmap.png"
+        alt="MergeMany: Summary"
+        width="800"
+    />
+</p>
+
+Let's analyze this:
+
+- At low `weight_decay`-values, the std- and max-ratios are very low,
+    while the loss and accuracy ratios are very high. 
+    This makes me think that the reason that `weight_decay` is so important
+    for `MergeMany` is that it makes the models more confident, and thus
+    the averaging done in `MergeMany` doesn't average out the information
+    in the outputs into noise, at least not as much.
+- The feature-size, on the other hand, barely has an impact on this.
+    Higher feature-size slightly increases the std- and max-ratios,
+    but it's not very significant.
+- The std- and max-ratios seem to worsen with the number of models that are merged.
+    This is probably because the averaging done in `MergeMany` averages out
+    the information in the outputs into noise, and the more models are merged,
+    the more averaging is done.
+    This effect is, however, reduced significantly at higher `weight_decay`-values.
+- The fact that the std-ratio looks almost identical to the accuracy-ratio 
+    seems to be more evidence for the hypothesis that the reason that `weight_decay`
+    is so important for `MergeMany` is that it makes the models more confident.
+- High `weight-decay`-values improve the accuracy of the merged model
+    as compared to the average of the models that make it up.
+    It seems that at a larger number of models that are merged,
+    this happens more reliably (as evidenced by the less noisy image)
+
+#### Analyzing the weights
+
+In the following image, four values are plotted over `weight_decay` and `feature_size`:
+
+1. The mean value of the elements of each weight.
+2. The mean difference between the magnitude of the elements of the same weights in two models, 
+    over all the weights in these models, in percent.
+3. The mean difference between the mean eigenvalue of the weights in two models, 
+    over all the weights in these models, in percent.
+    This should, of course, correspond directly to the previous value.
+    I did, however, calculate both to make sure that I didn't make a mistake.
+4. The mean angle between a weight's eigenvectors in degrees.
+    Measuring this values was a pot-shot.
+
+<p align="center">
+    <img
+        src="results/other/weight_statistics_hf20-1000_wd0.0-1.0_nm2-2.png"
+        alt="MergeMany: Summary"
+        width="800"
+    />
+
+Let's analyze this:
+
+- The mean value of the elements decreases with 
+    both increasing feature-size and `weight_decay`.
+    This is as expected. 
+    Weights in `nn.Linear`-layers are initialized using
+    `torch.nn.init.kaiming_uniform_`, which draws from a uniform distribution
+    which has a range that decreases with increasing input-feature size.
+    The `weight_decay`-term in the loss-function also decreases the weights,
+    because it is a L2-regularizer.
+- Both the percentage variation in the magnitude of the weights and the percentage variation
+    in the mean eigenvalue of the weights increase with both increasing `weight_decay`
+    and increasing feature-size.
+    This might be an explanation for why both improve the results of `MergeMany`.
+    As described [above](#analyzing-outputs), `weight_decay` makes the models more confident,
+    and this might be because there is larger variation in the weight-values 
+    of the models that are merged. 
+    This might offset the fact that in `MergeMany`, 
+    the weights of the merged models are averaged after being re-basined.
+    In other words, hight `weight_decay`-values and feature-sizes
+    might make the merged model more confident because they allow for 
+    some variation in the magnitudes of the elements of the weights.
+- The average angle between the eigenvectors of the weights is always around 90°...
+    except for low feature-sizes at medium to high `weight_decay`-values.
+    I have no idea why this is the case or what it means, but will attempt to analyze it further.
+
+
+### Summary
+
+- `weight_decay` is very important for `MergeMany`, and should be set to a high value.
+- The feature-size is important for `MergeMany` at low `weight_decay` values, but
+  becomes less important at higher `weight_decay` values.
+- The number of models used for merging negatively impacts the results of `MergeMany`
+  at low `weight_decay` values, but becomes irrelevant at higher `weight_decay` values.
+  (it might be interesting to check if it decreases bias, which is an important point
+   of the paper)
+- The merged model never reaches a loss as low as the average of the models that make it up,
+  but its top-1 accuracy is often higher.
+- The maximum output and the standard deviation of the outputs are lower in the merged model
+  than in the models that make it up, while loss and accuracy are higher.
+- The number of permutations rises quickly at low `weight_decay`-values,
+  but then almost levels off.
+
 # The model
 
 <p align="center">

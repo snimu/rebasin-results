@@ -960,6 +960,105 @@ def test_weight_statistics(
     )
 
 
+def get_avg_eigvec_angle_diff(matrix: torch.Tensor) -> float:
+    _, eigvecs = torch.linalg.eig(matrix)
+    avg_angle = 0
+    for v1, v2 in itertools.pairwise(eigvecs):
+        avg_angle += vec_angle(v1, v2)
+
+    res = avg_angle / len(eigvecs)
+    if isinstance(res, complex):
+        return res.real
+    else:
+        return res
+
+
+def construct_matrix_and_calculate_angle(ksize: int, sample_num) -> tuple[float, ...]:
+    uniforms, gaussians, diracs, orthogonals, sparses = [], [], [], [], []
+
+    for _ in range(sample_num):
+        uniform = get_avg_eigvec_angle_diff(torch.rand(ksize, ksize))
+        gaussian = get_avg_eigvec_angle_diff(torch.randn(ksize, ksize))
+        dirac = get_avg_eigvec_angle_diff(
+            nn.init.dirac_(
+                torch.empty(ksize, ksize, ksize)
+            )[:, :, 0].squeeze().to(torch.float)
+        )
+        orthogonal = get_avg_eigvec_angle_diff(
+            nn.init.orthogonal_(torch.empty(ksize, ksize)).to(torch.float)
+        )
+        sparse = get_avg_eigvec_angle_diff(
+            nn.init.sparse_(torch.empty(ksize, ksize), sparsity=0.3).to(torch.float)
+        )
+
+        uniforms.append(uniform)
+        gaussians.append(gaussian)
+        diracs.append(dirac)
+        orthogonals.append(orthogonal)
+        sparses.append(sparse)
+
+    uniform = torch.mean(torch.tensor(uniforms)).item()
+    gaussian = torch.mean(torch.tensor(gaussians)).item()
+    dirac = torch.mean(torch.tensor(diracs)).item()
+    orthogonal = torch.mean(torch.tensor(orthogonals)).item()
+    sparse = torch.mean(torch.tensor(sparses)).item()
+
+    return uniform, gaussian, dirac, orthogonal, sparse
+
+
+def test_eigvec_angles_different_distributions() -> None:
+    results = {
+        "distribution": [],
+        "ksize": [],
+        "sample_num": [],
+        "eigvec_angle": [],
+    }
+
+    ksizes = [int(k) for k in torch.arange(10, 1001, 10)]
+    sample_nums = [1, 2, 3, 4, 5, 6]
+
+    loop = tqdm(
+        itertools.product(ksizes, sample_nums),
+        total=len(ksizes) * len(sample_nums),
+        smoothing=0.8
+    )  # later results are much slower!
+    for ksize, sample_num in loop:
+        loop.set_description(f"{ksize=}, {sample_num=}")
+
+        uniform, gaussian, dirac, orthogonal, sparse = (
+            construct_matrix_and_calculate_angle(ksize, sample_num)
+        )
+
+        loop.set_description(f"{ksize=}")
+        results["distribution"].append("uniform")
+        results["ksize"].append(ksize)
+        results["sample_num"].append(sample_num)
+        results["eigvec_angle"].append(uniform)
+
+        results["distribution"].append("gaussian")
+        results["ksize"].append(ksize)
+        results["sample_num"].append(sample_num)
+        results["eigvec_angle"].append(gaussian)
+
+        results["distribution"].append("dirac")
+        results["ksize"].append(ksize)
+        results["sample_num"].append(sample_num)
+        results["eigvec_angle"].append(dirac)
+
+        results["distribution"].append("orthogonal")
+        results["ksize"].append(ksize)
+        results["sample_num"].append(sample_num)
+        results["eigvec_angle"].append(orthogonal)
+
+        results["distribution"].append("sparse0.5")
+        results["ksize"].append(ksize)
+        results["sample_num"].append(sample_num)
+        results["eigvec_angle"].append(sparse)
+
+    df = pd.DataFrame(results)
+    df.to_csv("results/other/eigvec_angles_different_distributions.csv", index=False)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', '--weight_decay', type=float, default=[0.0], nargs='+')
@@ -975,6 +1074,7 @@ def main() -> None:
     parser.add_argument('--compare_output_statistics', action='store_true', default=False)
     parser.add_argument('--forward_pass_nums', type=int, default=None, nargs='+')
     parser.add_argument('--test_weight_statistics', action='store_true', default=False)
+    parser.add_argument('--test_eigvec_angles_different_distributions', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -1027,6 +1127,10 @@ def main() -> None:
             args.weight_decay,
             args.num_models,
         )
+        return
+
+    if args.test_eigvec_angles_different_distributions:
+        test_eigvec_angles_different_distributions()
         return
 
     for weight_decay in args.weight_decay:
