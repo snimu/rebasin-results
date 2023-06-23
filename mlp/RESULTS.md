@@ -317,6 +317,57 @@ Let's analyze this:
     except for low feature-sizes at medium to high `weight_decay`-values.
     I have no idea why this is the case or what it means, but will attempt to analyze it further.
 
+I would like to take a closer look at the last point. 
+
+**Why does the angle between the eigenvectors look so strange?**
+
+My first idea (before go through the effort of creating a histogram)
+was to just plot the eigenvector-angles for different distributions 
+at different kernel-sizes.
+
+The chosen distributions are the following:
+
+- **Uniform**
+- **Normal**
+- **Orthogonal**
+- **Dirac**
+- **Sparse Normal**
+
+Here are the results:
+
+<p align="center">
+    <img
+        src="results/other/eigvec_angles_different_distributions.png"
+        alt="Angles between eigenvectors of different distributions"
+        width="800"
+    />
+</p>
+
+Let's analyze this:
+
+- The angles between the eigenvectors for the Dirac distribution 
+    very smoothly approach 90° as the feature-size increases,
+    beginning at slightly over 80° at a feature-size of 10.
+- The angles between the eigenvectors for the Uniform distribution
+    track the angles for the Dirac distribution very closely, 
+    with two differences:
+    For one, they are shifted lower by, seemingly, lower than 0.1°,
+    except at the beginning, where it's shifted by roughly 10°.
+    Secondly, the average angle is extremely noisy. 
+    It takes several samples to somewhat clean up the noise.
+- The angles between the eigenvectors for all other distributions
+    are also very noisy. They all track the Dirac distribution,
+    but more closely than the Uniform distribution, because they 
+    don't seem to be shifted down, except at the beginning,
+    where the Gaussian distributions (Normal and Sparse Normal)
+    are shifted down.
+- It seems that the decreasing angle between eigenvectors
+    at low feature-sizes is a normal phenomenon.
+    Why this effect is stronger at higher `weight_decay`-values
+    is, however, not explained by this. 
+    It seems like L2-Regularization 
+    (in the context of this model and training regime, on MNIST)
+    changes the distribution of the weights.
 
 ### Summary
 

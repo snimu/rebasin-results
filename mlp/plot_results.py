@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import math
 import os
 
 import matplotlib.pyplot as plt
@@ -705,24 +706,106 @@ def plot_mm_nm() -> None:
 def plot_eigvec_angles_different_distributions() -> None:
     df = pd.read_csv("results/other/eigvec_angles_different_distributions.csv")
 
-    distributions = ("uniform", "gaussian", "dirac", "orthogonal", "sparse0.5")
     ksizes = df["ksize"].unique()
     ksizes.sort()
+    sample_nums = df["sample_num"].unique()
 
-    plt.plot(ksizes, df[df["distribution"] == "uniform"]["eigvec_angle"], label="uniform")
-    plt.plot(ksizes, df[df["distribution"] == "gaussian"]["eigvec_angle"], label="gaussian")
-    plt.plot(ksizes, df[df["distribution"] == "dirac"]["eigvec_angle"], label="dirac")
-    plt.plot(ksizes, df[df["distribution"] == "orthogonal"]["eigvec_angle"], label="orthogonal")
-    plt.plot(ksizes, df[df["distribution"] == "sparse0.5"]["eigvec_angle"], label="sparse (s=0.5)")
+    fig, axs = plt.subplots(len(sample_nums), 2, figsize=(10, 18))
+    fig.subplots_adjust(top=0.95, bottom=0.05, hspace=0.4, wspace=0.2, left=0.07, right=0.98)
+    fig.suptitle("Eigenvector Angles for Different Distributions")
 
-    plt.xlabel("Kernel Size")
-    plt.ylabel(r"$\texttt{eigvec}_{\mathrm{angle}}$ $[\deg]$")
-    plt.title("Angle between eigenvectors for different distributions")
-    plt.legend()
-    plt.grid()
+    for i, sample_num in enumerate(sample_nums):
+        axs[i, 0].plot(
+            ksizes,
+            df[
+                (df["sample_num"] == sample_num) & (df["distribution"] == "uniform")
+            ]["eigvec_angle"],
+            color="orange"
+        )
+        axs[i, 0].plot(
+            ksizes,
+            df[
+                (df["sample_num"] == sample_num) & (df["distribution"] == "gaussian")
+            ]["eigvec_angle"],
+            color="purple"
+        )
+        axs[i, 0].plot(
+            ksizes,
+            df[
+                (df["sample_num"] == sample_num) & (df["distribution"] == "orthogonal")
+            ]["eigvec_angle"],
+            color="red"
+        )
+        axs[i, 0].plot(
+            ksizes,
+            df[
+                (df["sample_num"] == sample_num) & (df["distribution"] == "sparse0.5")
+            ]["eigvec_angle"],
+            color="green"
+        )
+        axs[i, 0].plot(
+            ksizes,
+            df[
+                (df["sample_num"] == sample_num) & (df["distribution"] == "dirac")
+            ]["eigvec_angle"],
+            color="blue"
+        )
+        axs[i, 0].set_xlabel("Kernel Size")
+        axs[i, 0].set_ylabel(r"$\texttt{eigvec}_{\mathrm{angle}}$ $[\deg]$")
+        axs[i, 0].set_title(f"Sample Num: {sample_num}")
+        axs[i, 0].grid()
 
-    plt.show()
-    # plt.savefig("results/other/eigvec_angles_different_distributions.png", dpi=300)
+        axs[i, 1].plot(
+            ksizes,
+            df[
+                (df["sample_num"] == sample_num) & (df["distribution"] == "uniform")
+            ]["eigvec_angle"],
+            color="orange"
+        )
+        axs[i, 1].plot(
+            ksizes,
+            df[
+                (df["sample_num"] == sample_num) & (df["distribution"] == "gaussian")
+            ]["eigvec_angle"],
+            color="purple"
+        )
+        axs[i, 1].plot(
+            ksizes,
+            df[
+                (df["sample_num"] == sample_num) & (df["distribution"] == "orthogonal")
+            ]["eigvec_angle"],
+            color="red"
+        )
+        axs[i, 1].plot(
+            ksizes,
+            df[
+                (df["sample_num"] == sample_num) & (df["distribution"] == "sparse0.5")
+            ]["eigvec_angle"],
+            color="green"
+        )
+        axs[i, 1].plot(
+            ksizes,
+            df[
+                (df["sample_num"] == sample_num) & (df["distribution"] == "dirac")
+            ]["eigvec_angle"],
+            color="blue"
+        )
+        axs[i, 1].set_xlabel("Kernel Size")
+        axs[i, 1].set_ylabel(r"$\texttt{eigvec}_{\mathrm{angle}}$ $[\deg]$")
+        axs[i, 1].set_title(f"Sample Num: {sample_num} (zoomed)")
+        axs[i, 1].grid()
+        axs[i, 1].set_ylim([89.6, 90.2])
+
+    fig.legend(
+        ncol=5,
+        loc="lower center",
+        #bbox_to_anchor=(0.5, 0.05),
+        labelcolor=["orange", "purple", "red", "green", "blue"],
+        labels=["uniform", "gaussian", "orthogonal", "sparse (s=0.5)", "dirac"],
+    )
+
+    # plt.show()
+    plt.savefig("results/other/eigvec_angles_different_distributions.png", dpi=300)
 
 
 if __name__ == "__main__":
