@@ -2,7 +2,24 @@
 
 These are results from running `PermutationCoordinateDescent` and `MergeMany` on MLPs.
 
+**Table of Contents**
+
+- [Results](#results)
+  - [PermutationCoordinateDescent](#permutationcoordinatedescent)
+  - [MergeMany](#mergemany)
+    - [By number of models](#by-number-of-models)
+    - [By feature size](#by-feature-size)
+    - [Larger sweeps](#larger-sweeps)
+      - [Analyzing outputs](#analyzing-outputs)
+      - [Analyzing the weights](#analyzing-the-weights)
+- [The model](#the-model)
+- [The permutations](#the-permutations)
+
 # Results
+
+Below is an analysis of the results of running 
+`PermutationCoordinateDescent` and `MergeMany` on the MLP presented 
+[here](#the-model).
 
 ## PermutationCoordinateDescent
 
