@@ -369,6 +369,46 @@ Let's analyze this:
     (in the context of this model and training regime, on MNIST)
     changes the distribution of the weights.
 
+This does not feel satisfying, so here is a histogram of the magnitudes of the
+elements of the weights for different `weight_decay`-values and feature-sizes.
+I've recorded then on two different training runs for each hyperparameter setting,
+and entered the results for both into the histogram. In black you see 
+the are of overlap, and in purple and orange you see where one of the models
+has more entries at that bin than the other.
+
+`wd` stands for `weight_decay`, `hf` for `hidden_features`
+(a.k.a. the feature size;
+each plot gives the histogram over three hidden weights of size `hf`x`hf`).
+
+<p align="center">
+    <img
+        src="results/other/weight_histograms_wd0.0-0.6_hf20-220_nbins100.png"
+        alt="Histograms of the magnitudes of the elements of the weights"
+        width="800"
+    />
+</p>
+
+Let's analyze this:
+
+- First off, the histogram values barely change from training run to training run.
+- At low `weight_decay`-values, the elements of the weights clearly 
+    follow a uniform distribution &mdash; which should not be surprising,
+    given that that's how they are initialized.
+    This explains the behavior of the eigenvectors at low `weight_decay`-
+    and feature-size values.
+- At higher `weight_decay` values (and especially combined with greater feature sizes)
+    the distribution becomes very much non-uniform, and, importantly, very sparse.
+    The reason why the mean values of the weights are so different at high 
+    `weight_decay` values is that this makes the means very susceptible to outliers.
+- This ultimately makes me think that the reason that high `weight_decay`-values
+    work so well for `PermutationCoordinateDescent` and `MergeMany` 
+    is that they move the values of the weight elements
+    very close together. This likely makes `model_b (rebasin)` fit more closely
+    to `model_a`. The sparsity of the weights means that averaging the 
+    weights from different models will retain some of the sparsity, 
+    and thus (apparently) higher confidence in the outputs than 
+    for uniformly distributed weight values.
+
 ### Summary
 
 - `weight_decay` is very important for `MergeMany`, and should be set to a high value.
