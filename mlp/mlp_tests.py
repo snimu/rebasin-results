@@ -384,6 +384,7 @@ def test_pcd_new(
         loop.set_description(settings)
 
         # TRAINING
+        loop.write("Training model A")
         model_a = train_mnist(
             hidden_features=hf,
             num_layers=nl,
@@ -391,6 +392,7 @@ def test_pcd_new(
             epochs=epochs,
             dataset=datasets[0],
         ).to(device)
+        loop.write("Training model B")
         model_b = train_mnist(
             hidden_features=hf,
             num_layers=nl,
