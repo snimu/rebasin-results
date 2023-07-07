@@ -11,7 +11,7 @@ from collections import Counter
 from typing import Any, Sequence
 
 from torchvision.datasets import MNIST
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, Subset
 from torch import optim
 from torch import nn
 import torch
@@ -310,11 +310,52 @@ def test_permutation_coordinate_descent(
     shutil.rmtree("models-b-original-b-rebasin")
 
 
+def split_mnist(num_splits: int, shuffle: bool = True) -> list[MNIST]:
+    """
+    Split MNIST into num_splits parts.
+    :param num_splits:
+    :return: the datasets
+    """
+    mnist = MNIST(
+        root="data",
+        train=True,
+        download=True,
+        transform=torchvision.transforms.ToTensor(),
+    )
+    # shuffle MNIST
+    if shuffle:
+        mnist.data = mnist.data[torch.randperm(len(mnist))]
+
+    # Split MNIST into num_splits parts
+    stepsize = len(mnist) // num_splits
+    datasets = []
+    for i in range(num_splits):
+        datasets.append(
+            torch.utils.data.Subset(
+                mnist, range(i*stepsize, (i+1)*stepsize)
+            )
+        )
+
+    return datasets
+
+
 def test_pcd_new(
         hidden_features: Sequence[int],
         weight_decays: Sequence[float],
         num_layers: Sequence[int],
+        epochs: int,
 ) -> None:
+    """
+    Test PermutationCoordinateDescent on a simple MLP
+    at different number of layers, hidden features and weight decays.
+
+    Train model A and B on distinct parts of MNIST.
+
+    :param hidden_features:
+    :param weight_decays:
+    :param num_layers:
+    :return:
+    """
     results = {
         "hidden_features": [],
         "weight_decay": [],
@@ -333,18 +374,29 @@ def test_pcd_new(
         smoothing=0.0,
     )
 
+    # Split mnist into 2 parts; don't shuffle here so that different runs are comparable
+    datasets = split_mnist(2, shuffle=False)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     for hf, wd, nl in loop:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         settings = f"{hf=}, {wd=}, {nl=}"
         loop.write(f"\n{settings}")
         loop.set_description(settings)
 
         # TRAINING
         model_a = train_mnist(
-            hidden_features=hf, num_layers=nl, weight_decay=wd
+            hidden_features=hf,
+            num_layers=nl,
+            weight_decay=wd,
+            epochs=epochs,
+            dataset=datasets[0],
         ).to(device)
         model_b = train_mnist(
-            hidden_features=hf, num_layers=nl, weight_decay=wd
+            hidden_features=hf,
+            num_layers=nl,
+            weight_decay=wd,
+            epochs=epochs,
+            dataset=datasets[1],
         ).to(device)
         model_b_orig = copy.deepcopy(model_b).to(device)
 
@@ -1292,6 +1344,7 @@ def main() -> None:
     parser.add_argument('-m', '--merge_many', action='store_true', default=False)
     parser.add_argument('-n', '--num_models', type=int, default=[3], nargs='+')
     parser.add_argument('-l', '--num_layers', type=int, default=[5], nargs='+')
+    parser.add_argument('-e', '--num_epochs', type=int, default=1)
     parser.add_argument('-c', '--count_permutations', action='store_true', default=False)
     parser.add_argument('--full_wd_hf_sweep', action='store_true', default=False)
     parser.add_argument('--compare_output_statistics', action='store_true', default=False)
@@ -1368,7 +1421,12 @@ def main() -> None:
         return
 
     if args.test_pcd:
-        test_pcd_new(args.hidden_features, args.weight_decay, args.num_layers)
+        test_pcd_new(
+            hidden_features=args.hidden_features,
+            weight_decays=args.weight_decay,
+            num_layers=args.num_layers,
+            epochs=args.num_epochs,
+        )
         return
 
     for weight_decay in args.weight_decay:
