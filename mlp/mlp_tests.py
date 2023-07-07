@@ -308,6 +308,167 @@ def test_permutation_coordinate_descent(
     shutil.rmtree("models-b-original-b-rebasin")
 
 
+def test_pcd_new(
+        hidden_features: Sequence[int],
+        weight_decays: Sequence[float],
+        num_layers: Sequence[int],
+) -> None:
+    results = {
+        "hidden_features": [],
+        "weight_decay": [],
+        "num_layers": [],
+        "loss-a-b-orig": [],
+        "acc-a-b-orig": [],
+        "loss-a-b-rebasin": [],
+        "acc-a-b-rebasin": [],
+        "loss-b-orig-b-rebasin": [],
+        "acc-b-orig-b-rebasin": [],
+    }
+
+    loop = tqdm(
+        itertools.product(hidden_features, weight_decays, num_layers),
+        total=len(hidden_features) * len(weight_decays) * len(num_layers),
+        smoothing=0.0,
+    )
+
+    for hf, wd, nl in loop:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        settings = f"{hf=}, {wd=}, {nl=}"
+        loop.write(f"\n{settings}")
+        loop.set_description(settings)
+
+        # TRAINING
+        model_a = train_mnist(
+            hidden_features=hf, num_layers=nl, weight_decay=wd
+        ).to(device)
+        model_b = train_mnist(
+            hidden_features=hf, num_layers=nl, weight_decay=wd
+        ).to(device)
+        model_b_orig = copy.deepcopy(model_b).to(device)
+
+        x = torch.randn(32, 28 * 28).to(device)
+        pcd = rebasin.PermutationCoordinateDescent(
+            model_a, model_b, x, device_b=device
+        )
+        pcd.rebasin()
+
+        # Check that output stays the same
+        assert torch.allclose(model_b(x), model_b_orig(x))
+
+        # Interpolate A B-rebasin
+        directory = "models-a-b-rebasin"
+        os.makedirs(directory, exist_ok=True)
+        loop.write(f"Interpolating {directory}")
+        interp = rebasin.interpolation.LerpSimple(
+            models=[model_a, model_b],
+            devices=[device, device],
+            device_interp=device,
+            savedir=directory,
+        )
+        interp.interpolate(steps=99)
+
+        # Interpolate A B-original
+        directory = "models-a-b-original"
+        os.makedirs(directory, exist_ok=True)
+        loop.write(f"Interpolating {directory}")
+        interp = rebasin.interpolation.LerpSimple(
+            models=[model_a, model_b_orig],
+            devices=[device, device],
+            device_interp=device,
+            savedir=directory,
+        )
+        interp.interpolate(steps=99)
+
+        # Interpolate B-original B-rebasin
+        directory = "models-b-original-b-rebasin"
+        os.makedirs(directory, exist_ok=True)
+        loop.write(f"Interpolating {directory}")
+        interp = rebasin.interpolation.LerpSimple(
+            models=[model_b_orig, model_b],
+            devices=[device, device],
+            device_interp=device,
+            savedir=directory,
+        )
+        interp.interpolate(steps=99)
+
+        # EVALUATION
+
+        # Original models
+        loss_a, acc_a = eval_fn(model_a, device)
+        loss_b, acc_b = eval_fn(model_b, device)
+        loss_b_orig, acc_b_orig = eval_fn(model_b_orig, device)
+
+        # Interpolated models
+        working_model = MLP(28 * 28, 10, hf)
+
+        directory = "models-a-b-rebasin"
+        files = get_filenames(directory)
+        loss_interp_a_b_rebasin = []
+        acc_interp_a_b_rebasin = []
+        loop.write(f"Evaluating {directory}")
+        for file in tqdm(files):
+            working_model.load_state_dict(torch.load(os.path.join(directory, file)))
+            working_model.to(device)
+            loss, acc = eval_fn(working_model, device)
+            loss_interp_a_b_rebasin.append(loss)
+            acc_interp_a_b_rebasin.append(acc)
+
+        directory = "models-a-b-original"
+        files = get_filenames(directory)
+        loss_interp_a_b_original = []
+        acc_interp_a_b_original = []
+        print(f"Evaluating {directory}")
+        for file in tqdm(files):
+            working_model.load_state_dict(torch.load(os.path.join(directory, file)))
+            working_model.to(device)
+            loss, acc = eval_fn(working_model, device)
+            loss_interp_a_b_original.append(loss)
+            acc_interp_a_b_original.append(acc)
+
+        directory = "models-b-original-b-rebasin"
+        files = get_filenames(directory)
+        loss_interp_b_original_b_rebasin = []
+        acc_interp_b_original_b_rebasin = []
+        print(f"Evaluating {directory}")
+        for file in tqdm(files):
+            working_model.load_state_dict(torch.load(os.path.join(directory, file)))
+            working_model.to(device)
+            loss, acc = eval_fn(working_model, device)
+            loss_interp_b_original_b_rebasin.append(loss)
+            acc_interp_b_original_b_rebasin.append(acc)
+
+        loss_interp_a_b_original = [loss_a, *loss_interp_a_b_original, loss_b_orig]
+        loss_interp_a_b_rebasin = [loss_a, *loss_interp_a_b_rebasin, loss_b]
+        loss_interp_b_original_b_rebasin = [loss_b_orig, *loss_interp_b_original_b_rebasin, loss_b]
+
+        acc_interp_a_b_original = [acc_a, *acc_interp_a_b_original, acc_b_orig]
+        acc_interp_a_b_rebasin = [acc_a, *acc_interp_a_b_rebasin, acc_b]
+        acc_interp_b_original_b_rebasin = [acc_b_orig, *acc_interp_b_original_b_rebasin, acc_b]
+
+        # Store results
+        results["hidden_features"].append(hf)
+        results["weight_decay"].append(wd)
+        results["num_layers"].append(nl)
+
+        results["loss-a-b-orig"].append(loss_interp_a_b_original)
+        results["loss-a-b-rebasin"].append(loss_interp_a_b_rebasin)
+        results["loss-b-orig-b-rebasin"].append(loss_interp_b_original_b_rebasin)
+
+        results["acc-a-b-orig"].append(acc_interp_a_b_original)
+        results["acc-a-b-rebasin"].append(acc_interp_a_b_rebasin)
+        results["acc-b-orig-b-rebasin"].append(acc_interp_b_original_b_rebasin)
+
+    # Save results
+    df = pd.DataFrame(results)
+    df.to_csv(
+        "pcd"
+        f"_hf{min(hidden_features)}-{max(hidden_features)}"
+        f"_wd{min(weight_decays)}-{max(weight_decays)}"
+        f"_nl{min(num_layers)}-{max(num_layers)}"
+        f".csv"
+    )
+
+
 def test_merge_many(
         hidden_features: Sequence[int],
         weight_decays: Sequence[float],
@@ -1137,6 +1298,7 @@ def main() -> None:
     parser.add_argument('--test_eigvec_angles_different_distributions', action='store_true', default=False)
     parser.add_argument('--test_weight_histograms', action='store_true', default=False)
     parser.add_argument('--num_bins', type=int, default=40)
+    parser.add_argument('--test_pcd', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -1201,6 +1363,10 @@ def main() -> None:
             args.hidden_features,
             args.num_bins,
         )
+        return
+
+    if args.test_pcd:
+        test_pcd_new(args.hidden_features, args.weight_decay, args.num_layers)
         return
 
     for weight_decay in args.weight_decay:
