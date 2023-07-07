@@ -11,7 +11,7 @@ from collections import Counter
 from typing import Any, Sequence
 
 from torchvision.datasets import MNIST
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torch import optim
 from torch import nn
 import torch
@@ -89,6 +89,7 @@ def train_mnist(
         ),
         batch_size=32,
         shuffle=True,
+        num_workers=12,
     )
 
     criterion = nn.CrossEntropyLoss()
