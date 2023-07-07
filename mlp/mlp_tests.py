@@ -453,7 +453,10 @@ def test_pcd_new(
         loss_b_orig, acc_b_orig = eval_fn(model_b_orig, device)
 
         # Interpolated models
-        working_model = MLP(28 * 28, 10, hf)
+        working_model = MLP(
+            hidden_features=hf,
+            num_layers=nl,
+        )
 
         directory = "models-a-b-rebasin"
         files = get_filenames(directory)
