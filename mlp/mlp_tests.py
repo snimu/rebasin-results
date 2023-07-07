@@ -68,7 +68,7 @@ def train_mnist(
         hidden_features: int | None = None,
         num_layers: int = 5,
         use_layer_norm: bool = True,
-        epochs: int = 2,
+        epochs: int = 1,
         learning_rate: float = 7e-5,
         weight_decay: float = 0.0,
         loop: tqdm[Any] | None = None,
@@ -1128,6 +1128,7 @@ def main() -> None:
     parser.add_argument('-v', '--verbose', action='store_true', default=False)
     parser.add_argument('-m', '--merge_many', action='store_true', default=False)
     parser.add_argument('-n', '--num_models', type=int, default=[3], nargs='+')
+    parser.add_argument('-l', '--num_layers', type=int, default=[5], nargs='+')
     parser.add_argument('-c', '--count_permutations', action='store_true', default=False)
     parser.add_argument('--full_wd_hf_sweep', action='store_true', default=False)
     parser.add_argument('--compare_output_statistics', action='store_true', default=False)
