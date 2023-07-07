@@ -517,6 +517,13 @@ def test_pcd_new(
         results["acc-a-b-rebasin"].append(acc_interp_a_b_rebasin)
         results["acc-b-orig-b-rebasin"].append(acc_interp_b_original_b_rebasin)
 
+        # Delete old models
+        # (I'm only interested in the results, not the models themselves,
+        # and I need to free the directories for the next run)
+        shutil.rmtree("models-a-b-rebasin")
+        shutil.rmtree("models-a-b-original")
+        shutil.rmtree("models-b-original-b-rebasin")
+
     # Save results
     df = pd.DataFrame(results)
     df.to_csv(
