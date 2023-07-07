@@ -466,7 +466,7 @@ def test_pcd_new(
         acc_interp_a_b_rebasin = []
         loop.write(f"Evaluating {directory}")
         for i, file in enumerate(files):
-            loop.set_description(f"{settings}; {i=}/{len(files)}")
+            loop.set_description(f"{settings}; {i+1}/{len(files)}")
             working_model.load_state_dict(torch.load(os.path.join(directory, file)))
             working_model.to(device)
             loss, acc = eval_fn(working_model, device)
@@ -477,9 +477,9 @@ def test_pcd_new(
         files = get_filenames(directory)
         loss_interp_a_b_original = []
         acc_interp_a_b_original = []
-        print(f"Evaluating {directory}")
+        loop.write(f"Evaluating {directory}")
         for i, file in enumerate(files):
-            loop.set_description(f"{settings}; {i=}/{len(files)}")
+            loop.set_description(f"{settings}; {i+1}/{len(files)}")
             working_model.load_state_dict(torch.load(os.path.join(directory, file)))
             working_model.to(device)
             loss, acc = eval_fn(working_model, device)
@@ -490,9 +490,9 @@ def test_pcd_new(
         files = get_filenames(directory)
         loss_interp_b_original_b_rebasin = []
         acc_interp_b_original_b_rebasin = []
-        print(f"Evaluating {directory}")
+        loop.write(f"Evaluating {directory}")
         for i, file in enumerate(files):
-            loop.set_description(f"{settings}; {i=}/{len(files)}")
+            loop.set_description(f"{settings}; {i+1}/{len(files)}")
             working_model.load_state_dict(torch.load(os.path.join(directory, file)))
             working_model.to(device)
             loss, acc = eval_fn(working_model, device)
