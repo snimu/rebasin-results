@@ -73,6 +73,12 @@ def train_mnist(
         weight_decay: float = 0.0,
         loop: tqdm[Any] | None = None,
         verbose: bool = False,
+        dataset: MNIST = MNIST(
+            root="data",
+            train=True,
+            download=True,
+            transform=torchvision.transforms.ToTensor(),
+        ),
 ) -> MLP:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     mlp = MLP(
@@ -81,12 +87,7 @@ def train_mnist(
     mlp.train()
 
     train_loader = DataLoader(
-        MNIST(
-            root="data",
-            train=True,
-            download=True,
-            transform=torchvision.transforms.ToTensor(),
-        ),
+        dataset,
         batch_size=32,
         shuffle=True,
         num_workers=12,
