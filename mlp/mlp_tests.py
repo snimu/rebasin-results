@@ -532,7 +532,8 @@ def test_pcd_new(
         f"_wd{min(weight_decays)}-{max(weight_decays)}"
         f"_nl{min(num_layers)}-{max(num_layers)}"
         f"_epochs{epochs}"
-        f".csv"
+        f".csv",
+        index=False,
     )
 
 
