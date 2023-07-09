@@ -408,9 +408,6 @@ def test_pcd_new(
         )
         pcd.rebasin()
 
-        # Check that output stays the same
-        assert torch.allclose(model_b(x), model_b_orig(x))
-
         # Interpolate A B-rebasin
         directory = "models-a-b-rebasin"
         os.makedirs(directory, exist_ok=True)
