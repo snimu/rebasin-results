@@ -1298,6 +1298,16 @@ def cat_all_weights(model: MLP, hf: int) -> torch.Tensor:
     return weights
 
 
+def get_bins(minimum: float, maximum: float, num_bins: int) -> list[float]:
+    edges = list(
+        torch.linspace(minimum, maximum, num_bins + 1, dtype=torch.float)
+    )
+    return [
+        torch.tensor([edges[i], edges[i + 1]]).mean().item()
+        for i in range(len(edges) - 1)
+    ]
+
+
 def test_weight_histograms(
         weight_decays: list[float],
         hidden_feature_sizes: list[int],
@@ -1308,6 +1318,7 @@ def test_weight_histograms(
         "hidden_features": [],
         "values1": [],
         "values2": [],
+        "bins": [],
     }
 
     loop = tqdm(
@@ -1329,6 +1340,8 @@ def test_weight_histograms(
         hist1 = torch.histc(weights1, bins=num_bins, min=minimum, max=maximum)
         hist2 = torch.histc(weights2, bins=num_bins, min=minimum, max=maximum)
 
+        bins = get_bins(minimum, maximum, num_bins)
+
         values1 = hist1.tolist()
         values2 = hist2.tolist()
 
@@ -1336,6 +1349,7 @@ def test_weight_histograms(
         results["hidden_features"].append(hf)
         results["values1"].append(values1)
         results["values2"].append(values2)
+        results["bins"].append(bins)
 
     df = pd.DataFrame(results)
     df.to_csv(
