@@ -6,6 +6,7 @@ These are results from running `PermutationCoordinateDescent` and `MergeMany` on
 
 - [Results](#results)
   - [PermutationCoordinateDescent](#permutationcoordinatedescent)
+    - [On disjunct datasets](#on-disjunct-datasets)
   - [MergeMany](#mergemany)
     - [By number of models](#by-number-of-models)
     - [By feature size](#by-feature-size)
@@ -77,7 +78,7 @@ Here are the results:
     <img
         src="results/permutation-coordinate-descent/pcd_hf200-200_wd0.0-0.5_nl2-10_epochs2.png"
         alt="PermutationCoordinateDescent results for MLP"
-        width="600"
+        width="800"
     />
 </p>
 
