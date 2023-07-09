@@ -60,6 +60,50 @@ Some observations:
 
 This is a clear success!!!
 
+### On disjunct datasets
+
+The above results are for two models trained on the same dataset.
+I wanted to see if the different features that they learned could be combined into 
+a model that performs better than either of the original ones.
+
+Now, I would like to test the performance of `PermutationCoordinateDescent`
+on two models trained on different datasets, as intended.
+To do so, I've split MNIST into two disjunct parts and trained a model on each.
+Then, I've run `PermutationCoordinateDescent` on them, and interpolated between them.
+
+Here are the results:
+
+<p align="center">
+    <img
+        src="results/permutation-coordinate-descent/pcd_hf200-200_wd0.0-0.5_nl2-10_epochs2.png"
+        alt="PermutationCoordinateDescent results for MLP"
+        width="600"
+    />
+</p>
+
+Observations:
+
+- The original models always have the best loss, as shown by L_min. 
+    This is as described in the paper.
+- However, at high `weight_decay` values, 
+    the loss of the worst of the interpolated models is barely higher 
+    than that of the best original model,
+    except at a high number of hidden layers.
+- Both of the above statements are true for interpolating both between 
+    `model_a` and `model_b (rebasin)` and between `model_a` and `model_b (original)`.
+    However, it clearly works better with `model_b (rebasin)`.
+- `PermutationCoordinateDescent` followed by interpolation can clearly 
+    yield models with higher accuracy than either of the original ones, 
+    if the `weight_decay` is high enough.
+- This, again, works with both `model_b (rebasin)` and `model_b (original)`,
+    and again, works better with `model_b (rebasin)`.
+- With high enough `weight_decay`, the accuracy of the worst of the interpolated models
+    is barely lower than that of the best original model, for `model_b (rebasin)`,
+    except for a high number of hidden layers.
+- The above is not true for `model_b (original)`.
+- In total, `PermutationCoordinateDescent` works well on models trained on disjunct datasets,
+    if the `weight_decay` is high enough and the number of hidden layers is not too high.
+
 ## MergeMany
 
 The above makes it likely that `MergeMany` also works better with a higher L2-regularizer.
