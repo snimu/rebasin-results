@@ -827,17 +827,19 @@ def plot_histograms() -> None:
                 (df["hidden_features"] == hidden_feature) &
                 (df["weight_decay"] == weight_decay)
             ]
+            bins = ast.literal_eval(this_df["bins"].values[0])
             values1 = ast.literal_eval(this_df["values1"].values[0])
             values2 = ast.literal_eval(this_df["values2"].values[0])
             assert len(values1) == len(values2)
-            bins = np.arange(len(values1))
             values_overlap = [min(v1, v2) for v1, v2 in zip(values1, values2)]
 
             axs[i, j].bar(np.arange(len(bins)), values1, width=1, color="orange")
             axs[i, j].bar(np.arange(len(bins)), values2, width=1, color="purple")
             axs[i, j].bar(np.arange(len(bins)), values_overlap, width=1, color="black")
-            axs[i, j].set_xticks([])
-            axs[i, j].set_xticklabels([])
+            xticks = np.array([0, int(len(bins) / 2), len(bins) - 1])
+            xticklabels = [round(bins[int(i)], 2) for i in xticks]
+            axs[i, j].set_xticks(xticks)
+            axs[i, j].set_xticklabels(xticklabels)
             axs[i, j].set_title(f"hf: {hidden_feature}, wd: {weight_decay}")
             axs[i, j].set_xlabel("Magnitude")
             axs[i, j].set_ylabel("Element Count")
@@ -849,6 +851,7 @@ def plot_histograms() -> None:
         labels=["model 1", "model 2", "overlap"],
     )
 
+    # plt.show()
     plt.savefig("results/other/weight_histograms_wd0.0-0.6_hf20-220_nbins100.png", dpi=300)
 
 
@@ -992,4 +995,4 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
 
 
 if __name__ == "__main__":
-    plot_pcd_on_split_dataset_heatmap()
+    plot_histograms()
