@@ -72,6 +72,15 @@ on two models trained on different datasets, as intended.
 To do so, I've split MNIST into two disjunct parts and trained a model on each.
 Then, I've run `PermutationCoordinateDescent` on them, and interpolated between them.
 
+Please have a look at the definitions written in the image.
+It essentially means the following: 
+In the first and third row, 
+values != 0 mean that the worst of the interpolated models is worse 
+that the worst of the original ones,
+while in the second and fourth row,
+values != 0 mean that the best of the interpolated models is better
+than the best of the original ones.
+
 Here are the results:
 
 <p align="center">
@@ -104,6 +113,44 @@ Observations:
 - The above is not true for `model_b (original)`.
 - In total, `PermutationCoordinateDescent` works well on models trained on disjunct datasets,
     if the `weight_decay` is high enough and the number of hidden layers is not too high.
+
+Let's push this to higher layer numbers and `weight_decay` values:
+
+<p align="center">
+    <img
+        src="results/permutation-coordinate-descent/pcd_hf200-200_wd0.0-0.9_nl2-20_epochs1.png"
+        alt="PermutationCoordinateDescent results for MLP"
+        width="800"
+    />
+</p>
+
+Observations:
+
+- Beyond a certain `weight_decay`-value, higher `weight_decay` doesn't seem to help.
+- Beyond a certain number of layers, the performance is bad for all `weight_decay` values.
+- Otherwise, the observations from above still hold.
+
+However, this was done at a fixed number of features per layer (which I call `hidden_features`).
+Let's see what happens when we increase the number of features per layer
+at a fixed `weight_decay`-value of 0.9 and with different numbers of layers:
+
+<p align="center">
+    <img
+        src="results/permutation-coordinate-descent/pcd_hf50-500_wd0.9-0.9_nl2-20_epochs1.png"
+        alt="PermutationCoordinateDescent results for MLP"
+        width="800"
+    />
+</p>
+
+Observations:
+- At a low number of layers, the size of the hidden features doesn't matter.
+- At a high number of layers, it is absolutely crucial.
+- This makes me think that the method might work well on transformer models,
+    because their feature-sizes are fairly large compared to their number of layers.
+- At the extremely high `weight_decay`-value that was chosen, 
+    it doesn't seem to matter whether we use `model_b (rebasin)` or `model_b (original)`.
+    In other words, `PermutationCoordinateDescent` is (apparently) only needed 
+    for lower `weight_decay`-values (which are, of course, more realistic ones).
 
 ## MergeMany
 
