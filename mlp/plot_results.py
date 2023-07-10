@@ -890,6 +890,8 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
 
     fig = plt.figure(figsize=(10, 14))
     fig.subplots_adjust(top=0.8, bottom=0.02, hspace=0.3, wspace=0.2, left=0.05, right=0.98)
+    # fig = plt.figure(figsize=(9, 18))
+    # fig.subplots_adjust(top=0.8, bottom=0.02, hspace=0.3, wspace=0.2, left=0.05, right=0.95)
     fig.suptitle(
         r"$\mathcal{L}$: Loss, $\mathcal{A}$: Accuracy, $\mathcal{R}$: Ratio \\---\\"
         r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}} = "
@@ -916,6 +918,7 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
         r"after rebasing \\"
         r"(a-b-orig): Interpolation between $\mathrm{model}_a$ and $\mathrm{model}_b$ "
         r"before rebasing \\"
+        r"\texttt{hidden_features}: $200$x$200$ \\"
     )
 
     for i, wd in enumerate(wds):
@@ -937,25 +940,25 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
     ax8 = fig.add_subplot(428)
 
     ax1.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$ (a-b-rebasin)")
-    ax2.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-rebasin)")
+    ax2.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-rebasin)")
     ax3.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$ (a-b-rebasin)")
-    ax4.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-rebasin)")
+    ax4.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-rebasin)")
     ax5.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$ (a-b-orig)")
-    ax6.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-orig)")
+    ax8.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-orig)")
     ax7.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$ (a-b-orig)")
-    ax8.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-orig)")
+    ax6.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-orig)")
 
     cmap = "viridis"
     cax1 = ax1.imshow(grid_l_ab_rebasin_1, cmap=cmap, origin='lower')
-    cax2 = ax2.imshow(grid_a_ab_rebasin_1, cmap=cmap, origin='lower')
+    cax2 = ax2.imshow(grid_a_ab_rebasin_2, cmap=cmap, origin='lower')
     cax3 = ax3.imshow(grid_l_ab_rebasin_2, cmap=cmap, origin='lower')
-    cax4 = ax4.imshow(grid_a_ab_rebasin_2, cmap=cmap, origin='lower')
+    cax4 = ax4.imshow(grid_a_ab_rebasin_1, cmap=cmap, origin='lower')
     cax5 = ax5.imshow(grid_l_ab_orig_1, cmap=cmap, origin='lower')
-    cax6 = ax6.imshow(grid_a_ab_orig_1, cmap=cmap, origin='lower')
+    cax6 = ax6.imshow(grid_a_ab_orig_2, cmap=cmap, origin='lower')
     cax7 = ax7.imshow(grid_l_ab_orig_2, cmap=cmap, origin='lower')
-    cax8 = ax8.imshow(grid_a_ab_orig_2, cmap=cmap, origin='lower')
+    cax8 = ax8.imshow(grid_a_ab_orig_1, cmap=cmap, origin='lower')
 
-    for ax in (ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8):
+    for ax in (ax1, ax4, ax3, ax2, ax5, ax8, ax7, ax6):
         ax.set_xlabel('Weight Decay')
         ax.set_ylabel('Number of Layers')
         ax.set_xticks(np.arange(len(wds)))
@@ -963,7 +966,7 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
         ax.set_yticks(np.arange(len(nls)))
         ax.set_yticklabels(nls)
 
-    for caxL1, caxL2, caxA1, caxA2 in zip((cax1, cax5), (cax3, cax7), (cax2, cax6), (cax4, cax8)):
+    for caxL1, caxL2, caxA1, caxA2 in zip((cax1, cax5), (cax3, cax7), (cax4, cax8), (cax2, cax6)):
         fig.colorbar(caxL1, label=r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$")
         fig.colorbar(caxL2, label=r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$")
         fig.colorbar(caxA1, label=r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$")
@@ -973,26 +976,153 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
         for j, nl in enumerate(nls):
             ax1.text(i, j, round(grid_l_ab_rebasin_1[j, i], 2),
                     ha="center", va="center", color="w")
-            ax2.text(i, j, round(grid_a_ab_rebasin_1[j, i], 2),
+            ax4.text(i, j, round(grid_a_ab_rebasin_1[j, i], 2),
                     ha="center", va="center", color="w")
             ax3.text(i, j, round(grid_l_ab_rebasin_2[j, i], 2),
                     ha="center", va="center", color="w")
-            ax4.text(i, j, round(grid_a_ab_rebasin_2[j, i], 2),
+            ax2.text(i, j, round(grid_a_ab_rebasin_2[j, i], 2),
                     ha="center", va="center", color="w")
             ax5.text(i, j, round(grid_l_ab_orig_1[j, i], 2),
                     ha="center", va="center", color="w")
-            ax6.text(i, j, round(grid_a_ab_orig_1[j, i], 2),
+            ax8.text(i, j, round(grid_a_ab_orig_1[j, i], 2),
                     ha="center", va="center", color="w")
             ax7.text(i, j, round(grid_l_ab_orig_2[j, i], 2),
                     ha="center", va="center", color="w")
-            ax8.text(i, j, round(grid_a_ab_orig_2[j, i], 2),
+            ax6.text(i, j, round(grid_a_ab_orig_2[j, i], 2),
                     ha="center", va="center", color="w")
 
+    # plt.show()
     plt.savefig(
         "results/permutation-coordinate-descent/pcd_hf200-200_wd0.0-0.5_nl2-10_epochs2.png",
         dpi=300,
     )
 
 
+def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
+    df = pd.read_csv(
+        "results/permutation-coordinate-descent/pcd_hf50-500_wd0.9-0.9_nl2-20_epochs1.csv"
+    )
+    hfs = df["hidden_features"].unique()
+    hfs.sort()
+    nls = df["num_layers"].unique()
+    nls.sort()
+
+    grid_l_ab_rebasin_1 = np.zeros((len(nls), len(hfs)))
+    grid_l_ab_rebasin_2 = np.zeros((len(nls), len(hfs)))
+    grid_a_ab_rebasin_1 = np.zeros((len(nls), len(hfs)))
+    grid_a_ab_rebasin_2 = np.zeros((len(nls), len(hfs)))
+    grid_l_ab_orig_1 = np.zeros((len(nls), len(hfs)))
+    grid_l_ab_orig_2 = np.zeros((len(nls), len(hfs)))
+    grid_a_ab_orig_1 = np.zeros((len(nls), len(hfs)))
+    grid_a_ab_orig_2 = np.zeros((len(nls), len(hfs)))
+
+    fig = plt.figure(figsize=(9, 18))
+    fig.subplots_adjust(top=0.8, bottom=0.02, hspace=0.3, wspace=0.2, left=0.05, right=0.95)
+    fig.suptitle(
+        r"$\mathcal{L}$: Loss, $\mathcal{A}$: Accuracy, $\mathcal{R}$: Ratio \\---\\"
+        r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}} = "
+        r"\frac"
+        r"{\max\left(\mathrm{losses}\right)}"
+        r"{\max\left(\mathcal{L}_{\mathrm{model}_a}, \mathcal{L}_{\mathrm{model}_b}\right)}$: "
+        r"If $> 1.0$, the original models are not the worst models. \\---\\"
+        r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}} = "
+        r"\frac"
+        r"{\min\left(\mathrm{losses}\right)}"
+        r"{\min\left(\mathcal{L}_{\mathrm{model}_a}, \mathcal{L}_{\mathrm{model}_b}\right)}$: "
+        r"If $< 1.0$, the original models are not the best models. \\---\\"
+        r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}} = "
+        r"\frac"
+        r"{\max\left(\mathrm{accuracies}\right)}"
+        r"{\max\left(\mathcal{A}_{\mathrm{model}_a}, \mathcal{A}_{\mathrm{model}_b}\right)}$: "
+        r"If $> 1.0$, the original models are not the best models. \\---\\"
+        r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}} = "
+        r"\frac"
+        r"{\min\left(\mathrm{accuracies}\right)}"
+        r"{\min\left(\mathcal{A}_{\mathrm{model}_a}, \mathcal{A}_{\mathrm{model}_b}\right)}$: "
+        r"If $< 1.0$, the original models are not the worst models. \\---\\"
+        r"(a-b-rebasin): Interpolation between $\mathrm{model}_a$ and $\mathrm{model}_b$ "
+        r"after rebasing \\"
+        r"(a-b-orig): Interpolation between $\mathrm{model}_a$ and $\mathrm{model}_b$ "
+        r"before rebasing \\"
+        r"\texttt{weight_decay}: $0.9$ \\"
+    )
+
+    for i, hf in enumerate(hfs):
+        for j, nl in enumerate(nls):
+            loc_df = df[(df['hidden_features'] == hf) & (df['num_layers'] == nl)]
+
+            draw_ratio(loc_df, grid_l_ab_rebasin_1, grid_l_ab_rebasin_2, "loss-a-b-rebasin", i, j)
+            draw_ratio(loc_df, grid_a_ab_rebasin_1, grid_a_ab_rebasin_2, "acc-a-b-rebasin", i, j)
+            draw_ratio(loc_df, grid_l_ab_orig_1, grid_l_ab_orig_2, "loss-a-b-orig", i, j)
+            draw_ratio(loc_df, grid_a_ab_orig_1, grid_a_ab_orig_2, "acc-a-b-orig", i, j)
+
+    ax1 = fig.add_subplot(421)
+    ax2 = fig.add_subplot(422)
+    ax3 = fig.add_subplot(423)
+    ax4 = fig.add_subplot(424)
+    ax5 = fig.add_subplot(425)
+    ax6 = fig.add_subplot(426)
+    ax7 = fig.add_subplot(427)
+    ax8 = fig.add_subplot(428)
+
+    ax1.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$ (a-b-rebasin)")
+    ax2.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-rebasin)")
+    ax3.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$ (a-b-rebasin)")
+    ax4.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-rebasin)")
+    ax5.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$ (a-b-orig)")
+    ax7.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$ (a-b-orig)")
+    ax6.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-orig)")
+    ax8.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-orig)")
+
+    cmap = "viridis"
+    cax1 = ax1.imshow(grid_l_ab_rebasin_1, cmap=cmap, origin='lower')
+    cax2 = ax2.imshow(grid_a_ab_rebasin_2, cmap=cmap, origin='lower')
+    cax3 = ax3.imshow(grid_l_ab_rebasin_2, cmap=cmap, origin='lower')
+    cax4 = ax4.imshow(grid_a_ab_rebasin_1, cmap=cmap, origin='lower')
+    cax5 = ax5.imshow(grid_l_ab_orig_1, cmap=cmap, origin='lower')
+    cax6 = ax6.imshow(grid_a_ab_orig_2, cmap=cmap, origin='lower')
+    cax7 = ax7.imshow(grid_l_ab_orig_2, cmap=cmap, origin='lower')
+    cax8 = ax8.imshow(grid_a_ab_orig_1, cmap=cmap, origin='lower')
+
+    for ax in (ax1, ax2, ax3, ax4, ax5, ax8, ax7, ax6):
+        ax.set_xlabel('Hidden Features')
+        ax.set_ylabel('Number of Layers')
+        ax.set_xticks(np.arange(len(hfs)))
+        ax.set_xticklabels(hfs)
+        ax.set_yticks(np.arange(len(nls)))
+        ax.set_yticklabels(nls)
+
+    for caxL1, caxL2, caxA1, caxA2 in zip((cax1, cax5), (cax3, cax7), (cax4, cax8), (cax2, cax6)):
+        fig.colorbar(caxL1, label=r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$")
+        fig.colorbar(caxL2, label=r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$")
+        fig.colorbar(caxA1, label=r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$")
+        fig.colorbar(caxA2, label=r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$")
+
+    for i, hf in enumerate(hfs):
+        for j, nl in enumerate(nls):
+            ax1.text(i, j, round(grid_l_ab_rebasin_1[j, i], 2),
+                    ha="center", va="center", color="w")
+            ax4.text(i, j, round(grid_a_ab_rebasin_1[j, i], 2),
+                    ha="center", va="center", color="w")
+            ax3.text(i, j, round(grid_l_ab_rebasin_2[j, i], 2),
+                    ha="center", va="center", color="w")
+            ax2.text(i, j, round(grid_a_ab_rebasin_2[j, i], 2),
+                    ha="center", va="center", color="w")
+            ax5.text(i, j, round(grid_l_ab_orig_1[j, i], 2),
+                    ha="center", va="center", color="w")
+            ax8.text(i, j, round(grid_a_ab_orig_1[j, i], 2),
+                    ha="center", va="center", color="w")
+            ax7.text(i, j, round(grid_l_ab_orig_2[j, i], 2),
+                    ha="center", va="center", color="w")
+            ax6.text(i, j, round(grid_a_ab_orig_2[j, i], 2),
+                    ha="center", va="center", color="w")
+
+    # plt.show()
+    plt.savefig(
+        "results/permutation-coordinate-descent/pcd_hf50-500_wd0.9-0.9_nl2-20_epochs1.png",
+        dpi=300,
+    )
+
+
 if __name__ == "__main__":
-    plot_histograms()
+    plot_pcd_on_split_dataset_heatmap()
