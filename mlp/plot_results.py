@@ -1002,7 +1002,7 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
     df = pd.read_csv(
         "results/permutation-coordinate-descent/pcd_hf100-1000_wd0.0-0.9_nl5-50_epochs1.csv"
     )
-    df = df[df["weight_decay"] == 0.9]
+    df = df[df["weight_decay"] == 0.0]
     hfs = df["hidden_features"].unique()
     hfs.sort()
     nls = df["num_layers"].unique()
@@ -1045,7 +1045,7 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
         r"after rebasing \\"
         r"(a-b-orig): Interpolation between $\mathrm{model}_a$ and $\mathrm{model}_b$ "
         r"before rebasing \\"
-        r"\texttt{weight_decay}: $0.9$ \\"
+        r"\texttt{weight_decay}: $0.0$ \\"
     )
 
     for i, hf in enumerate(hfs):
@@ -1120,7 +1120,7 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
 
     # plt.show()
     plt.savefig(
-        "results/permutation-coordinate-descent/pcd_hf100-1000_wd0.9-0.9_nl5-50_epochs1.png",
+        "results/permutation-coordinate-descent/pcd_hf100-1000_wd0.0-0.0_nl5-50_epochs1.png",
         dpi=300,
     )
 

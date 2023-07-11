@@ -180,6 +180,23 @@ Observations:
     and towards a fairly low number of layers, though not too low.
     With how few such points there are, however, I'm going to call this random for now.
 
+There is one last thing I want to try: Do a sweep such as the above, 
+but with `weight_decay = 0.0`. Here are the results:
+
+<p align="center">
+    <img
+        src="results/permutation-coordinate-descent/pcd_hf100-1000_wd0.0-0.0_nl5-50_epochs1.png"
+        alt="PermutationCoordinateDescent results for MLP"
+        width="800"
+    />
+</p>
+
+Observations:
+- This obviously works significantly worse than at high `weight_decay`-values.
+- If I may speculate a bit: it will likely work much better `weight_decay`-values of 0.1
+    already; 0.9 isn't needed. 
+    It will also likely work much better with larger `hidden_features`-values.
+
 ## MergeMany
 
 The above makes it likely that `MergeMany` also works better with a higher L2-regularizer.
