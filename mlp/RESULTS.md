@@ -180,6 +180,37 @@ Observations:
     and towards a fairly low number of layers, though not too low.
     With how few such points there are, however, I'm going to call this random for now.
 
+There is one point where R_A,max is around 1.6; this is a ridiculously high value.
+Let's plot this:
+
+<p align="center">
+    <img
+        src="results/permutation-coordinate-descent/pcd_hf500_wd0.9_nl20_epochs1.png"
+        alt="PermutationCoordinateDescent results for MLP"
+        width="800"
+    />
+</p>
+
+Observations:
+- Obviously, the interpolated models can be so much better than the original models
+    is because those are just so damn terrible. 
+    `weight_decay = 0.9` is a ridiculously high value and shouldn't be used.
+
+So instead, let's plot something at a much more reasonable `weight_decay`-value of 0.1:
+
+<p align="center">
+    <img
+        src="results/permutation-coordinate-descent/pcd_hf200_wd0.1_nl10_epochs1.png"
+        alt="PermutationCoordinateDescent results for MLP"
+        width="800"
+    />
+</p>
+
+Unfortunately, this doesn't look too good.
+The loss- and accuracy-barriers are barely reduced.
+Yes, `PermutationCoordinateDescent` helps a little bit,
+but by no means enough to be significant.
+
 There is one last thing I want to try: Do a sweep such as the above, 
 but with `weight_decay = 0.0`. Here are the results:
 
@@ -196,6 +227,18 @@ Observations:
 - If I may speculate a bit: it will likely work much better `weight_decay`-values of 0.1
     already; 0.9 isn't needed. 
     It will also likely work much better with larger `hidden_features`-values.
+
+
+#### Summary
+
+All in all, `PermutationCoordinateDescent` doesn't seem to work too well 
+on models trained on disjunct datasets.
+It significantly reduces the loss- and accuracy-barrier for some settings,
+and through interpolation, models with much higher accuracy than the original ones 
+can even be found.
+However, this is only the case for models that are already terrible.
+For models that are good, `PermutationCoordinateDescent` 
+barely reduces the loss- and accuracy-barrier at all.
 
 ## MergeMany
 

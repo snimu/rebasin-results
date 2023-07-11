@@ -1125,5 +1125,55 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
     )
 
 
+def plot_pcd_on_split_dataset_lineplot(wd: float, hf: int, nl: int) -> None:
+    df = pd.read_csv(
+        f"results/permutation-coordinate-descent/"
+        f"pcd_hf200-200_wd0.0-0.9_nl2-20_epochs1.csv"
+    )
+    df = df[
+        (df["weight_decay"] == wd)
+        & (df["hidden_features"] == hf)
+        & (df["num_layers"] == nl)
+    ]
+    loss_a_b_orig = ast.literal_eval(df["loss-a-b-orig"].values[0])
+    loss_a_b_rebasin = ast.literal_eval(df["loss-a-b-rebasin"].values[0])
+    loss_b_orig_b_rebasin = ast.literal_eval(df["loss-b-orig-b-rebasin"].values[0])
+    acc_a_b_orig = ast.literal_eval(df["acc-a-b-orig"].values[0])
+    acc_a_b_rebasin = ast.literal_eval(df["acc-a-b-rebasin"].values[0])
+    acc_b_orig_b_rebasin = ast.literal_eval(df["acc-b-orig-b-rebasin"].values[0])
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+    fig.suptitle(
+        f"PCD on Split Dataset "
+        f"(weight_decay={wd}, hidden_features={hf}, num_layers={nl})"
+    )
+    fig.subplots_adjust(bottom=0.2, top=0.85)
+
+    x = np.arange(len(loss_a_b_orig), dtype=np.float64) / len(loss_a_b_orig) * 100
+    ax1.plot(x, loss_a_b_orig, label="a-b-orig")
+    ax1.plot(x, loss_a_b_rebasin, label="a-b-rebasin")
+    ax1.plot(x, loss_b_orig_b_rebasin, label="b-orig-b-rebasin")
+    ax1.set_title("Loss")
+    ax1.set_xlabel("Interpolation %")
+    ax1.set_ylabel("Loss")
+
+    ax2.plot(x, acc_a_b_orig)
+    ax2.plot(x, acc_a_b_rebasin)
+    ax2.plot(x, acc_b_orig_b_rebasin)
+    ax2.set_title("Accuracy")
+    ax2.set_xlabel("Interpolation %")
+    ax2.set_ylabel("Accuracy")
+
+    fig.legend(
+        ncol=3,
+        loc="lower center",
+    )
+    # plt.show()
+    plt.savefig(
+        f"results/permutation-coordinate-descent/pcd_hf{hf}_wd{wd}_nl{nl}_epochs1.png",
+        dpi=300,
+    )
+
+
 if __name__ == "__main__":
-    plot_pcd_on_split_dataset_heatmap_hf_nl()
+    plot_pcd_on_split_dataset_lineplot(wd=0.1, nl=10, hf=200)
