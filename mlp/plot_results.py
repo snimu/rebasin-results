@@ -857,17 +857,17 @@ def plot_histograms() -> None:
 
 def draw_ratio(
         df: pd.DataFrame,
-        grid1: np.ndarray[Any, Any],
-        grid2: np.ndarray[Any, Any],
+        grid_max: np.ndarray[Any, Any],
+        grid_min: np.ndarray[Any, Any],
         key: str,
         i: int,
         j: int,
 ) -> None:
     metriclist = ast.literal_eval(df[key].values[0])
-    ratio1 = max(metriclist) / max(metriclist[0], metriclist[-1])
-    ratio2 = min(metriclist) / min(metriclist[0], metriclist[-1])
-    grid1[j, i] = ratio1
-    grid2[j, i] = ratio2
+    ratio_max = max(metriclist) / max(metriclist[0], metriclist[-1])
+    ratio_min = min(metriclist) / min(metriclist[0], metriclist[-1])
+    grid_max[j, i] = ratio_max
+    grid_min[j, i] = ratio_min
 
 
 def plot_pcd_on_split_dataset_heatmap() -> None:
@@ -879,14 +879,14 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
     nls = df["num_layers"].unique()
     nls.sort()
 
-    grid_l_ab_rebasin_1 = np.zeros((len(nls), len(wds)))
-    grid_l_ab_rebasin_2 = np.zeros((len(nls), len(wds)))
-    grid_a_ab_rebasin_1 = np.zeros((len(nls), len(wds)))
-    grid_a_ab_rebasin_2 = np.zeros((len(nls), len(wds)))
-    grid_l_ab_orig_1 = np.zeros((len(nls), len(wds)))
-    grid_l_ab_orig_2 = np.zeros((len(nls), len(wds)))
-    grid_a_ab_orig_1 = np.zeros((len(nls), len(wds)))
-    grid_a_ab_orig_2 = np.zeros((len(nls), len(wds)))
+    grid_l_ab_rebasin_max = np.zeros((len(nls), len(wds)))
+    grid_l_ab_rebasin_min = np.zeros((len(nls), len(wds)))
+    grid_a_ab_rebasin_max = np.zeros((len(nls), len(wds)))
+    grid_a_ab_rebasin_min = np.zeros((len(nls), len(wds)))
+    grid_l_ab_orig_max = np.zeros((len(nls), len(wds)))
+    grid_l_ab_orig_min = np.zeros((len(nls), len(wds)))
+    grid_a_ab_orig_max = np.zeros((len(nls), len(wds)))
+    grid_a_ab_orig_min = np.zeros((len(nls), len(wds)))
 
     fig = plt.figure(figsize=(10, 14))
     fig.subplots_adjust(top=0.8, bottom=0.02, hspace=0.3, wspace=0.2, left=0.05, right=0.98)
@@ -925,10 +925,10 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
         for j, nl in enumerate(nls):
             loc_df = df[(df['weight_decay'] == wd) & (df['num_layers'] == nl)]
 
-            draw_ratio(loc_df, grid_l_ab_rebasin_1, grid_l_ab_rebasin_2, "loss-a-b-rebasin", i, j)
-            draw_ratio(loc_df, grid_a_ab_rebasin_1, grid_a_ab_rebasin_2, "acc-a-b-rebasin", i, j)
-            draw_ratio(loc_df, grid_l_ab_orig_1, grid_l_ab_orig_2, "loss-a-b-orig", i, j)
-            draw_ratio(loc_df, grid_a_ab_orig_1, grid_a_ab_orig_2, "acc-a-b-orig", i, j)
+            draw_ratio(loc_df, grid_l_ab_rebasin_max, grid_l_ab_rebasin_min, "loss-a-b-rebasin", i, j)
+            draw_ratio(loc_df, grid_a_ab_rebasin_max, grid_a_ab_rebasin_min, "acc-a-b-rebasin", i, j)
+            draw_ratio(loc_df, grid_l_ab_orig_max, grid_l_ab_orig_min, "loss-a-b-orig", i, j)
+            draw_ratio(loc_df, grid_a_ab_orig_max, grid_a_ab_orig_min, "acc-a-b-orig", i, j)
 
     ax1 = fig.add_subplot(421)
     ax2 = fig.add_subplot(422)
@@ -949,14 +949,14 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
     ax6.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-orig)")
 
     cmap = "viridis"
-    cax1 = ax1.imshow(grid_l_ab_rebasin_1, cmap=cmap, origin='lower')
-    cax2 = ax2.imshow(grid_a_ab_rebasin_2, cmap=cmap, origin='lower')
-    cax3 = ax3.imshow(grid_l_ab_rebasin_2, cmap=cmap, origin='lower')
-    cax4 = ax4.imshow(grid_a_ab_rebasin_1, cmap=cmap, origin='lower')
-    cax5 = ax5.imshow(grid_l_ab_orig_1, cmap=cmap, origin='lower')
-    cax6 = ax6.imshow(grid_a_ab_orig_2, cmap=cmap, origin='lower')
-    cax7 = ax7.imshow(grid_l_ab_orig_2, cmap=cmap, origin='lower')
-    cax8 = ax8.imshow(grid_a_ab_orig_1, cmap=cmap, origin='lower')
+    cax1 = ax1.imshow(grid_l_ab_rebasin_max, cmap=cmap, origin='lower')
+    cax2 = ax2.imshow(grid_a_ab_rebasin_min, cmap=cmap, origin='lower')
+    cax3 = ax3.imshow(grid_l_ab_rebasin_min, cmap=cmap, origin='lower')
+    cax4 = ax4.imshow(grid_a_ab_rebasin_max, cmap=cmap, origin='lower')
+    cax5 = ax5.imshow(grid_l_ab_orig_max, cmap=cmap, origin='lower')
+    cax6 = ax6.imshow(grid_a_ab_orig_min, cmap=cmap, origin='lower')
+    cax7 = ax7.imshow(grid_l_ab_orig_min, cmap=cmap, origin='lower')
+    cax8 = ax8.imshow(grid_a_ab_orig_max, cmap=cmap, origin='lower')
 
     for ax in (ax1, ax4, ax3, ax2, ax5, ax8, ax7, ax6):
         ax.set_xlabel('Weight Decay')
@@ -974,21 +974,21 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
 
     for i, wd in enumerate(wds):
         for j, nl in enumerate(nls):
-            ax1.text(i, j, round(grid_l_ab_rebasin_1[j, i], 2),
+            ax1.text(i, j, round(grid_l_ab_rebasin_max[j, i], 2),
                     ha="center", va="center", color="w")
-            ax4.text(i, j, round(grid_a_ab_rebasin_1[j, i], 2),
+            ax4.text(i, j, round(grid_a_ab_rebasin_max[j, i], 2),
                     ha="center", va="center", color="w")
-            ax3.text(i, j, round(grid_l_ab_rebasin_2[j, i], 2),
+            ax3.text(i, j, round(grid_l_ab_rebasin_min[j, i], 2),
                     ha="center", va="center", color="w")
-            ax2.text(i, j, round(grid_a_ab_rebasin_2[j, i], 2),
+            ax2.text(i, j, round(grid_a_ab_rebasin_min[j, i], 2),
                     ha="center", va="center", color="w")
-            ax5.text(i, j, round(grid_l_ab_orig_1[j, i], 2),
+            ax5.text(i, j, round(grid_l_ab_orig_max[j, i], 2),
                     ha="center", va="center", color="w")
-            ax8.text(i, j, round(grid_a_ab_orig_1[j, i], 2),
+            ax8.text(i, j, round(grid_a_ab_orig_max[j, i], 2),
                     ha="center", va="center", color="w")
-            ax7.text(i, j, round(grid_l_ab_orig_2[j, i], 2),
+            ax7.text(i, j, round(grid_l_ab_orig_min[j, i], 2),
                     ha="center", va="center", color="w")
-            ax6.text(i, j, round(grid_a_ab_orig_2[j, i], 2),
+            ax6.text(i, j, round(grid_a_ab_orig_min[j, i], 2),
                     ha="center", va="center", color="w")
 
     # plt.show()
@@ -1000,24 +1000,25 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
 
 def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
     df = pd.read_csv(
-        "results/permutation-coordinate-descent/pcd_hf50-500_wd0.9-0.9_nl2-20_epochs1.csv"
+        "results/permutation-coordinate-descent/pcd_hf100-1000_wd0.0-0.9_nl5-50_epochs1.csv"
     )
+    df = df[df["weight_decay"] == 0.9]
     hfs = df["hidden_features"].unique()
     hfs.sort()
     nls = df["num_layers"].unique()
     nls.sort()
 
-    grid_l_ab_rebasin_1 = np.zeros((len(nls), len(hfs)))
-    grid_l_ab_rebasin_2 = np.zeros((len(nls), len(hfs)))
-    grid_a_ab_rebasin_1 = np.zeros((len(nls), len(hfs)))
-    grid_a_ab_rebasin_2 = np.zeros((len(nls), len(hfs)))
-    grid_l_ab_orig_1 = np.zeros((len(nls), len(hfs)))
-    grid_l_ab_orig_2 = np.zeros((len(nls), len(hfs)))
-    grid_a_ab_orig_1 = np.zeros((len(nls), len(hfs)))
-    grid_a_ab_orig_2 = np.zeros((len(nls), len(hfs)))
+    grid_l_ab_rebasin_max = np.zeros((len(nls), len(hfs)))
+    grid_l_ab_rebasin_min = np.zeros((len(nls), len(hfs)))
+    grid_a_ab_rebasin_max = np.zeros((len(nls), len(hfs)))
+    grid_a_ab_rebasin_min = np.zeros((len(nls), len(hfs)))
+    grid_l_ab_orig_max = np.zeros((len(nls), len(hfs)))
+    grid_l_ab_orig_min = np.zeros((len(nls), len(hfs)))
+    grid_a_ab_orig_max = np.zeros((len(nls), len(hfs)))
+    grid_a_ab_orig_min = np.zeros((len(nls), len(hfs)))
 
     fig = plt.figure(figsize=(9, 18))
-    fig.subplots_adjust(top=0.8, bottom=0.02, hspace=0.3, wspace=0.2, left=0.05, right=0.95)
+    fig.subplots_adjust(top=0.8, bottom=0.04, hspace=0.3, wspace=0.2, left=0.05, right=0.95)
     fig.suptitle(
         r"$\mathcal{L}$: Loss, $\mathcal{A}$: Accuracy, $\mathcal{R}$: Ratio \\---\\"
         r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}} = "
@@ -1051,10 +1052,10 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
         for j, nl in enumerate(nls):
             loc_df = df[(df['hidden_features'] == hf) & (df['num_layers'] == nl)]
 
-            draw_ratio(loc_df, grid_l_ab_rebasin_1, grid_l_ab_rebasin_2, "loss-a-b-rebasin", i, j)
-            draw_ratio(loc_df, grid_a_ab_rebasin_1, grid_a_ab_rebasin_2, "acc-a-b-rebasin", i, j)
-            draw_ratio(loc_df, grid_l_ab_orig_1, grid_l_ab_orig_2, "loss-a-b-orig", i, j)
-            draw_ratio(loc_df, grid_a_ab_orig_1, grid_a_ab_orig_2, "acc-a-b-orig", i, j)
+            draw_ratio(loc_df, grid_l_ab_rebasin_max, grid_l_ab_rebasin_min, "loss-a-b-rebasin", i, j)
+            draw_ratio(loc_df, grid_a_ab_rebasin_max, grid_a_ab_rebasin_min, "acc-a-b-rebasin", i, j)
+            draw_ratio(loc_df, grid_l_ab_orig_max, grid_l_ab_orig_min, "loss-a-b-orig", i, j)
+            draw_ratio(loc_df, grid_a_ab_orig_max, grid_a_ab_orig_min, "acc-a-b-orig", i, j)
 
     ax1 = fig.add_subplot(421)
     ax2 = fig.add_subplot(422)
@@ -1075,14 +1076,14 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
     ax8.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-orig)")
 
     cmap = "viridis"
-    cax1 = ax1.imshow(grid_l_ab_rebasin_1, cmap=cmap, origin='lower')
-    cax2 = ax2.imshow(grid_a_ab_rebasin_2, cmap=cmap, origin='lower')
-    cax3 = ax3.imshow(grid_l_ab_rebasin_2, cmap=cmap, origin='lower')
-    cax4 = ax4.imshow(grid_a_ab_rebasin_1, cmap=cmap, origin='lower')
-    cax5 = ax5.imshow(grid_l_ab_orig_1, cmap=cmap, origin='lower')
-    cax6 = ax6.imshow(grid_a_ab_orig_2, cmap=cmap, origin='lower')
-    cax7 = ax7.imshow(grid_l_ab_orig_2, cmap=cmap, origin='lower')
-    cax8 = ax8.imshow(grid_a_ab_orig_1, cmap=cmap, origin='lower')
+    cax1 = ax1.imshow(grid_l_ab_rebasin_max, cmap=cmap, origin='lower')
+    cax2 = ax2.imshow(grid_a_ab_rebasin_min, cmap=cmap, origin='lower')
+    cax3 = ax3.imshow(grid_l_ab_rebasin_min, cmap=cmap, origin='lower')
+    cax4 = ax4.imshow(grid_a_ab_rebasin_max, cmap=cmap, origin='lower')
+    cax5 = ax5.imshow(grid_l_ab_orig_max, cmap=cmap, origin='lower')
+    cax6 = ax6.imshow(grid_a_ab_orig_min, cmap=cmap, origin='lower')
+    cax7 = ax7.imshow(grid_l_ab_orig_min, cmap=cmap, origin='lower')
+    cax8 = ax8.imshow(grid_a_ab_orig_max, cmap=cmap, origin='lower')
 
     for ax in (ax1, ax2, ax3, ax4, ax5, ax8, ax7, ax6):
         ax.set_xlabel('Hidden Features')
@@ -1100,29 +1101,29 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
 
     for i, hf in enumerate(hfs):
         for j, nl in enumerate(nls):
-            ax1.text(i, j, round(grid_l_ab_rebasin_1[j, i], 2),
+            ax1.text(i, j, round(grid_l_ab_rebasin_max[j, i], 2),
                     ha="center", va="center", color="w")
-            ax4.text(i, j, round(grid_a_ab_rebasin_1[j, i], 2),
+            ax4.text(i, j, round(grid_a_ab_rebasin_max[j, i], 2),
                     ha="center", va="center", color="w")
-            ax3.text(i, j, round(grid_l_ab_rebasin_2[j, i], 2),
+            ax3.text(i, j, round(grid_l_ab_rebasin_min[j, i], 2),
                     ha="center", va="center", color="w")
-            ax2.text(i, j, round(grid_a_ab_rebasin_2[j, i], 2),
+            ax2.text(i, j, round(grid_a_ab_rebasin_min[j, i], 2),
                     ha="center", va="center", color="w")
-            ax5.text(i, j, round(grid_l_ab_orig_1[j, i], 2),
+            ax5.text(i, j, round(grid_l_ab_orig_max[j, i], 2),
                     ha="center", va="center", color="w")
-            ax8.text(i, j, round(grid_a_ab_orig_1[j, i], 2),
+            ax8.text(i, j, round(grid_a_ab_orig_max[j, i], 2),
                     ha="center", va="center", color="w")
-            ax7.text(i, j, round(grid_l_ab_orig_2[j, i], 2),
+            ax7.text(i, j, round(grid_l_ab_orig_min[j, i], 2),
                     ha="center", va="center", color="w")
-            ax6.text(i, j, round(grid_a_ab_orig_2[j, i], 2),
+            ax6.text(i, j, round(grid_a_ab_orig_min[j, i], 2),
                     ha="center", va="center", color="w")
 
     # plt.show()
     plt.savefig(
-        "results/permutation-coordinate-descent/pcd_hf50-500_wd0.9-0.9_nl2-20_epochs1.png",
+        "results/permutation-coordinate-descent/pcd_hf100-1000_wd0.9-0.9_nl5-50_epochs1.png",
         dpi=300,
     )
 
 
 if __name__ == "__main__":
-    plot_pcd_on_split_dataset_heatmap()
+    plot_pcd_on_split_dataset_heatmap_hf_nl()

@@ -152,6 +152,34 @@ Observations:
     In other words, `PermutationCoordinateDescent` is (apparently) only needed 
     for lower `weight_decay`-values (which are, of course, more realistic ones).
 
+Let's see what happens when we increase the number of layers and `hidden_features` even further:
+
+<p align="center">
+    <img
+        src="results/permutation-coordinate-descent/pcd_hf100-1000_wd0.9-0.9_nl5-50_epochs1.png"
+        alt="PermutationCoordinateDescent results for MLP"
+        width="800"
+    />
+</p>
+
+Observations:
+- The performance of the interpolated models (a-b-rebasin) is strongly correlated to that
+    of the interpolated models (a-b-original).
+- There is a weird area in the left upper corner of R_L,max where the interpolated
+    models are not worse than the best of the original ones, even though the
+    `hidden_features` are so low at a very high number of layers.
+    This is reflected in the accuracy.
+    It might be interesting to see if pushing the number of layers up even further 
+    would reveal a similar pattern.
+    That would mean that there isn't just a small area of good performance, 
+    but instead a small area of bad performance, while the rest is all good!
+- Here, the performance of the interpolated models from (a-b-rebasin)
+    is better than that of the interpolated models from (a-b-original).
+- The points where a model with significantly higher accuracy than the original models
+    could be found seem to be to the right (many `hidden_features`) 
+    and towards a fairly low number of layers, though not too low.
+    With how few such points there are, however, I'm going to call this random for now.
+
 ## MergeMany
 
 The above makes it likely that `MergeMany` also works better with a higher L2-regularizer.
