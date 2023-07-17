@@ -887,11 +887,14 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
     grid_l_ab_orig_min = np.zeros((len(nls), len(wds)))
     grid_a_ab_orig_max = np.zeros((len(nls), len(wds)))
     grid_a_ab_orig_min = np.zeros((len(nls), len(wds)))
+    grid_min_losses_ab_rebasin = np.zeros((len(nls), len(wds)))
+    grid_max_acc_ab_rebasin = np.zeros((len(nls), len(wds)))
+    grid_min_losses_ab_orig = np.zeros((len(nls), len(wds)))
+    grid_max_acc_ab_orig = np.zeros((len(nls), len(wds)))
 
-    fig = plt.figure(figsize=(10, 14))
+    fig, axs = plt.subplots(4, 3, figsize=(15, 14))
     fig.subplots_adjust(top=0.8, bottom=0.02, hspace=0.3, wspace=0.2, left=0.05, right=0.98)
-    # fig = plt.figure(figsize=(9, 18))
-    # fig.subplots_adjust(top=0.8, bottom=0.02, hspace=0.3, wspace=0.2, left=0.05, right=0.95)
+
     fig.suptitle(
         r"$\mathcal{L}$: Loss, $\mathcal{A}$: Accuracy, $\mathcal{R}$: Ratio \\---\\"
         r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}} = "
@@ -929,73 +932,115 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
             draw_ratio(loc_df, grid_a_ab_rebasin_max, grid_a_ab_rebasin_min, "acc-a-b-rebasin", i, j)
             draw_ratio(loc_df, grid_l_ab_orig_max, grid_l_ab_orig_min, "loss-a-b-orig", i, j)
             draw_ratio(loc_df, grid_a_ab_orig_max, grid_a_ab_orig_min, "acc-a-b-orig", i, j)
+            # calculate min(losses) and max(accuracies) values for each category
+            grid_min_losses_ab_rebasin[j, i] = np.min(
+                ast.literal_eval(loc_df['loss-a-b-rebasin'].values[0])
+            )
+            grid_max_acc_ab_rebasin[j, i] = np.max(
+                ast.literal_eval(loc_df['acc-a-b-rebasin'].values[0])
+            )
+            grid_min_losses_ab_orig[j, i] = np.min(
+                ast.literal_eval(loc_df['loss-a-b-orig'].values[0])
+            )
+            grid_max_acc_ab_orig[j, i] = np.max(
+                ast.literal_eval(loc_df['acc-a-b-orig'].values[0])
+            )
 
-    ax1 = fig.add_subplot(421)
-    ax2 = fig.add_subplot(422)
-    ax3 = fig.add_subplot(423)
-    ax4 = fig.add_subplot(424)
-    ax5 = fig.add_subplot(425)
-    ax6 = fig.add_subplot(426)
-    ax7 = fig.add_subplot(427)
-    ax8 = fig.add_subplot(428)
+    # Set titles for each subplot
+    for i in range(4):
+        axs[i, 0].set_title(
+            r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$ (a-b-"
+            + f"{'rebasin' if i < 2 else 'orig'}"
+            + ")"
+        )
+        axs[i, 1].set_title(
+            r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-"
+            + f"{'rebasin' if i < 2 else 'orig'}"
+            + ")"
+        )
+        title = r'$\min(\mathrm{losses})$' if i % 2 == 0 else r'$\max(\mathrm{accuracies})$'
+        axs[i, 2].set_title(
+            f"{title}"
+            + f" (a-b-{'rebasin' if i < 2 else 'orig'})"
+        )
 
-    ax1.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$ (a-b-rebasin)")
-    ax2.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-rebasin)")
-    ax3.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$ (a-b-rebasin)")
-    ax4.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-rebasin)")
-    ax5.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$ (a-b-orig)")
-    ax8.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-orig)")
-    ax7.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$ (a-b-orig)")
-    ax6.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-orig)")
+    # Fill in the plots
+    caxs = [[None] * 3] * 4
+    for i in range(4):
+        caxs[i][0] = axs[i, 0].imshow(
+            grid_l_ab_rebasin_max if i < 2 else grid_l_ab_orig_max,
+            cmap='viridis', origin='lower'
+        )
+        caxs[i][1] = axs[i, 1].imshow(
+            grid_a_ab_rebasin_min if i < 2 else grid_a_ab_orig_min,
+            cmap='viridis', origin='lower'
+        )
+        caxs[i][2] = axs[i, 2].imshow(
+            grid_min_losses_ab_rebasin if i % 2 == 0 else grid_max_acc_ab_rebasin,
+            cmap='viridis', origin='lower'
+        )
 
-    cmap = "viridis"
-    cax1 = ax1.imshow(grid_l_ab_rebasin_max, cmap=cmap, origin='lower')
-    cax2 = ax2.imshow(grid_a_ab_rebasin_min, cmap=cmap, origin='lower')
-    cax3 = ax3.imshow(grid_l_ab_rebasin_min, cmap=cmap, origin='lower')
-    cax4 = ax4.imshow(grid_a_ab_rebasin_max, cmap=cmap, origin='lower')
-    cax5 = ax5.imshow(grid_l_ab_orig_max, cmap=cmap, origin='lower')
-    cax6 = ax6.imshow(grid_a_ab_orig_min, cmap=cmap, origin='lower')
-    cax7 = ax7.imshow(grid_l_ab_orig_min, cmap=cmap, origin='lower')
-    cax8 = ax8.imshow(grid_a_ab_orig_max, cmap=cmap, origin='lower')
+    # Add color bars and labels
+    for i in range(4):
+        fig.colorbar(
+            caxs[i][0],
+            label=r"$\mathcal{R}_{\mathrm{"
+                  + f"{'min' if i%2 else 'max'}"
+                  + r"}, \mathcal{L}}$")
+        fig.colorbar(
+            caxs[i][1],
+            label=r"$\mathcal{R}_{\mathrm{"
+                  + f"{'max' if i%2 else 'min'}"
+                  + r"}, \mathcal{A}}$"
+        )
+        fig.colorbar(
+            caxs[i][2],
+            label=r"$\max{"
+                  + f"\mathrm{{accuracies}}" if i%2 else r"\min{\mathrm{{losses}}}"
+                  + r"}$"
+        )
 
-    for ax in (ax1, ax4, ax3, ax2, ax5, ax8, ax7, ax6):
-        ax.set_xlabel('Weight Decay')
-        ax.set_ylabel('Number of Layers')
-        ax.set_xticks(np.arange(len(wds)))
-        ax.set_xticklabels(wds)
-        ax.set_yticks(np.arange(len(nls)))
-        ax.set_yticklabels(nls)
-
-    for caxL1, caxL2, caxA1, caxA2 in zip((cax1, cax5), (cax3, cax7), (cax4, cax8), (cax2, cax6)):
-        fig.colorbar(caxL1, label=r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$")
-        fig.colorbar(caxL2, label=r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$")
-        fig.colorbar(caxA1, label=r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$")
-        fig.colorbar(caxA2, label=r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$")
+    for i in range(4):
+        for j in range(3):
+            axs[i, j].set_xlabel("Weight decay")
+            axs[i, j].set_ylabel("Number of layers")
+            axs[i, j].set_xticks(np.arange(len(wds)))
+            axs[i, j].set_xticklabels(wds)
+            axs[i, j].set_yticks(np.arange(len(nls)))
+            axs[i, j].set_yticklabels(nls)
 
     for i, wd in enumerate(wds):
         for j, nl in enumerate(nls):
-            ax1.text(i, j, round(grid_l_ab_rebasin_max[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax4.text(i, j, round(grid_a_ab_rebasin_max[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax3.text(i, j, round(grid_l_ab_rebasin_min[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax2.text(i, j, round(grid_a_ab_rebasin_min[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax5.text(i, j, round(grid_l_ab_orig_max[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax8.text(i, j, round(grid_a_ab_orig_max[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax7.text(i, j, round(grid_l_ab_orig_min[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax6.text(i, j, round(grid_a_ab_orig_min[j, i], 2),
-                    ha="center", va="center", color="w")
+            axs[0, 0].text(i, j, round(grid_l_ab_rebasin_max[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[0, 1].text(i, j, round(grid_a_ab_rebasin_min[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[0, 2].text(i, j, round(grid_min_losses_ab_rebasin[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[1, 0].text(i, j, round(grid_l_ab_rebasin_min[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[1, 1].text(i, j, round(grid_a_ab_rebasin_max[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[1, 2].text(i, j, round(grid_max_acc_ab_rebasin[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[2, 0].text(i, j, round(grid_l_ab_orig_max[j, i], 2),
+                            ha="center", va="center", color="w")
+            axs[2, 1].text(i, j, round(grid_a_ab_orig_min[j, i], 2),
+                            ha="center", va="center", color="w")
+            axs[2, 2].text(i, j, round(grid_min_losses_ab_orig[j, i], 2),
+                            ha="center", va="center", color="w")
+            axs[3, 0].text(i, j, round(grid_l_ab_orig_min[j, i], 2),
+                            ha="center", va="center", color="w")
+            axs[3, 1].text(i, j, round(grid_a_ab_orig_max[j, i], 2),
+                            ha="center", va="center", color="w")
+            axs[3, 2].text(i, j, round(grid_max_acc_ab_orig[j, i], 2),
+                            ha="center", va="center", color="w")
 
-    # plt.show()
-    plt.savefig(
-        "results/permutation-coordinate-descent/pcd_hf200-200_wd0.0-0.5_nl2-10_epochs2.png",
-        dpi=300,
-    )
+    plt.show()
+    # plt.savefig(
+    #     "results/permutation-coordinate-descent/pcd_hf200-200_wd0.0-0.5_nl2-10_epochs2.png",
+    #     dpi=300,
+    # )
 
 
 def plot_pcd_on_split_dataset_heatmap_hf_nl(weight_decay: float = 0.0) -> None:
@@ -1016,9 +1061,14 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl(weight_decay: float = 0.0) -> None:
     grid_l_ab_orig_min = np.zeros((len(nls), len(hfs)))
     grid_a_ab_orig_max = np.zeros((len(nls), len(hfs)))
     grid_a_ab_orig_min = np.zeros((len(nls), len(hfs)))
+    grid_min_losses_ab_rebasin = np.zeros((len(nls), len(hfs)))
+    grid_max_acc_ab_rebasin = np.zeros((len(nls), len(hfs)))
+    grid_min_losses_ab_orig = np.zeros((len(nls), len(hfs)))
+    grid_max_acc_ab_orig = np.zeros((len(nls), len(hfs)))
 
-    fig = plt.figure(figsize=(9, 18))
-    fig.subplots_adjust(top=0.8, bottom=0.04, hspace=0.3, wspace=0.2, left=0.05, right=0.95)
+    fig, axs = plt.subplots(4, 3, figsize=(14, 18))
+    fig.subplots_adjust(top=0.8, bottom=0.02, hspace=0.3, wspace=0.2, left=0.05, right=0.98)
+
     fig.suptitle(
         r"$\mathcal{L}$: Loss, $\mathcal{A}$: Accuracy, $\mathcal{R}$: Ratio \\---\\"
         r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}} = "
@@ -1056,74 +1106,97 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl(weight_decay: float = 0.0) -> None:
             draw_ratio(loc_df, grid_a_ab_rebasin_max, grid_a_ab_rebasin_min, "acc-a-b-rebasin", i, j)
             draw_ratio(loc_df, grid_l_ab_orig_max, grid_l_ab_orig_min, "loss-a-b-orig", i, j)
             draw_ratio(loc_df, grid_a_ab_orig_max, grid_a_ab_orig_min, "acc-a-b-orig", i, j)
+            grid_min_losses_ab_rebasin[j, i] = np.min(
+                ast.literal_eval(loc_df['loss-a-b-rebasin'].values[0])
+            )
+            grid_max_acc_ab_rebasin[j, i] = np.max(
+                ast.literal_eval(loc_df['acc-a-b-rebasin'].values[0])
+            )
+            grid_min_losses_ab_orig[j, i] = np.min(
+                ast.literal_eval(loc_df['loss-a-b-orig'].values[0])
+            )
+            grid_max_acc_ab_orig[j, i] = np.max(
+                ast.literal_eval(loc_df['acc-a-b-orig'].values[0])
+            )
 
-    ax1 = fig.add_subplot(421)
-    ax2 = fig.add_subplot(422)
-    ax3 = fig.add_subplot(423)
-    ax4 = fig.add_subplot(424)
-    ax5 = fig.add_subplot(425)
-    ax6 = fig.add_subplot(426)
-    ax7 = fig.add_subplot(427)
-    ax8 = fig.add_subplot(428)
+    for i in range(4):
+        label = (
+            r"$\mathcal{R}_{\mathrm{"
+            + f"{'min' if i % 2 else 'max'}"
+            + r"}, \mathcal{L}}$"
+        )
+        axs[i, 0].set_title(label + f" (a-b-{'rebasin' if i < 2 else 'orig'})")
+        cax1 = axs[i, 0].imshow(
+            grid_l_ab_rebasin_max if i < 2 else grid_l_ab_orig_max,
+            cmap='viridis', origin='lower'
+        )
+        fig.colorbar(cax1, label=label)
 
-    ax1.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$ (a-b-rebasin)")
-    ax2.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-rebasin)")
-    ax3.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$ (a-b-rebasin)")
-    ax4.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-rebasin)")
-    ax5.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$ (a-b-orig)")
-    ax7.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$ (a-b-orig)")
-    ax6.set_title(r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$ (a-b-orig)")
-    ax8.set_title(r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$ (a-b-orig)")
+        label = (
+            r"$\mathcal{R}_{\mathrm{"
+            + f"{'max' if i % 2 else 'min'}"
+            + r"}, \mathcal{A}}$"
+        )
+        axs[i, 1].set_title(label + f" (a-b-{'rebasin' if i < 2 else 'orig'})")
+        cax2 = axs[i, 1].imshow(
+            grid_a_ab_rebasin_min if i < 2 else grid_a_ab_orig_min,
+            cmap='viridis', origin='lower'
+        )
+        fig.colorbar(cax2, label=label)
 
-    cmap = "viridis"
-    cax1 = ax1.imshow(grid_l_ab_rebasin_max, cmap=cmap, origin='lower')
-    cax2 = ax2.imshow(grid_a_ab_rebasin_min, cmap=cmap, origin='lower')
-    cax3 = ax3.imshow(grid_l_ab_rebasin_min, cmap=cmap, origin='lower')
-    cax4 = ax4.imshow(grid_a_ab_rebasin_max, cmap=cmap, origin='lower')
-    cax5 = ax5.imshow(grid_l_ab_orig_max, cmap=cmap, origin='lower')
-    cax6 = ax6.imshow(grid_a_ab_orig_min, cmap=cmap, origin='lower')
-    cax7 = ax7.imshow(grid_l_ab_orig_min, cmap=cmap, origin='lower')
-    cax8 = ax8.imshow(grid_a_ab_orig_max, cmap=cmap, origin='lower')
+        label = r'$\max(\mathrm{accuracies})$' if i % 2 else r'$\min(\mathrm{losses})$'
+        axs[i, 2].set_title(label + f" (a-b-{'rebasin' if i < 2 else 'orig'})")
+        cax3 = axs[i, 2].imshow(
+            grid_min_losses_ab_rebasin if i % 2 == 0 else grid_max_acc_ab_rebasin,
+            cmap='viridis', origin='lower'
+        )
+        fig.colorbar(
+            cax3,
+            label=label
+        )
 
-    for ax in (ax1, ax2, ax3, ax4, ax5, ax8, ax7, ax6):
-        ax.set_xlabel('Hidden Features')
-        ax.set_ylabel('Number of Layers')
-        ax.set_xticks(np.arange(len(hfs)))
-        ax.set_xticklabels(hfs)
-        ax.set_yticks(np.arange(len(nls)))
-        ax.set_yticklabels(nls)
-
-    for caxL1, caxL2, caxA1, caxA2 in zip((cax1, cax5), (cax3, cax7), (cax4, cax8), (cax2, cax6)):
-        fig.colorbar(caxL1, label=r"$\mathcal{R}_{\mathrm{max}, \mathcal{L}}$")
-        fig.colorbar(caxL2, label=r"$\mathcal{R}_{\mathrm{min}, \mathcal{L}}$")
-        fig.colorbar(caxA1, label=r"$\mathcal{R}_{\mathrm{max}, \mathcal{A}}$")
-        fig.colorbar(caxA2, label=r"$\mathcal{R}_{\mathrm{min}, \mathcal{A}}$")
+    for i in range(4):
+        for j in range(3):
+            axs[i, j].set_xlabel("Hidden features (nxn)")
+            axs[i, j].set_ylabel("Number of layers")
+            axs[i, j].set_xticks(np.arange(len(hfs)))
+            axs[i, j].set_xticklabels(hfs)
+            axs[i, j].set_yticks(np.arange(len(nls)))
+            axs[i, j].set_yticklabels(nls)
 
     for i, hf in enumerate(hfs):
         for j, nl in enumerate(nls):
-            ax1.text(i, j, round(grid_l_ab_rebasin_max[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax4.text(i, j, round(grid_a_ab_rebasin_max[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax3.text(i, j, round(grid_l_ab_rebasin_min[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax2.text(i, j, round(grid_a_ab_rebasin_min[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax5.text(i, j, round(grid_l_ab_orig_max[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax8.text(i, j, round(grid_a_ab_orig_max[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax7.text(i, j, round(grid_l_ab_orig_min[j, i], 2),
-                    ha="center", va="center", color="w")
-            ax6.text(i, j, round(grid_a_ab_orig_min[j, i], 2),
-                    ha="center", va="center", color="w")
+            axs[0, 0].text(i, j, round(grid_l_ab_rebasin_max[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[0, 1].text(i, j, round(grid_a_ab_rebasin_min[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[0, 2].text(i, j, round(grid_min_losses_ab_rebasin[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[1, 0].text(i, j, round(grid_l_ab_rebasin_min[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[1, 1].text(i, j, round(grid_a_ab_rebasin_max[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[1, 2].text(i, j, round(grid_max_acc_ab_rebasin[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[2, 0].text(i, j, round(grid_l_ab_orig_max[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[2, 1].text(i, j, round(grid_a_ab_orig_min[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[2, 2].text(i, j, round(grid_min_losses_ab_orig[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[3, 0].text(i, j, round(grid_l_ab_orig_min[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[3, 1].text(i, j, round(grid_a_ab_orig_max[j, i], 2),
+                           ha="center", va="center", color="w")
+            axs[3, 2].text(i, j, round(grid_max_acc_ab_orig[j, i], 2),
+                           ha="center", va="center", color="w")
 
-    plt.show()
-    # plt.savefig(
-    #     f"results/permutation-coordinate-descent/"
-    #     f"pcd_hf100-1000_wd{weight_decay}-0.0_nl5-50_epochs1.png",
-    #     dpi=300,
-    # )
+    # plt.show()
+    plt.savefig(
+        f"results/permutation-coordinate-descent/"
+        f"pcd_hf100-1000_wd{weight_decay}_nl5-50_epochs1.png",
+        dpi=300,
+    )
 
 
 def plot_pcd_on_split_dataset_lineplot(wd: float, hf: int, nl: int) -> None:
