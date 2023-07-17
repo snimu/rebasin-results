@@ -998,11 +998,11 @@ def plot_pcd_on_split_dataset_heatmap() -> None:
     )
 
 
-def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
+def plot_pcd_on_split_dataset_heatmap_hf_nl(weight_decay: float = 0.0) -> None:
     df = pd.read_csv(
-        "results/permutation-coordinate-descent/pcd_hf100-1000_wd0.0-0.9_nl5-50_epochs1.csv"
+        "results/permutation-coordinate-descent/pcd_hf100-1000_wd0.0-0.2_nl5-50_epochs1.csv"
     )
-    df = df[df["weight_decay"] == 0.0]
+    df = df[df["weight_decay"] == weight_decay]
     hfs = df["hidden_features"].unique()
     hfs.sort()
     nls = df["num_layers"].unique()
@@ -1045,7 +1045,7 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
         r"after rebasing \\"
         r"(a-b-orig): Interpolation between $\mathrm{model}_a$ and $\mathrm{model}_b$ "
         r"before rebasing \\"
-        r"\texttt{weight_decay}: $0.0$ \\"
+        r"\texttt{weight_decay}: $" + f"{weight_decay}" + r"$ \\"
     )
 
     for i, hf in enumerate(hfs):
@@ -1118,11 +1118,12 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl() -> None:
             ax6.text(i, j, round(grid_a_ab_orig_min[j, i], 2),
                     ha="center", va="center", color="w")
 
-    # plt.show()
-    plt.savefig(
-        "results/permutation-coordinate-descent/pcd_hf100-1000_wd0.0-0.0_nl5-50_epochs1.png",
-        dpi=300,
-    )
+    plt.show()
+    # plt.savefig(
+    #     f"results/permutation-coordinate-descent/"
+    #     f"pcd_hf100-1000_wd{weight_decay}-0.0_nl5-50_epochs1.png",
+    #     dpi=300,
+    # )
 
 
 def plot_pcd_on_split_dataset_lineplot(wd: float, hf: int, nl: int) -> None:
@@ -1176,4 +1177,6 @@ def plot_pcd_on_split_dataset_lineplot(wd: float, hf: int, nl: int) -> None:
 
 
 if __name__ == "__main__":
-    plot_pcd_on_split_dataset_lineplot(wd=0.1, nl=10, hf=200)
+    plot_pcd_on_split_dataset_heatmap_hf_nl(weight_decay=0.1)
+    plot_pcd_on_split_dataset_heatmap_hf_nl(weight_decay=0.2)
+    plot_pcd_on_split_dataset_heatmap_hf_nl(weight_decay=0.0)
