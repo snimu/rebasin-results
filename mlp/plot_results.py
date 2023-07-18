@@ -1157,7 +1157,7 @@ def plot_pcd_on_split_dataset_heatmap_hf_nl(weight_decay: float = 0.0) -> None:
 
     for i in range(4):
         for j in range(3):
-            axs[i, j].set_xlabel("Hidden features (nxn)")
+            axs[i, j].set_xlabel("Hidden features (n by n)")
             axs[i, j].set_ylabel("Number of layers")
             axs[i, j].set_xticks(np.arange(len(hfs)))
             axs[i, j].set_xticklabels(hfs)
